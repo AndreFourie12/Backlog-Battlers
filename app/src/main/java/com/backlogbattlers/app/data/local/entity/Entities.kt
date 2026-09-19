@@ -59,3 +59,4 @@ data class LibraryEntryEntity(
     //marks local only changes for our future sync call
     val pendingSync: Boolean = false,
 )
+//------------------------------EOF------------------------------\\
