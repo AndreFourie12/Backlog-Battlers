@@ -2,6 +2,8 @@ package com.backlogbattlers.app.data.local
 
 import androidx.room.TypeConverter
 
+//------------------------------
+// this class provides conversion methods for custom types stored in Room
 class Converters {
 
     //------------------------------
