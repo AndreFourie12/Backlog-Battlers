@@ -1,6 +1,6 @@
 package com.backlogbattlers.app.domain.model
 
-// user data class represents domain model for user details
+// User data class represents domain model for user details
 data class User(
     val userId: String,
     val displayName: String,
@@ -12,7 +12,7 @@ data class User(
     val lastLoginDate: String?,
 )
 
-// game data class represents domain model for game information
+// Game data class represents domain model for game information
 data class Game(
     val gameId: Int,
     val title: String,
@@ -23,17 +23,59 @@ data class Game(
     val cachedAt: Long,
 )
 
+// enum representing gaming platforms
+enum class Platform {
+    PC,
+    PLAYSTATION,
+    XBOX,
+    SWITCH,
+    OTHER,
+}
+
+// enum representing backlog library item status
+enum class LibraryStatus {
+    BACKLOG,
+    PLAYING,
+    COMPLETED,
+    ABANDONED,
+}
+
+// enum representing game completion types
+enum class CompletionType {
+    MAIN_STORY,
+    MAIN_EXTRA,
+    COMPLETIONIST,
+}
+
+// enum representing supported application languages
+enum class AppLanguage {
+    ENGLISH,
+    NODECIDEDYET,
+    AFRIKAANS,
+}
+
+//------------------------------
 // LibraryEntry data class represents domain model for user game library entries
 data class LibraryEntry(
     val libraryEntryId: String,
     val gameId: Int,
-    val platform: String,
-    val status: String,
+    val platform: Platform,
+    val status: LibraryStatus,
     val hoursPlayed: Float,
     val unlockedAchievementIds: List<String>,
-    val completionType: String?,
+    val completionType: CompletionType?,
     val addedAt: Long,
     val updatedAt: Long,
     val pendingSync: Boolean = false,
+)
+
+//------------------------------
+// UserSettings data class represents domain model for application settings
+data class UserSettings(
+    val language: AppLanguage = AppLanguage.ENGLISH,
+    val biometricLoginEnabled: Boolean = false,
+    val achievementNotificationsEnabled: Boolean = true,
+    val rankChangeNotificationsEnabled: Boolean = true,
+    val seasonResetNotificationsEnabled: Boolean = true,
 )
 //------------------------------EOF------------------------------\\
