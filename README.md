@@ -3,11 +3,14 @@
     <img src="images/BacklogBattlers_Logo.png" alt="Logo" width="120" height="90">
   </a>
 
-<h3 align="center">BacklogBusters</h3>
+<h3 align="center">Backlog Battlers</h3>
   <p align="center">
-    PROG7414 Repo for BacklogBusters, a mobile app designed to help gamers complete unfinished games.
+    PROG7314 Repo for Backlog Battlers, a mobile app designed to help gamers complete unfinished games.
     <br />
     <br />
+    <a href="https://github.com/AndreFourie12/Backlog-Battlers/actions/workflows/android-ci.yml">
+      <img src="https://github.com/AndreFourie12/Backlog-Battlers/actions/workflows/android-ci.yml/badge.svg" alt="Android CI status">
+    </a>
   </p>
 </div>
 

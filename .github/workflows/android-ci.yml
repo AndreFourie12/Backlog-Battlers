@@ -2,9 +2,9 @@ name: Android CI
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ '**' ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
 
 jobs:
   build-and-test:
@@ -32,8 +32,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-#      - name: Run unit tests
-#        run: ./gradlew test --stacktrace
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
@@ -44,9 +44,9 @@ jobs:
           name: app-debug
           path: app/build/outputs/apk/debug/*.apk
 
-#      - name: Upload test results
-#        if: always()
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: unit-test-results
-#          path: app/build/reports/tests/
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: app/build/reports/tests/
