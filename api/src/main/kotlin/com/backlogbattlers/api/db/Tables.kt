@@ -5,6 +5,8 @@ import org.jetbrains.exposed.v1.javatime.date
 import org.jetbrains.exposed.v1.javatime.timestamp
 import java.time.Instant
 import kotlin.uuid.Uuid
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.javatime.time
 
 /**
  * Every table in the database. Each `object` below becomes one SQL table.
@@ -12,6 +14,11 @@ import kotlin.uuid.Uuid
  */
 
 /** One row per signed-in person. Created the first time they log in with Google. */
+enum class Platform { PC, PLAYSTATION, XBOX, SWITCH, OTHER }
+enum class LibraryStatus { BACKLOG, PLAYING, COMPLETED, ABANDONED }
+enum class CompletionType {MAIN_STORY, MAIN_EXTRA, COMPLETIONIST }
+
+// Users Table
 object Users : Table("users") {
     // Primary key: we generate it in Kotlin instead of the database
     val id = uuid("id").clientDefault { Uuid.random() }
@@ -65,9 +72,44 @@ object Achievements : Table("achievements")
     override val primaryKey = PrimaryKey(gameId, achievementId)
 }
 
+// LibraryEntries Table
+object LibraryEntries : Table ("library_entries")
+{
+    val id = uuid("id").clientDefault { Uuid.random() }
+    val userId = reference("user_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val platform = enumerationByName<Platform>("platform", 20)
+    val gameId = reference("game_id", Games.id)
+    val status = enumerationByName<LibraryStatus>("status", 20).default(LibraryStatus.BACKLOG)
+    val hoursPlayed = double("hours_played").nullable().default(0.0)
+    val completionType = enumerationByName<CompletionType>("completion_type", 20).nullable()
+    val hoursPlayedAtCompletion = double("hours_played_at_completion").nullable()
+    val completedAt = timestamp("completed_at").nullable()
+    val addedAt = timestamp("added_at").default(Instant.now())
+    val updatedAt = timestamp("updated_at").default(Instant.now())
+
+    override val primaryKey = PrimaryKey(id)
+
+    init
+    {
+        uniqueIndex(userId, gameId, platform)
+    }
+}
+
+// UnlockedAchievements Table
+object UnlockedAchievements : Table("unlocked_achievements")
+{
+    val libraryEntryId = reference("library_entry_id", LibraryEntries.id, onDelete = ReferenceOption.CASCADE)
+    val achievementId = varchar("achievement_id", 64)
+    val unlockedAt = timestamp("unlocked_at").default(Instant.now())
+
+    override val primaryKey = PrimaryKey(libraryEntryId, achievementId)
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
     Games,
-    Achievements
+    Achievements,
+    LibraryEntries,
+    UnlockedAchievements
 )
