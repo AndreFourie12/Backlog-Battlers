@@ -28,6 +28,14 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.logback.classic)
 
+    // Database: Exposed (Kotlin SQL DSL) + Hikari connection pool
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.java.time)
+    implementation(libs.hikari)
+    runtimeOnly(libs.postgresql) // production database (Neon)
+    implementation(libs.h2) // in-memory database for local runs and unit tests
+
     testImplementation(libs.ktor.server.test.host)
     testImplementation(kotlin("test"))
 }
