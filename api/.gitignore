@@ -1,0 +1,9 @@
+.gradle/
+build/
+.kotlin/
+.idea/
+*.iml
+out/
+
+# Secrets (IGDB client secret, database URL, etc.) live in environment variables only
+.env
