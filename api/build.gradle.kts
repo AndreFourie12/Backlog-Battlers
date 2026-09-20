@@ -25,8 +25,14 @@ dependencies {
     implementation(libs.ktor.server.netty)
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.server.status.pages) // turns exceptions into JSON error responses
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.logback.classic)
+
+    // HTTP client, used by the API to call IGDB
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
 
     // Database: Exposed (Kotlin SQL DSL) + Hikari connection pool
     implementation(libs.exposed.core)
@@ -37,6 +43,7 @@ dependencies {
     implementation(libs.h2) // in-memory database for local runs and unit tests
 
     testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.ktor.client.mock) // fake IGDB responses in tests
     testImplementation(kotlin("test"))
 }
 
