@@ -19,6 +19,7 @@ fun Application.module() {
     // Serialise/deserialise all request and response bodies as JSON
     install(ContentNegotiation) { json() }
 
+    // @Dylan, @Andre
     // To add a feature, create : routes/YourFeatureRoutes.kt with `fun Route.yourFeatureRoutes()`,
     // and call it below.
     routing { healthRoutes() }
