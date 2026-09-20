@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- the uppercase day header above feed entries -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvActivityHeader"
+    style="@style/Text.Overline"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    android:layout_height="wrap_content"
+    android:paddingStart="@dimen/page_padding"
+    android:paddingTop="8dp"
+    android:paddingEnd="@dimen/page_padding"
+    android:paddingBottom="10dp" />

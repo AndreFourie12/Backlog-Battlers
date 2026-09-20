@@ -1,4 +1,6 @@
 package com.backlogbattlers.app.fragments
 
-class StandingsFragment {
+import androidx.fragment.app.Fragment
+
+class StandingsFragment : Fragment() {
 }
