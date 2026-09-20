@@ -19,7 +19,7 @@ class UsersTableTest {
     fun `a saved user can be read back with defaults applied`() {
         transaction(db) {
             Users.insert {
-                it[firebaseUid] = "firebase-abc"
+                it[googleSubjectId] = "google-sub-abc"
                 it[displayName] = "Mihir"
                 it[email] = "mihir@example.com"
                 it[lastLoginDate] = LocalDate.of(2026, 9, 19)
@@ -27,7 +27,7 @@ class UsersTableTest {
         }
 
         val row = transaction(db) {
-            Users.selectAll().where { Users.firebaseUid eq "firebase-abc" }.single()
+            Users.selectAll().where { Users.googleSubjectId eq "google-sub-abc" }.single()
         }
 
         assertEquals("Mihir", row[Users.displayName])
@@ -36,3 +36,4 @@ class UsersTableTest {
         assertEquals("en", row[Users.preferredLanguage])
     }
 }
+//------------------------------EOF------------------------------\\
