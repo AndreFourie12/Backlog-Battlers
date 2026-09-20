@@ -1,4 +1,5 @@
 plugins {
+    application
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktor) // provides `run` and `buildFatJar` (used later for deployment)
@@ -26,6 +27,8 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.status.pages) // turns exceptions into JSON error responses
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.logback.classic)
 
@@ -49,4 +52,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    environment("JWT_SECRET", "test-secret-key-123456789")
+    environment("JWT_ISSUER", "test-issuer")
+    environment("GOOGLE_OAUTH_CLIENT_ID", "129359182019-hll9g7b1908vgpjpol4lkfrtfd7cq10s.apps.googleusercontent.com")
 }

@@ -1,5 +1,6 @@
 package com.backlogbattlers.api
 
+import com.backlogbattlers.api.auth.GoogleTokenException
 import com.backlogbattlers.api.games.IgdbException
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -24,5 +25,14 @@ fun Application.configureErrors() {
             call.application.log.warn("IGDB problem: ${cause.message}")
             call.respond(HttpStatusCode.BadGateway, ApiError("The game catalogue is unavailable right now"))
         }
+        exception<GoogleTokenException> { call, cause ->
+            call.application.log.warn("Google token verification failed: ${cause.message}")
+            call.respond(HttpStatusCode.Unauthorized, ApiError(cause.message ?: "Invalid Google ID token"))
+        }
+        exception<IllegalArgumentException> { call, cause ->
+            call.application.log.warn("Authentication failed: ${cause.message}")
+            call.respond(HttpStatusCode.Unauthorized, ApiError(cause.message ?: "Invalid authentication request"))
+        }
     }
 }
+//------------------------------EOF------------------------------\\
