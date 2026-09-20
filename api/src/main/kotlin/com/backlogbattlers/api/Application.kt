@@ -9,6 +9,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
 import com.backlogbattlers.api.routes.gameRoutes
 import com.backlogbattlers.api.routes.healthRoutes
+import com.backlogbattlers.api.routes.libraryRoutes
 
 /**
  * Ktor module, loaded by name from application.yaml.
@@ -25,8 +26,12 @@ fun Application.module() {
     // @Dylan, @Andre
     // To add a feature, create : routes/YourFeatureRoutes.kt with `fun Route.yourFeatureRoutes()`,
     // and call it below.
+    val igdb = IgdbClient.fromEnvironment()
     routing {
         healthRoutes()
-        gameRoutes(IgdbClient.fromEnvironment())
+        gameRoutes(igdb)
+        // Until login is built nobody can be identified, so every library request answers 401.
+        // The login feature replaces `{ null }` with the real "who is calling" function.
+        libraryRoutes(igdb, currentUser = { null })
     }
 }
