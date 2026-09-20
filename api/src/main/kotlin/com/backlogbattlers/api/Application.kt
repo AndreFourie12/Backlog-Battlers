@@ -2,6 +2,8 @@ package com.backlogbattlers.api
 
 import com.backlogbattlers.api.db.DatabaseFactory
 import com.backlogbattlers.api.games.IgdbClient
+import com.backlogbattlers.api.games.SteamClient
+import com.backlogbattlers.api.routes.achievementRoutes
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -30,6 +32,7 @@ fun Application.module() {
     routing {
         healthRoutes()
         gameRoutes(igdb)
+        achievementRoutes(igdb, SteamClient.fromEnvironment())
         // Until login is built nobody can be identified, so every library request answers 401.
         // The login feature replaces `{ null }` with the real "who is calling" function.
         libraryRoutes(igdb, currentUser = { null })
