@@ -1,4 +1,6 @@
 package com.backlogbattlers.app.fragments
 
-class SearchFragment {
+import androidx.fragment.app.Fragment
+
+class SearchFragment : Fragment() {
 }

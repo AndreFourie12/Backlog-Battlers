@@ -1,4 +1,6 @@
 package com.backlogbattlers.app.fragments
 
-class SettingsFragment {
+import androidx.fragment.app.Fragment
+
+class SettingsFragment : Fragment() {
 }
