@@ -2,7 +2,7 @@ package com.backlogbattlers.app.util
 
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import com.example.prog7314_poe_backlog_battler.R
+import com.backlogbattlers.app.R
 
 
 // the ring drawable a rank carries
