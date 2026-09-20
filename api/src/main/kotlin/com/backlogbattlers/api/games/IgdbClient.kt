@@ -82,6 +82,13 @@ class IgdbClient(
             "fields game_id,normally,completely,count; where game_id = $gameId; limit 1;",
         ).firstOrNull()
 
+    /** The game's Steam app id, or null when IGDB has no Steam listing for it. */
+    suspend fun steamAppId(gameId: Int): Int? =
+        query<List<IgdbExternalGame>>(
+            "external_games",
+            "fields uid; where game = $gameId & external_game_source = $STEAM_SOURCE_ID; limit 1;",
+        ).firstOrNull()?.uid?.toIntOrNull()
+
     /** Sends one Apicalypse query to an IGDB endpoint and decodes the JSON list it returns. */
     private suspend inline fun <reified T> query(endpoint: String, apicalypse: String): T {
         val accessToken = accessToken()
@@ -134,6 +141,7 @@ class IgdbClient(
         private const val TOKEN_URL = "https://id.twitch.tv/oauth2/token"
         private const val GAME_FIELDS = "fields name,cover.image_id,platforms.name;"
         private const val MAX_PAGE_SIZE = 50
+        private const val STEAM_SOURCE_ID = 1 // IGDB's id for Steam in its external game sources
         private const val TOKEN_MARGIN_SECONDS = 60L
 
         /**
