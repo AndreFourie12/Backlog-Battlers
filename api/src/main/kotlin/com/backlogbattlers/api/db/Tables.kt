@@ -80,12 +80,12 @@ object LibraryEntries : Table ("library_entries")
     val platform = enumerationByName<Platform>("platform", 20)
     val gameId = reference("game_id", Games.id)
     val status = enumerationByName<LibraryStatus>("status", 20).default(LibraryStatus.BACKLOG)
-    val hoursPlayed = double("hours_played").nullable().default(0.0)
+    val hoursPlayed = double("hours_played").default(0.0)
     val completionType = enumerationByName<CompletionType>("completion_type", 20).nullable()
     val hoursPlayedAtCompletion = double("hours_played_at_completion").nullable()
     val completedAt = timestamp("completed_at").nullable()
-    val addedAt = timestamp("added_at").default(Instant.now())
-    val updatedAt = timestamp("updated_at").default(Instant.now())
+    val addedAt = timestamp("added_at").clientDefault { Instant.now() }
+    val updatedAt = timestamp("updated_at").clientDefault { Instant.now() }
 
     override val primaryKey = PrimaryKey(id)
 
@@ -100,7 +100,7 @@ object UnlockedAchievements : Table("unlocked_achievements")
 {
     val libraryEntryId = reference("library_entry_id", LibraryEntries.id, onDelete = ReferenceOption.CASCADE)
     val achievementId = varchar("achievement_id", 64)
-    val unlockedAt = timestamp("unlocked_at").default(Instant.now())
+    val unlockedAt = timestamp("unlocked_at").clientDefault { Instant.now() }
 
     override val primaryKey = PrimaryKey(libraryEntryId, achievementId)
 }
