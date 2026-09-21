@@ -10,7 +10,9 @@ class ConfigTest {
 
     @Test
     fun `the example file lists every setting the API reads and holds no real values`() {
-        val example = Config.readFile(File("apikey.properties.example"))
+        val targetFile = listOf(File("apikey.properties.example"), File("api/apikey.properties.example"))
+            .firstOrNull { it.isFile } ?: File("apikey.properties.example")
+        val example = Config.readFile(targetFile)
 
         // If the code starts needing a new setting, this fails until the example file mentions it
         val expected = setOf(
