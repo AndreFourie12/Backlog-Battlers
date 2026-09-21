@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@+id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.backlogbattlers.app.fragments.SplashFragment"
+        android:label="Splash"
+        tools:layout="@layout/fragment_splash">
+        <action
+            android:id="@+id/action_splashFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_splashFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.backlogbattlers.app.fragments.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- the five bottom navigation destinations -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.backlogbattlers.app.fragments.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_standingsFragment"
+            app:destination="@id/standingsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_gameDetailFragment"
+            app:destination="@id/gameDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/gamesFragment"
+        android:name="com.backlogbattlers.app.fragments.GamesFragment"
+        android:label="Games"
+        tools:layout="@layout/fragment_games">
+        <action
+            android:id="@+id/action_gamesFragment_to_gameDetailFragment"
+            app:destination="@id/gameDetailFragment" />
+        <action
+            android:id="@+id/action_gamesFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/activityFragment"
+        android:name="com.backlogbattlers.app.fragments.ActivityFragment"
+        android:label="Activity"
+        tools:layout="@layout/fragment_activity">
+        <action
+            android:id="@+id/action_activityFragment_to_standingsFragment"
+            app:destination="@id/standingsFragment" />
+        <action
+            android:id="@+id/action_activityFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_activityFragment_to_gameDetailFragment"
+            app:destination="@id/gameDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/friendsFragment"
+        android:name="com.backlogbattlers.app.fragments.FriendsFragment"
+        android:label="Friends"
+        tools:layout="@layout/fragment_friends" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.backlogbattlers.app.fragments.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profileFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_gameDetailFragment"
+            app:destination="@id/gameDetailFragment" />
+    </fragment>
+
+    <!-- drill downs, these hide the bottom navigation while they are open -->
+    <fragment
+        android:id="@+id/gameDetailFragment"
+        android:name="com.backlogbattlers.app.fragments.GameDetailFragment"
+        android:label="Game Detail"
+        tools:layout="@layout/fragment_game_detail">
+        <argument
+            android:name="gameId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/standingsFragment"
+        android:name="com.backlogbattlers.app.fragments.StandingsFragment"
+        android:label="Leaderboard"
+        tools:layout="@layout/fragment_standings" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.backlogbattlers.app.fragments.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.backlogbattlers.app.fragments.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_searchFragment_to_gameDetailFragment"
+            app:destination="@id/gameDetailFragment" />
+    </fragment>
+
+</navigation>

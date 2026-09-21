@@ -23,8 +23,8 @@ object Users : Table("users") {
     // Primary key: we generate it in Kotlin instead of the database
     val id = uuid("id").clientDefault { Uuid.random() }
 
-    // The stable ID Firebase gives this person; how a login token is matched to a row
-    val firebaseUid = varchar("firebase_uid", 128).uniqueIndex()
+    // he stable Google subject ID for this person how a login token is matched to a row
+    val googleSubjectId = varchar("google_subject_id", 128).uniqueIndex()
 
     val displayName = varchar("display_name", 100)
     val email = varchar("email", 255)
