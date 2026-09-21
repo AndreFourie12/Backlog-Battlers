@@ -94,3 +94,8 @@
 ## Video Demonstration
 
 ## References 
+
+https://pictogrammers.com/library/mdi/
+
+
+https://medium.com/design-bootcamp/enhancing-steams-navigation-to-increase-user-retention-product-design-case-study-72a165d9572f
