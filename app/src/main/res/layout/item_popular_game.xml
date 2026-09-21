@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- one row of "Popular to start with" on the games screen. Same view ids as item_search_result,
+     so SearchResultAdapter fills it: art, name, "platform · genre", and an Add button (or Owned once it is in the library) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/library_row_gap"
+    android:background="@drawable/bg_card"
+    android:foreground="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="13dp"
+    android:paddingTop="@dimen/library_row_padding"
+    android:paddingEnd="12dp"
+    android:paddingBottom="@dimen/library_row_padding">
+
+    <ImageView
+        android:id="@+id/img_game_art"
+        android:layout_width="@dimen/library_thumb_width"
+        android:layout_height="@dimen/library_thumb_height"
+        android:background="@drawable/bg_art_placeholder"
+        android:contentDescription="@string/cd_game_art"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_game_title"
+            style="@style/Text.CardTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="2"
+            tools:text="The Witcher 3: Wild Hunt" />
+
+        <TextView
+            android:id="@+id/tv_game_subtitle"
+            style="@style/Text.CaptionMuted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="PC · Role-playing (RPG)" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_owned"
+        style="@style/Text.OwnedBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/library_action_height"
+        android:text="@string/owned"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/btn_add_to_library"
+        style="@style/Widget.App.AddButton"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/library_action_height"
+        android:contentDescription="@string/cd_add_to_library"
+        android:text="@string/add" />
+</LinearLayout>

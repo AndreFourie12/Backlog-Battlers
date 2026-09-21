@@ -85,6 +85,13 @@
     <string name="try_again_body">Check your connection and try again.</string>
     <string name="added_to_library">%1$s added to your backlog</string>
 
+    <!-- games screen -->
+    <string name="search_library">Search library</string>
+    <string name="library_empty_title">Your library is empty</string>
+    <string name="library_empty_body">Add games you own or want to play. Each one tracks its achievements and shows how many points are still left to earn.</string>
+    <string name="add_first_game">Add your first game</string>
+    <string name="popular_to_start_with">Popular to start with</string>
+
     <!-- content descriptions -->
     <string name="cd_back">Back</string>
     <string name="cd_search">Search</string>
@@ -237,5 +244,10 @@
     <plurals name="search_result_count">
         <item quantity="one">%1$d result</item>
         <item quantity="other">%1$d results</item>
+    </plurals>
+
+    <plurals name="library_game_count">
+        <item quantity="one">%1$d game in your library</item>
+        <item quantity="other">%1$d games in your library</item>
     </plurals>
 </resources>

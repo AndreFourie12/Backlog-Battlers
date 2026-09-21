@@ -97,8 +97,6 @@ class AppearanceFragment : Fragment() {
         super.onDestroyView()
     }
 
-    //------------------------------
-    // fills one of the two theme cards and wires its tap
     private fun bindThemeOption(
         option: View,
         icon: Int,
@@ -111,7 +109,6 @@ class AppearanceFragment : Fragment() {
         option.findViewById<TextView>(R.id.tvThemeOptionBody).setText(body)
         option.setOnClickListener {
             viewModel.setThemeMode(mode)
-            // recreates the activity, which is what makes the change visible
             applyThemeMode(mode)
         }
     }
@@ -125,8 +122,6 @@ class AppearanceFragment : Fragment() {
         option.findViewById<View>(R.id.ivThemeOptionCheck).setVisible(selected)
     }
 
-    //------------------------------
-    // inflates a tile for every backdrop the app ships with
     private fun buildBackdropPicker(container: LinearLayout) {
         container.removeAllViews()
         backdropTiles.clear()
@@ -134,7 +129,6 @@ class AppearanceFragment : Fragment() {
         HomeBackdrop.entries.forEach { backdrop ->
             val tile = container.inflateChild(R.layout.item_backdrop_option)
 
-            // rounds the artwork off against the frame's background shape
             tile.findViewById<View>(R.id.frameBackdropThumb).clipToOutline = true
 
             tile.findViewById<ImageView>(R.id.ivBackdropArt)
@@ -150,8 +144,6 @@ class AppearanceFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // accent ring and tick on the backdrop the home screen is using
     private fun markBackdropSelection(tile: View, selected: Boolean) {
         tile.findViewById<View>(R.id.viewBackdropOutline).setBackgroundResource(
             if (selected) R.drawable.bg_thumb_selected else R.drawable.bg_thumb_outline

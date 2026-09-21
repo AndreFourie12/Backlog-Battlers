@@ -79,9 +79,6 @@ class AboutFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // the legal text lives in strings rather than on a server, the app has no
-    // web presence yet
     private fun showDocument(@StringRes title: Int, @StringRes body: Int) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(title)

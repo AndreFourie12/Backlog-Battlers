@@ -20,14 +20,10 @@ import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.viewmodels.SettingsViewModel
 import kotlinx.coroutines.launch
 
-// display name editing. the email and avatar come from the google account, so
-// they are shown but locked
 class EditProfileFragment : Fragment() {
 
     private val viewModel: SettingsViewModel by viewModels()
 
-    // set once from the stored user so later collections do not overwrite a
-    // name the user is halfway through typing
     private var nameLoaded = false
 
     //------------------------------

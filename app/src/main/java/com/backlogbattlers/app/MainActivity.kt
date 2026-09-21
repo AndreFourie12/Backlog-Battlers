@@ -13,12 +13,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 // main activity of the application hosting fragment navigation and bottom navigation bar
 class MainActivity : AppCompatActivity() {
 
-    // these screens paint artwork behind the status bar, so they keep the top inset themselves
     private val fullBleedDestinations = setOf(R.id.homeFragment)
     private var contentDrawsBehindStatusBar = false
 
-    //------------------------------
-    // Sets up activity layout, edge/edge insets, bottom nav, destination change listeners.\
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,8 +41,6 @@ class MainActivity : AppCompatActivity() {
             ViewCompat.requestApplyInsets(root)
 
             when (destination.id) {
-                // full screen destinations, and the settings stack, own the
-                // whole window rather than sitting above the tab bar
                 R.id.splashFragment,
                 R.id.loginFragment,
                 R.id.settingsFragment,

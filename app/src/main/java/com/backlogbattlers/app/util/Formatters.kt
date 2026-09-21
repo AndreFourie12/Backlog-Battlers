@@ -1,5 +1,7 @@
 package com.backlogbattlers.app.util
 
+import com.backlogbattlers.app.domain.model.Platform
+
 //------------------------------
 // the display formatting the screens share
 
@@ -13,8 +15,17 @@ fun platformLabel(platform: String): String = when (platform.uppercase()) {
     else -> "Other"
 }
 
+// the API lists a game's platforms in no set order, so the one a game is shown and filed under is picked
+// by rank instead, following the order of Platform: PC first, then the consoles, "other" last.
+// Null when the game lists none
+fun primaryPlatform(platforms: List<String>): Platform? {
+    return platforms
+        .map { name -> runCatching { Platform.valueOf(name.uppercase()) }.getOrDefault(Platform.OTHER) }
+        .minOrNull()
+}
+
 fun gameSubtitle(platforms: List<String>, genres: List<String>): String {
-    val platform = platforms.firstOrNull()?.let { platformLabel(it) }
+    val platform = primaryPlatform(platforms)?.let { platformLabel(it.name) }
     val genre = genres.firstOrNull()
     return listOfNotNull(platform, genre).joinToString(" · ")
 }

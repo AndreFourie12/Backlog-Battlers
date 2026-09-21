@@ -12,6 +12,7 @@ import com.backlogbattlers.app.domain.model.Game
 import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.SearchSort
+import com.backlogbattlers.app.util.primaryPlatform
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -191,7 +192,7 @@ class SearchViewModel(
             try {
                 libraryRepository.addToLibrary(
                     gameId = game.gameId,
-                    platform = firstPlatformOf(game),
+                    platform = platformOf(game),
                     status = LibraryStatus.BACKLOG,
                 )
                 _addedGames.tryEmit(game.title)
@@ -269,10 +270,7 @@ class SearchViewModel(
         }
     }
 
-    private fun firstPlatformOf(game: Game): Platform {
-        val name = game.platforms.firstOrNull() ?: return Platform.OTHER
-        return runCatching { Platform.valueOf(name) }.getOrDefault(Platform.OTHER)
-    }
+    private fun platformOf(game: Game): Platform = primaryPlatform(game.platforms) ?: Platform.OTHER
 
     private companion object {
         const val TAG = "SearchViewModel"

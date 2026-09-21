@@ -36,6 +36,7 @@ class FakeGameRepository : GameRepository {
 
     var searchResults: List<Game> = emptyList()
     var browseResults: List<Game> = emptyList()
+    var popularGames: List<Game> = emptyList()
 
     var failing = false
 
@@ -60,6 +61,8 @@ class FakeGameRepository : GameRepository {
 
     override suspend fun getStarterGames(): List<Recommendation> =
         browseResults.map { Recommendation(it, "Trending with new players") }
+
+    override suspend fun getPopularGames(): List<Game> = popularGames
 }
 
 class FakeLibraryRepository : LibraryRepository {
