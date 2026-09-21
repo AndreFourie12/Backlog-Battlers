@@ -29,4 +29,9 @@
     <color name="accent_border">#8C52B6FB</color>
     <color name="success_tint">#294ADE80</color>
     <color name="gold_tint">#24E8B34C</color>
+
+    <!-- google sign in button, google brand guidelines -->
+    <color name="google_surface">#FFFFFFFF</color>
+    <color name="google_on_surface">#FF1F1F1F</color>
+    <color name="google_ripple">#1F1F1F1F</color>
 </resources>
