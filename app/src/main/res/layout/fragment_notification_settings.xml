@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:scrollbars="none"
+    tools:context=".fragments.NotificationSettingsFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/bottom_content_inset">
+
+        <include
+            android:id="@+id/barNotifications"
+            layout="@layout/partial_settings_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/notifications_intro" />
+
+        <!-- YOUR PROGRESS -->
+        <include
+            android:id="@+id/headerProgress"
+            layout="@layout/item_settings_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/card_padding"
+            android:paddingTop="2dp"
+            android:paddingEnd="@dimen/card_padding"
+            android:paddingBottom="2dp">
+
+            <include
+                android:id="@+id/toggleAchievements"
+                layout="@layout/item_settings_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                android:id="@+id/dividerProgress"
+                layout="@layout/partial_settings_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp" />
+
+            <include
+                android:id="@+id/toggleSeason"
+                layout="@layout/item_settings_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- COMPETITION -->
+        <include
+            android:id="@+id/headerCompetition"
+            layout="@layout/item_settings_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/card_padding"
+            android:paddingTop="2dp"
+            android:paddingEnd="@dimen/card_padding"
+            android:paddingBottom="2dp">
+
+            <include
+                android:id="@+id/toggleRank"
+                layout="@layout/item_settings_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                android:id="@+id/dividerCompetition"
+                layout="@layout/partial_settings_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp" />
+
+            <include
+                android:id="@+id/toggleFriends"
+                layout="@layout/item_settings_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

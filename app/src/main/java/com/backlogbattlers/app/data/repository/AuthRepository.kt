@@ -44,6 +44,9 @@ interface AuthRepository {
     // signs in user with Google authentication
     suspend fun signInWithGoogle(): AuthResult
 
+    // renames the signed in user locally, returns false when nobody is signed in
+    suspend fun updateDisplayName(displayName: String): Boolean
+
     // signs out current user
     suspend fun signOut()
 }
@@ -142,6 +145,16 @@ class AuthRepositoryImpl(
             }
             AuthResult.Failure(userMessage)
         }
+    }
+
+    //------------------------------
+    // renames the signed in user in room. the change is local for now, it will
+    // go up with the rest of the profile once /users is wired into the app
+    override suspend fun updateDisplayName(displayName: String): Boolean {
+        val userId = tokenStorage.getUserId() ?: return false
+        val existing = userDao.getUser(userId) ?: return false
+        userDao.upsert(existing.copy(displayName = displayName))
+        return true
     }
 
     //------------------------------

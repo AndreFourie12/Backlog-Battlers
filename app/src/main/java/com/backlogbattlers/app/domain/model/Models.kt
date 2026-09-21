@@ -54,6 +54,22 @@ enum class AppLanguage {
     AFRIKAANS,
 }
 
+// enum representing the appearance the user picked in settings
+enum class ThemeMode {
+    DARK,
+    LIGHT,
+}
+
+// enum representing the artwork shown behind the home screen header.
+// the drawable each one maps to lives in util/Backdrops.kt
+enum class HomeBackdrop {
+    HILLS,
+    MOUNTAIN,
+    MEADOW,
+    FOREST,
+    COAST,
+}
+
 //------------------------------
 // LibraryEntry data class represents domain model for user game library entries
 data class LibraryEntry(
@@ -73,9 +89,12 @@ data class LibraryEntry(
 // UserSettings data class represents domain model for application settings
 data class UserSettings(
     val language: AppLanguage = AppLanguage.ENGLISH,
+    val themeMode: ThemeMode = ThemeMode.DARK,
+    val homeBackdrop: HomeBackdrop = HomeBackdrop.HILLS,
     val biometricLoginEnabled: Boolean = false,
     val achievementNotificationsEnabled: Boolean = true,
     val rankChangeNotificationsEnabled: Boolean = true,
     val seasonResetNotificationsEnabled: Boolean = true,
+    val friendActivityNotificationsEnabled: Boolean = true,
 )
 //------------------------------EOF------------------------------\\

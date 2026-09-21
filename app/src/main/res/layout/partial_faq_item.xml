@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    one question in the help screen. the answer starts collapsed and the
+    chevron rotates when HelpSupportFragment expands it.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/rowFaqQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/settings_row_height"
+        android:orientation="horizontal"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:id="@+id/tvFaqQuestion"
+            style="@style/Text.Body"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="2dp"
+            android:textColor="@color/text_primary" />
+
+        <ImageView
+            android:id="@+id/ivFaqChevron"
+            android:layout_width="@dimen/settings_row_chevron"
+            android:layout_height="@dimen/settings_row_chevron"
+            android:layout_marginStart="10dp"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_chevron_down"
+            app:tint="@color/text_tertiary" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvFaqAnswer"
+        style="@style/Text.Caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:includeFontPadding="false"
+        android:lineSpacingExtra="3dp"
+        android:visibility="gone" />
+</LinearLayout>

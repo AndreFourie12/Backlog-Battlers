@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    one appearance choice, Dark or Light. the accent ring and the tick are what
+    mark the option that is currently applied.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/themeOptionRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card"
+    android:foreground="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/card_padding"
+    android:paddingTop="13dp"
+    android:paddingEnd="@dimen/card_padding"
+    android:paddingBottom="13dp">
+
+    <ImageView
+        android:id="@+id/ivThemeOptionIcon"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:background="@drawable/bg_circle_surface"
+        android:contentDescription="@null"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        app:tint="@color/text_primary" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvThemeOptionTitle"
+            style="@style/Text.CardTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false" />
+
+        <TextView
+            android:id="@+id/tvThemeOptionBody"
+            style="@style/Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:includeFontPadding="false"
+            android:textColor="@color/text_tertiary" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/ivThemeOptionCheck"
+        android:layout_width="@dimen/settings_check"
+        android:layout_height="@dimen/settings_check"
+        android:layout_marginStart="10dp"
+        android:background="@drawable/bg_circle_accent"
+        android:contentDescription="@string/cd_selected"
+        android:padding="4dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_check"
+        app:tint="@color/on_accent" />
+</LinearLayout>

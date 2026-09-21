@@ -37,4 +37,16 @@
     <dimen name="empty_state_tile">46dp</dimen>
     <dimen name="empty_state_icon">22dp</dimen>
     <dimen name="cta_height">48dp</dimen>
+
+    <!-- settings screens -->
+    <dimen name="settings_bar_height">56dp</dimen>
+    <dimen name="settings_bar_button">36dp</dimen>
+    <dimen name="settings_row_height">52dp</dimen>
+    <dimen name="settings_row_icon">20dp</dimen>
+    <dimen name="settings_row_chevron">16dp</dimen>
+    <dimen name="settings_header_top">22dp</dimen>
+    <dimen name="settings_header_bottom">8dp</dimen>
+    <dimen name="settings_avatar">88dp</dimen>
+    <dimen name="settings_backdrop_thumb">92dp</dimen>
+    <dimen name="settings_check">22dp</dimen>
 </resources>

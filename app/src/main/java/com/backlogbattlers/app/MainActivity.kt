@@ -35,7 +35,18 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.splashFragment, R.id.loginFragment -> {
+                // full screen destinations, and the settings stack, own the
+                // whole window rather than sitting above the tab bar
+                R.id.splashFragment,
+                R.id.loginFragment,
+                R.id.settingsFragment,
+                R.id.editProfileFragment,
+                R.id.notificationSettingsFragment,
+                R.id.appearanceFragment,
+                R.id.privacyDataFragment,
+                R.id.helpSupportFragment,
+                R.id.aboutFragment,
+                -> {
                     bottomNav.visibility = View.GONE
                     navDivider.visibility = View.GONE
                 }
