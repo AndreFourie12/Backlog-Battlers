@@ -121,4 +121,39 @@ data class UserSettings(
     val seasonResetNotificationsEnabled: Boolean = true,
     val friendActivityNotificationsEnabled: Boolean = true,
 )
+
+// how a signed in user relates to someone found by a friend search
+enum class FriendRelationshipStatus {
+    NONE,
+    PENDING_SENT,
+    PENDING_RECEIVED,
+    FRIENDS,
+}
+
+// a person the signed in user is friends with, or the signed in user themself once
+data class Friend(
+    val userId: String,
+    val displayName: String,
+    val avatarUrl: String?,
+    val monthlyPoints: Int,
+    val achievementCount: Int,
+    val isOnline: Boolean,
+)
+
+// one incoming, not yet answered friend request
+data class FriendRequest(
+    val requestId: String,
+    val fromUserId: String,
+    val fromDisplayName: String,
+    val fromAvatarUrl: String?,
+    val createdAt: Long,
+)
+
+// one person found while searching for someone to add
+data class FriendSearchResult(
+    val userId: String,
+    val displayName: String,
+    val avatarUrl: String?,
+    val status: FriendRelationshipStatus,
+)
 //------------------------------EOF------------------------------\\

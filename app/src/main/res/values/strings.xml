@@ -99,6 +99,29 @@
     <string name="cd_remove">Remove</string>
     <string name="cd_app_logo">Backlog Battlers logo</string>
     <string name="cd_game_art">Game artwork</string>
+    <string name="cd_reject_request">Reject friend request</string>
+
+    <!-- friends feature -->
+    <string name="tab_all_friends">All Friends</string>
+    <string name="tab_following">Following</string>
+    <string name="tab_requests">Requests</string>
+    <string name="reject">Reject</string>
+    <string name="pending">Pending</string>
+    <string name="already_friends">Friends</string>
+    <string name="search_friends_hint">Search friends</string>
+    <string name="find_friends_title">Find Friends</string>
+    <string name="search_for_friends_hint">Search by name</string>
+    <string name="no_search_results_title">No results</string>
+    <string name="no_search_results_body">Try a different name</string>
+    <string name="search_friends_prompt_title">Find friends by name</string>
+    <string name="search_friends_prompt_body">Tap search or press enter when ready</string>
+    <string name="following_empty_title">Following isn\'t available yet</string>
+    <string name="following_empty_body">Check back once this is built</string>
+    <string name="no_friends_title_empty">It\'s just you for now</string>
+    <string name="no_friends_body_empty">Everyone on your friends list is ranked by points earned this month, and the leaderboard resets on the 1st.</string>
+    <string name="share_invite_link">Share Invite Link</string>
+    <string name="find_by_username">Find by username</string>
+    <string name="invite_share_text">Add me on Backlog Battlers! Search for me by name once you\'re signed in.</string>
 
     <!-- sign in screen -->
     <string name="login_tagline">Track your games, earn points for every achievement, and compete with friends each month.</string>
