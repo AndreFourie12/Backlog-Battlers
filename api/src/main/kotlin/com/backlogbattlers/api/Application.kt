@@ -28,11 +28,11 @@ fun Application.module() {
     // @Dylan, @Andre
     // To add a feature, create : routes/YourFeatureRoutes.kt with `fun Route.yourFeatureRoutes()`,
     // and call it below.
-    val igdb = IgdbClient.fromEnvironment()
+    val igdb = IgdbClient.fromConfig()
     routing {
         healthRoutes()
         gameRoutes(igdb)
-        achievementRoutes(igdb, SteamClient.fromEnvironment())
+        achievementRoutes(igdb, SteamClient.fromConfig())
         // Until login is built nobody can be identified, so every library request answers 401.
         // The login feature replaces `{ null }` with the real "who is calling" function.
         libraryRoutes(igdb, currentUser = { null })

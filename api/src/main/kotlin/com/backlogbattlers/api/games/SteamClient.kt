@@ -1,5 +1,6 @@
 package com.backlogbattlers.api.games
 
+import com.backlogbattlers.api.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
@@ -96,10 +97,10 @@ class SteamClient(
     companion object {
         private const val BASE_URL = "https://api.steampowered.com/ISteamUserStats"
 
-        /** Builds the real client from STEAM_API_KEY. The key is optional. */
-        fun fromEnvironment(): SteamClient = SteamClient(
+        /** Builds the real client from STEAM_API_KEY (see [Config]). The key is optional. */
+        fun fromConfig(): SteamClient = SteamClient(
             http = HttpClient(CIO),
-            apiKey = System.getenv("STEAM_API_KEY").orEmpty(),
+            apiKey = Config.default.get("STEAM_API_KEY").orEmpty(),
         )
     }
 }
