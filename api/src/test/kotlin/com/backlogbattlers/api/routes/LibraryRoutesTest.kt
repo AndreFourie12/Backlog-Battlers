@@ -82,7 +82,7 @@ class LibraryRoutesTest {
 
     private fun newUser(): Uuid = transaction(db) {
         Users.insert {
-            it[firebaseUid] = "firebase-${Uuid.random()}"
+            it[googleSubjectId] = "google-${Uuid.random()}"
             it[displayName] = "Tester"
             it[email] = "tester@example.com"
             it[lastLoginDate] = LocalDate.now()

@@ -19,7 +19,8 @@ class LibraryEntriesTest {
         // Setup: one user and one game for the library entries to belong to
         val uid = transaction(db) {
             val newUserId = Users.insert {
-                it[firebaseUid] = "firebase-1"
+                // rather reflecting google SSO
+                it[googleSubjectId] = "google-sub-1"
                 it[displayName] = "Mihir"
                 it[email] = "mihir@example.com"
                 it[lastLoginDate] = LocalDate.now()
@@ -46,3 +47,4 @@ class LibraryEntriesTest {
         assertFailsWith<ExposedSQLException> { addEntry(Platform.PC) } // duplicate: rejected
     }
 }
+//------------------------------EOF------------------------------\\
