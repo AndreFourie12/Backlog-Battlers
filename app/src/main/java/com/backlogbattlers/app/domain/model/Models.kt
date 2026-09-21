@@ -21,6 +21,8 @@ data class Game(
     // landscape art for the wide game tiles, null when the game has none
     val artworkUrl: String? = null,
     val platforms: List<String>,
+    // the genres IGDB files the game under, shown under its name and used by the genre filter
+    val genres: List<String> = emptyList(),
     val avgCompletionHours: Float?,
     val avg100PercentHours: Float?,
     val cachedAt: Long,
@@ -39,6 +41,24 @@ enum class Platform {
     XBOX,
     SWITCH,
     OTHER,
+}
+
+// the chips under "Browse by genre" on the search screen.
+// the key is what the API expects for the category; the label it is shown with
+// lives with the other ui helpers in util/BrowseCategories.kt
+enum class BrowseCategory(val key: String) {
+    ACTION("action"),
+    RPG("rpg"),
+    PUZZLE("puzzle"),
+    COOP("coop"),
+    STRATEGY("strategy"),
+}
+
+// how the search results are ordered, chosen with the Sort chip
+enum class SearchSort {
+    RELEVANCE,
+    NAME_A_Z,
+    NAME_Z_A,
 }
 
 // enum representing backlog library item status
