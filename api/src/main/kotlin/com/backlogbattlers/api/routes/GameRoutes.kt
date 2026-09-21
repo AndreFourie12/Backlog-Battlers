@@ -1,16 +1,13 @@
 package com.backlogbattlers.api.routes
 
 import com.backlogbattlers.api.ApiError
-import com.backlogbattlers.api.db.Games
-import com.backlogbattlers.api.games.GameDto
 import com.backlogbattlers.api.games.IgdbClient
+import com.backlogbattlers.api.games.saveGame
 import com.backlogbattlers.api.games.toDto
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.jetbrains.exposed.v1.jdbc.upsert
 
 private const val MAX_QUERY_LENGTH = 100
 
@@ -45,18 +42,5 @@ fun Route.gameRoutes(igdb: IgdbClient) {
         val dto = game.toDto(igdb.timeToBeat(id))
         saveGame(dto)
         call.respond(dto)
-    }
-}
-
-/** Keeps our own copy of the game so leaderboards and scoring can use it without calling IGDB. */
-private fun saveGame(game: GameDto) {
-    transaction {
-        // upsert = insert, or update if this game id is already stored
-        Games.upsert {
-            it[id] = game.gameId
-            it[title] = game.title
-            it[avgCompletionHours] = game.avgCompletionHours
-            it[avg100PercentHours] = game.avg100PercentHours
-        }
     }
 }

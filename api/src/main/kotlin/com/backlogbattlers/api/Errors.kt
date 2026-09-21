@@ -6,6 +6,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.application.log
+import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
 import kotlinx.serialization.Serializable
@@ -25,14 +26,30 @@ fun Application.configureErrors() {
             call.application.log.warn("IGDB problem: ${cause.message}")
             call.respond(HttpStatusCode.BadGateway, ApiError("The game catalogue is unavailable right now"))
         }
+        
+        // A request body that is missing, is not JSON, or has a wrong or unknown value
+        exception<BadRequestException> { call, _ ->
+            call.respond(HttpStatusCode.BadRequest, ApiError("The request body is missing or not valid for this endpoint"))
+        }
+
+        // Failed Google ID token verification
         exception<GoogleTokenException> { call, cause ->
             call.application.log.warn("Google token verification failed: ${cause.message}")
             call.respond(HttpStatusCode.Unauthorized, ApiError(cause.message ?: "Invalid Google ID token"))
         }
+
+        // Other authentication failures
         exception<IllegalArgumentException> { call, cause ->
             call.application.log.warn("Authentication failed: ${cause.message}")
             call.respond(HttpStatusCode.Unauthorized, ApiError(cause.message ?: "Invalid authentication request"))
         }
+
+        // Anything unexpected: log everything, tell the app nothing about the internals
+        exception<Throwable> { call, cause ->
+            call.application.log.error("Unhandled error on ${call.request.local.method.value} ${call.request.local.uri}", cause)
+            call.respond(HttpStatusCode.InternalServerError, ApiError("Something went wrong on the server"))
+        }
+
     }
 }
 //------------------------------EOF------------------------------\\
