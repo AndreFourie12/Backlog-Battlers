@@ -14,7 +14,7 @@
     <dimen name="icon_size">22dp</dimen>
     <dimen name="hero_height">190dp</dimen>
     <dimen name="bottom_content_inset">24dp</dimen>
-
+ 
     <!-- sign in screen -->
     <dimen name="login_page_padding">24dp</dimen>
     <dimen name="login_hero_height">320dp</dimen>
@@ -24,7 +24,7 @@
     <dimen name="login_logo_height">43dp</dimen>
     <dimen name="login_tagline_max_width">310dp</dimen>
     <dimen name="login_button_height">48dp</dimen>
-
+ 
     <!-- home screen -->
     <dimen name="home_hero_height">210dp</dimen>
     <dimen name="home_hero_scrim_top">62dp</dimen>
@@ -37,15 +37,27 @@
     <dimen name="empty_state_tile">46dp</dimen>
     <dimen name="empty_state_icon">22dp</dimen>
     <dimen name="cta_height">48dp</dimen>
-
+ 
     <dimen name="recommendation_thumb_width">123dp</dimen>
     <dimen name="recommendation_thumb_height">70dp</dimen>
     <dimen name="recommendation_thumb_radius">8dp</dimen>
     <dimen name="recommendation_badge">22dp</dimen>
     <dimen name="recommendation_badge_inset">5dp</dimen>
     <dimen name="recommendation_chevron">14dp</dimen>
-
+ 
     <!-- the faint line between the rows of a list -->
     <dimen name="list_divider_thickness">1dp</dimen>
     <dimen name="list_divider_gap">10dp</dimen>
+ 
+    <!-- settings screens -->
+    <dimen name="settings_bar_height">56dp</dimen>
+    <dimen name="settings_bar_button">36dp</dimen>
+    <dimen name="settings_row_height">52dp</dimen>
+    <dimen name="settings_row_icon">20dp</dimen>
+    <dimen name="settings_row_chevron">16dp</dimen>
+    <dimen name="settings_header_top">22dp</dimen>
+    <dimen name="settings_header_bottom">8dp</dimen>
+    <dimen name="settings_avatar">88dp</dimen>
+    <dimen name="settings_backdrop_thumb">92dp</dimen>
+    <dimen name="settings_check">22dp</dimen>
 </resources>

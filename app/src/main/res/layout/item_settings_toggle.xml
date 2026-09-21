@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    a settings row that carries a switch instead of a chevron. the whole row is
+    tappable, the switch itself is not focusable so the row owns the click.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:foreground="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/settings_row_height"
+    android:orientation="horizontal"
+    android:paddingStart="2dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="2dp"
+    android:paddingBottom="10dp">
+
+    <ImageView
+        android:id="@+id/ivSettingsToggleIcon"
+        android:layout_width="@dimen/settings_row_icon"
+        android:layout_height="@dimen/settings_row_icon"
+        android:contentDescription="@null"
+        android:scaleType="fitCenter"
+        app:tint="@color/text_secondary" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvSettingsToggleTitle"
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/tvSettingsToggleBody"
+            style="@style/Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="2dp"
+            android:textColor="@color/text_tertiary" />
+    </LinearLayout>
+
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/swSettingsToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:clickable="false"
+        android:focusable="false" />
+</LinearLayout>

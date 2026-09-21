@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    one home backdrop choice. the artwork fills the tile, the outline on top of
+    it turns accent when this is the backdrop the home screen is using.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/backdropOptionRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/list_gap"
+    android:orientation="vertical">
+
+    <!-- BackdropPicker sets clipToOutline on this so the art takes the
+         rounded corners of the background shape -->
+    <FrameLayout
+        android:id="@+id/frameBackdropThumb"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/settings_backdrop_thumb"
+        android:background="@drawable/bg_thumb_clip">
+
+        <ImageView
+            android:id="@+id/ivBackdropArt"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/cd_backdrop_preview"
+            android:scaleType="centerCrop" />
+
+        <View
+            android:id="@+id/viewBackdropOutline"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_thumb_outline"
+            android:foreground="?attr/selectableItemBackground" />
+
+        <ImageView
+            android:id="@+id/ivBackdropCheck"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:background="@drawable/bg_circle_accent"
+            android:contentDescription="@string/cd_selected"
+            android:padding="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_check"
+            app:tint="@color/on_accent" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvBackdropLabel"
+        style="@style/Text.CaptionStrong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:includeFontPadding="false" />
+</LinearLayout>

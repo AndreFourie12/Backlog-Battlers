@@ -19,6 +19,9 @@ import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 
 // dependency locator holding application singletons for database, network, and repository instances
@@ -30,6 +33,13 @@ object ServiceLocator {
 
     @Volatile
     private var applicationContext: Context? = null
+
+    // for writes that have to finish even though the screen that started them
+    // is going away, such as saving the appearance right before the activity
+    // is recreated to pick the new theme up
+    val applicationScope: CoroutineScope by lazy {
+        CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    }
 
     val database: AppDatabase by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing database")

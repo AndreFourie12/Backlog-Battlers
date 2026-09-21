@@ -88,4 +88,127 @@
     <string name="login_privacy_link">Privacy Policy</string>
 
     <string name="cd_home_backdrop">Rolling hills under a bright sky</string>
+
+
+
+    <!-- settings, section headers -->
+    <string name="settings_section_account">ACCOUNT</string>
+    <string name="settings_section_preferences">PREFERENCES</string>
+    <string name="settings_section_support">SUPPORT</string>
+
+    <!-- settings, rows -->
+    <string name="settings_edit_profile">Edit Profile</string>
+    <string name="settings_connected_accounts">Connected Accounts</string>
+    <string name="settings_connected_accounts_pending">Coming soon</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_privacy">Privacy &amp; Data</string>
+    <string name="settings_help">Help &amp; Support</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version_value">v%1$s</string>
+    <string name="settings_notifications_all_on">All on</string>
+    <string name="settings_notifications_all_off">All off</string>
+    <string name="settings_notifications_some_on">%1$d of %2$d on</string>
+
+    <!-- settings, log out -->
+    <string name="log_out_confirm_title">Log out?</string>
+    <string name="log_out_confirm_body">You will need to sign in with Google again to get back to your backlog.</string>
+    <string name="log_out_confirm_action">Log Out</string>
+    <string name="cancel">Cancel</string>
+
+
+
+    <!-- edit profile -->
+    <string name="title_edit_profile">Edit Profile</string>
+    <string name="edit_profile_display_name">Display name</string>
+    <string name="edit_profile_display_name_hint">How friends see you</string>
+    <string name="edit_profile_email">Email</string>
+    <string name="edit_profile_email_locked">Your email comes from the Google account you signed in with.</string>
+    <string name="edit_profile_avatar_note">Your picture comes from your Google account.</string>
+    <string name="edit_profile_save">Save changes</string>
+    <string name="edit_profile_saved">Profile updated</string>
+    <string name="edit_profile_name_empty">Enter a display name</string>
+    <string name="edit_profile_name_too_long">Display names are 24 characters or fewer</string>
+    <string name="edit_profile_signed_out">Sign in to edit your profile</string>
+    <string name="cd_avatar">Profile picture</string>
+
+
+
+    <!-- notification settings -->
+    <string name="title_notifications">Notifications</string>
+    <string name="notifications_intro">Choose what Backlog Battlers tells you about.</string>
+    <string name="notifications_section_progress">YOUR PROGRESS</string>
+    <string name="notifications_section_competition">COMPETITION</string>
+    <string name="notif_achievements">Achievements</string>
+    <string name="notif_achievements_body">When you unlock an achievement in a tracked game</string>
+    <string name="notif_rank">Rank changes</string>
+    <string name="notif_rank_body">When you move up or down the monthly leaderboard</string>
+    <string name="notif_season">Season resets</string>
+    <string name="notif_season_body">When a new month starts and points reset</string>
+    <string name="notif_friends">Friend activity</string>
+    <string name="notif_friends_body">When a friend completes a game or passes you</string>
+
+
+
+    <!-- appearance -->
+    <string name="title_appearance">Appearance</string>
+    <string name="appearance_section_theme">THEME</string>
+    <string name="appearance_section_backdrop">HOME BACKDROP</string>
+    <string name="appearance_theme_dark">Dark</string>
+    <string name="appearance_theme_dark_body">The default. Easy on the eyes at night.</string>
+    <string name="appearance_theme_light">Light</string>
+    <string name="appearance_theme_light_body">Brighter, better in daylight.</string>
+    <string name="appearance_backdrop_body">The artwork behind the header on your home screen.</string>
+    <string name="backdrop_hills">Rolling Hills</string>
+    <string name="backdrop_mountain">Mountain Valley</string>
+    <string name="backdrop_meadow">Summer Meadow</string>
+    <string name="backdrop_forest">Pine Forest</string>
+    <string name="backdrop_coast">Chalk Coast</string>
+    <string name="cd_backdrop_preview">Backdrop preview</string>
+    <string name="cd_selected">Selected</string>
+
+
+
+    <!-- privacy and data -->
+    <string name="title_privacy">Privacy &amp; Data</string>
+    <string name="privacy_section_security">SECURITY</string>
+    <string name="privacy_section_data">YOUR DATA</string>
+    <string name="privacy_biometric">Biometric login</string>
+    <string name="privacy_biometric_body">Use your fingerprint or face to unlock the app</string>
+    <string name="privacy_what_we_store">What we store</string>
+    <string name="privacy_what_we_store_body">Your display name, email and avatar come from the Google account you sign in with. Your library, playtime and achievement progress are kept on this device and synced to your account so your leaderboard position stays accurate.</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_terms">Terms of Use</string>
+
+
+
+    <!-- help and support -->
+    <string name="title_help">Help &amp; Support</string>
+    <string name="help_section_faq">COMMON QUESTIONS</string>
+    <string name="help_faq_points_q">How are points worked out?</string>
+    <string name="help_faq_points_a">Every achievement you unlock is worth points based on how rare it is across the community. Rarer achievements are worth more, so finishing a hard game beats grinding an easy one.</string>
+    <string name="help_faq_season_q">When does the season reset?</string>
+    <string name="help_faq_season_a">Leaderboard points reset on the first day of each month. Your library, playtime and unlocked achievements are kept, only the monthly ranking starts again.</string>
+    <string name="help_faq_platform_q">Why is my playtime missing?</string>
+    <string name="help_faq_platform_a">Playtime is pulled in when you link a gaming account. Account linking is still being built, so for now you can enter hours yourself on a game\'s detail screen.</string>
+    <string name="help_faq_friends_q">How do I add friends?</string>
+    <string name="help_faq_friends_a">Open the Friends tab and search for a display name, or send an invite. Once they accept, you both show up on each other\'s monthly leaderboard.</string>
+
+
+
+    <!-- about -->
+    <string name="title_about">About</string>
+    <string name="about_tagline">Clear your backlog. Beat your friends.</string>
+    <string name="about_section_app">APP</string>
+    <string name="about_section_legal">LEGAL</string>
+    <string name="about_version">Version</string>
+    <string name="about_build">Build</string>
+    <string name="about_build_debug">Debug</string>
+    <string name="about_build_release">Release</string>
+    <string name="about_blurb">Backlog Battlers tracks the games you own, scores the achievements you unlock, and puts you on a monthly leaderboard against your friends. Built as a PROG7314 portfolio project.</string>
+    <string name="about_open_source">Open source licences</string>
+    <string name="about_copyright">© 2026 Backlog Battlers</string>
+    <string name="about_terms_body">Backlog Battlers is a student portfolio project, provided as is and without warranty. Use it to track your own games. Do not attempt to falsify achievements or leaderboard standings, and do not use the app to harass other players. Accounts that do either may be removed. Because this is a coursework build, features can change or disappear between versions and data is not guaranteed to survive a reinstall.</string>
+    <string name="about_privacy_body">Signing in with Google gives the app your display name, email address and profile picture. That, along with your library, playtime, achievements and monthly points, is stored on this device and on the project backend so your leaderboard position is accurate.\n\nYour data is never sold or shared with advertisers. Friends can see your display name, picture, points and recent activity. Nobody can see your email address.\n\nSigning out clears your session and your local copy of your profile from this device.</string>
+    <string name="about_licences_body">This app is built on open source work released under the Apache License 2.0:\n\n• AndroidX and Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines and kotlinx.serialization\n• Ktor Client\n\nFull licence texts are available from each project\'s repository.</string>
 </resources>

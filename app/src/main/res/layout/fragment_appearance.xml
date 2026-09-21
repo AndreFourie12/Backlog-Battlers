@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:scrollbars="none"
+    tools:context=".fragments.AppearanceFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/bottom_content_inset">
+
+        <include
+            android:id="@+id/barAppearance"
+            layout="@layout/partial_settings_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- THEME -->
+        <include
+            android:id="@+id/headerTheme"
+            layout="@layout/item_settings_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding" />
+
+        <include
+            android:id="@+id/optionThemeDark"
+            layout="@layout/item_theme_option"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding" />
+
+        <include
+            android:id="@+id/optionThemeLight"
+            layout="@layout/item_theme_option"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="@dimen/list_gap"
+            android:layout_marginEnd="@dimen/page_padding" />
+
+        <!-- HOME BACKDROP -->
+        <include
+            android:id="@+id/headerBackdrop"
+            layout="@layout/item_settings_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding" />
+
+        <TextView
+            style="@style/Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:layout_marginBottom="12dp"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="2dp"
+            android:text="@string/appearance_backdrop_body" />
+
+        <!-- AppearanceFragment inflates one item_backdrop_option per choice -->
+        <LinearLayout
+            android:id="@+id/containerBackdrops"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:orientation="vertical" />
+    </LinearLayout>
+</ScrollView>

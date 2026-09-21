@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    back button and title, shared by settings and every screen under it.
+    the fragment adds the status bar inset on top of this bar's padding.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settingsBar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/settings_bar_height"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/page_padding"
+    android:paddingTop="10dp"
+    android:paddingEnd="@dimen/page_padding"
+    android:paddingBottom="6dp">
+
+    <ImageView
+        android:id="@+id/btnSettingsBack"
+        android:layout_width="@dimen/settings_bar_button"
+        android:layout_height="@dimen/settings_bar_button"
+        android:background="@drawable/bg_circle_surface"
+        android:contentDescription="@string/cd_back"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:padding="9dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_chevron_left"
+        app:tint="@color/text_primary" />
+
+    <TextView
+        android:id="@+id/tvSettingsBarTitle"
+        style="@style/Text.ScreenTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:maxLines="1" />
+</LinearLayout>

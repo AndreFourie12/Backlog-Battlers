@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:scrollbars="none"
+    tools:context=".fragments.EditProfileFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/bottom_content_inset">
+
+        <include
+            android:id="@+id/barEditProfile"
+            layout="@layout/partial_settings_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- avatar, read only, it comes from the google account -->
+        <ImageView
+            android:id="@+id/ivProfileAvatar"
+            android:layout_width="@dimen/settings_avatar"
+            android:layout_height="@dimen/settings_avatar"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_circle_surface"
+            android:contentDescription="@string/cd_avatar"
+            android:padding="22dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_person"
+            app:tint="@color/text_secondary" />
+
+        <TextView
+            style="@style/Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:gravity="center_horizontal"
+            android:includeFontPadding="false"
+            android:text="@string/edit_profile_avatar_note"
+            android:textColor="@color/text_tertiary" />
+
+        <!-- display name -->
+        <TextView
+            style="@style/Text.Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="@dimen/section_spacing"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:includeFontPadding="false"
+            android:text="@string/edit_profile_display_name" />
+
+        <EditText
+            android:id="@+id/etDisplayName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:background="@drawable/bg_field"
+            android:hint="@string/edit_profile_display_name_hint"
+            android:importantForAutofill="no"
+            android:inputType="textPersonName|textCapWords"
+            android:maxLength="24"
+            android:maxLines="1"
+            android:paddingStart="14dp"
+            android:paddingTop="14dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="14dp"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_tertiary"
+            android:textSize="15sp" />
+
+        <!-- email, read only -->
+        <TextView
+            style="@style/Text.Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:includeFontPadding="false"
+            android:text="@string/edit_profile_email" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:background="@drawable/bg_field"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingTop="14dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="14dp">
+
+            <TextView
+                android:id="@+id/tvProfileEmail"
+                style="@style/Text.Body"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/text_secondary" />
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="10dp"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_lock"
+                app:tint="@color/text_tertiary" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="2dp"
+            android:text="@string/edit_profile_email_locked"
+            android:textColor="@color/text_tertiary" />
+
+        <TextView
+            android:id="@+id/btnSaveProfile"
+            style="@style/Widget.App.PrimaryButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cta_height"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="@dimen/section_spacing"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:text="@string/edit_profile_save" />
+    </LinearLayout>
+</ScrollView>

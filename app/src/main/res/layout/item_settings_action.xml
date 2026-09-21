@@ -1,54 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    one tappable settings row: leading icon, title, an optional value on the
-    right, then the chevron. SettingsFragment and the sub screens fill these in
-    through bindSettingsRow(), so the same layout covers every list in settings.
+    a two line settings row that performs an action rather than opening a
+    screen, so it carries a supporting line under the title.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/settings_row_height"
+    android:layout_height="wrap_content"
     android:background="@android:color/transparent"
     android:foreground="?attr/selectableItemBackground"
     android:gravity="center_vertical"
+    android:minHeight="@dimen/settings_row_height"
     android:orientation="horizontal"
     android:paddingStart="2dp"
-    android:paddingEnd="2dp">
+    android:paddingTop="10dp"
+    android:paddingEnd="2dp"
+    android:paddingBottom="10dp">
 
     <ImageView
-        android:id="@+id/ivSettingsRowIcon"
+        android:id="@+id/ivSettingsActionIcon"
         android:layout_width="@dimen/settings_row_icon"
         android:layout_height="@dimen/settings_row_icon"
         android:contentDescription="@null"
         android:scaleType="fitCenter"
         app:tint="@color/text_secondary" />
 
-    <TextView
-        android:id="@+id/tvSettingsRowTitle"
-        style="@style/Text.BodyStrong"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="14dp"
         android:layout_weight="1"
-        android:ellipsize="end"
-        android:includeFontPadding="false"
-        android:maxLines="1"
-        android:textStyle="normal" />
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvSettingsRowValue"
-        style="@style/Text.Body"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:ellipsize="end"
-        android:includeFontPadding="false"
-        android:maxLines="1"
-        android:textColor="@color/text_tertiary"
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/tvSettingsActionTitle"
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/tvSettingsActionBody"
+            style="@style/Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="2dp"
+            android:textColor="@color/text_tertiary" />
+    </LinearLayout>
 
     <ImageView
-        android:id="@+id/ivSettingsRowChevron"
+        android:id="@+id/ivSettingsActionChevron"
         android:layout_width="@dimen/settings_row_chevron"
         android:layout_height="@dimen/settings_row_chevron"
         android:layout_marginStart="8dp"

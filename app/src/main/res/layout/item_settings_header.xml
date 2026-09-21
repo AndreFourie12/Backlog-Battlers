@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- the uppercase label above a group of settings rows -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvSettingsHeader"
+    style="@style/Text.Overline"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    android:layout_height="wrap_content"
+    android:paddingStart="4dp"
+    android:paddingTop="@dimen/settings_header_top"
+    android:paddingEnd="4dp"
+    android:paddingBottom="@dimen/settings_header_bottom" />

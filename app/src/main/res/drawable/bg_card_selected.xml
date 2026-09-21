@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- a card the user has picked, the accent ring is what marks it -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/accent_tint" />
+    <corners android:radius="14dp" />
+    <stroke android:width="2dp" android:color="@color/accent" />
+</shape>
