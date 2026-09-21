@@ -74,4 +74,14 @@
     <string name="cd_clear">Clear search</string>
     <string name="cd_add_to_library">Add to library</string>
     <string name="cd_remove">Remove</string>
+    <string name="cd_app_logo">Backlog Battlers logo</string>
+
+    <!-- sign in screen -->
+    <string name="login_tagline">Track your games, earn points for every achievement, and compete with friends each month.</string>
+    <string name="login_continue_with_google">Continue with Google</string>
+    <string name="login_signing_in">Signing in</string>
+    <string name="login_account_hint">New here? This creates your account. Already playing? It signs you back in.</string>
+    <string name="login_terms_notice">By continuing you agree to the Terms and Privacy Policy.</string>
+    <string name="login_terms_link">Terms</string>
+    <string name="login_privacy_link">Privacy Policy</string>
 </resources>
