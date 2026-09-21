@@ -5,5 +5,8 @@ build/
 *.iml
 out/
 
-# Secrets (IGDB client secret, database URL, etc.) live in environment variables only
+# Secrets (IGDB client secret, database URL, etc.) live in environment variables or apikey.properties only
 .env
+
+# Local keys file (copy apikey.properties.example to apikey.properties). Never commit it.
+apikey.properties
