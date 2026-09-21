@@ -2,6 +2,7 @@ package com.backlogbattlers.api
 
 import com.backlogbattlers.api.auth.GoogleTokenException
 import com.backlogbattlers.api.games.IgdbException
+import com.backlogbattlers.api.games.SteamException
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -26,7 +27,12 @@ fun Application.configureErrors() {
             call.application.log.warn("IGDB problem: ${cause.message}")
             call.respond(HttpStatusCode.BadGateway, ApiError("The game catalogue is unavailable right now"))
         }
-        
+
+        exception<SteamException> { call, cause ->
+            call.application.log.warn("Steam problem: ${cause.message}")
+            call.respond(HttpStatusCode.BadGateway, ApiError("Achievement data is unavailable right now"))
+        }
+
         // A request body that is missing, is not JSON, or has a wrong or unknown value
         exception<BadRequestException> { call, _ ->
             call.respond(HttpStatusCode.BadRequest, ApiError("The request body is missing or not valid for this endpoint"))

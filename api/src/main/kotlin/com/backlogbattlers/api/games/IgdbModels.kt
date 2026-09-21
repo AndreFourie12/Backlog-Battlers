@@ -38,3 +38,10 @@ data class IgdbTimeToBeat(
     /** How many players submitted a time; a low count means the average is unreliable. */
     val count: Int? = null,
 )
+
+/** One row from `POST /v4/external_games`: the id a game has in another store. */
+@Serializable
+data class IgdbExternalGame(
+    /** For the Steam source this is the Steam app id, as text. */
+    val uid: String,
+)

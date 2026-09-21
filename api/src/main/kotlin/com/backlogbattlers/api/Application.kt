@@ -4,6 +4,8 @@ import com.backlogbattlers.api.auth.GoogleIdTokenVerifier
 import com.backlogbattlers.api.auth.JwtService
 import com.backlogbattlers.api.db.DatabaseFactory
 import com.backlogbattlers.api.games.IgdbClient
+import com.backlogbattlers.api.games.SteamClient
+import com.backlogbattlers.api.routes.achievementRoutes
 import com.backlogbattlers.api.games.igdbHttpClient
 import com.backlogbattlers.api.routes.authRoutes
 import com.backlogbattlers.api.routes.gameRoutes
@@ -47,6 +49,7 @@ fun Application.module() {
     routing {
         healthRoutes()
         gameRoutes(igdb)
+        achievementRoutes(igdb, SteamClient.fromEnvironment())
         authRoutes(googleVerifier, jwtService)
         // Until login is built nobody can be identified, so every library request answers 401.
         // The login feature replaces `{ null }` with the real "who is calling" function.
