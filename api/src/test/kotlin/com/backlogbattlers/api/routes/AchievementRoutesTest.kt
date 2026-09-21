@@ -48,7 +48,7 @@ class AchievementRoutesTest {
     private val jsonHeaders = headersOf(HttpHeaders.ContentType, "application/json")
     private val tokenJson = """{"access_token":"tok","expires_in":3600,"token_type":"bearer"}"""
     private val hadesJson = """[{"id":113112,"name":"Hades","platforms":[{"id":6,"name":"PC (Microsoft Windows)"}]}]"""
-    private val steamListing = """[{"id":1740294,"uid":"1145360","external_game_source":1}]"""
+    private val steamListing = """[{"id":1740294,"game":113112,"uid":"1145360","external_game_source":1}]"""
     private val rarityJson = """{"achievementpercentages":{"achievements":[
         {"name":"AchClearTartarus","percent":"81.9"},
         {"name":"AchLeveledKeepsakes","percent":"5.9"},

@@ -138,14 +138,52 @@ class IgdbClientTest {
     @Test
     fun `the Steam app id is read from IGDB's external game listing`() = runBlocking {
         val seen = mutableListOf<HttpRequestData>()
-        val body = """[{"id":1740294,"uid":"1145360","external_game_source":1}]"""
+        val body = """[{"id":1740294,"game":113112,"uid":"1145360","external_game_source":1}]"""
         val client = clientWith(handler = fakeServices(seen, igdbBody = body))
 
         assertEquals(1145360, client.steamAppId(113112))
 
         val request = seen.last()
         assertEquals("/v4/external_games", request.url.encodedPath)
-        assertTrue(bodyOf(request).contains("where game = 113112 & external_game_source = 1;"))
+        assertTrue(bodyOf(request).contains("where game = (113112) & external_game_source = 1;"))
+    }
+
+    @Test
+    fun `several Steam app ids are fetched in one request and keyed by game`() = runBlocking {
+        val seen = mutableListOf<HttpRequestData>()
+        val body = """[{"id":1,"game":113112,"uid":"1145360"},{"id":2,"game":7344,"uid":"261570"}]"""
+        val client = clientWith(handler = fakeServices(seen, igdbBody = body))
+
+        val ids = client.steamAppIds(listOf(113112, 7344, 113112))
+
+        assertEquals(mapOf(113112 to 1145360, 7344 to 261570), ids)
+        // One IGDB request for the whole page, and the repeated id is only asked for once
+        assertEquals(1, seen.count { it.url.encodedPath == "/v4/external_games" })
+        assertTrue(bodyOf(seen.last()).contains("where game = (113112,7344)"))
+    }
+
+    @Test
+    fun `no game ids means no request at all`() = runBlocking {
+        val seen = mutableListOf<HttpRequestData>()
+        val client = clientWith(handler = fakeServices(seen))
+
+        assertEquals(emptyMap(), client.steamAppIds(emptyList()))
+        assertTrue(seen.isEmpty())
+    }
+
+    @Test
+    fun `browse filters by the category and puts the most rated games first`() = runBlocking {
+        val seen = mutableListOf<HttpRequestData>()
+        val client = clientWith(handler = fakeServices(seen))
+
+        client.browse(BrowseCategory.RPG, page = 2, pageSize = 20)
+
+        val body = bodyOf(seen.last())
+        assertTrue(body.contains("""genres.name = "Role-playing (RPG)""""))
+        assertTrue(body.contains("cover != null"))
+        assertTrue(body.contains("sort total_rating_count desc;"))
+        assertTrue(body.contains("limit 20;"))
+        assertTrue(body.contains("offset 20;"))
     }
 
     @Test
@@ -154,7 +192,7 @@ class IgdbClientTest {
         assertNull(none.steamAppId(1))
 
         // An Amazon-style id such as B08WWC6GBX is not a Steam app id
-        val notNumeric = clientWith(handler = fakeServices(mutableListOf(), igdbBody = """[{"id":1,"uid":"B08WWC6GBX"}]"""))
+        val notNumeric = clientWith(handler = fakeServices(mutableListOf(), igdbBody = """[{"id":1,"game":1,"uid":"B08WWC6GBX"}]"""))
         assertNull(notNumeric.steamAppId(1))
     }
 }
