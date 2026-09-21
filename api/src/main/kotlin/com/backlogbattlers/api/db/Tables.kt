@@ -105,11 +105,49 @@ object UnlockedAchievements : Table("unlocked_achievements")
     override val primaryKey = PrimaryKey(libraryEntryId, achievementId)
 }
 
+// friendrequests table
+object FriendRequests : Table("friend_requests")
+{
+    val id = uuid("id").clientDefault { Uuid.random() }
+    val senderId = reference("sender_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val receiverId = reference("receiver_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val createdAt = timestamp("created_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(id)
+
+    init
+    {
+        // a sender can only have one pending request open to the same receiver at a time
+        uniqueIndex(senderId, receiverId)
+    }
+}
+
+// friendships table
+object Friendships : Table("friendships")
+{
+    val id = uuid("id").clientDefault { Uuid.random() }
+    // userAId is always smaller id of the pair, so a friendship
+    // between two people is only ever stored once, never as two of the same rows
+    val userAId = reference("user_a_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val userBId = reference("user_b_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val createdAt = timestamp("created_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(id)
+
+    init
+    {
+        uniqueIndex(userAId, userBId)
+    }
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
     Games,
     Achievements,
     LibraryEntries,
-    UnlockedAchievements
+    UnlockedAchievements,
+    FriendRequests,
+    Friendships,
 )
+//------------------------------EOF------------------------------\\
