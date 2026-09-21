@@ -64,6 +64,28 @@
 
 
 
+    <!-- search screen -->
+    <string name="genre_action">Action</string>
+    <string name="genre_rpg">RPG</string>
+    <string name="genre_puzzle">Puzzle</string>
+    <string name="genre_coop">Co-op</string>
+    <string name="genre_strategy">Strategy</string>
+    <string name="filter_platform">Platform</string>
+    <string name="filter_genre">Genre</string>
+    <string name="filter_sort">Sort</string>
+    <string name="filter_any_platform">Any platform</string>
+    <string name="filter_any_genre">Any genre</string>
+    <string name="sort_relevance">Relevance</string>
+    <string name="sort_name_a_z">Name A–Z</string>
+    <string name="sort_name_z_a">Name Z–A</string>
+    <string name="search_no_results">No games match “%1$s”</string>
+    <string name="search_no_results_filtered">No results left with these filters</string>
+    <string name="search_no_results_filtered_body">Widen the platform or genre to see more.</string>
+    <string name="search_no_results_body">Check the spelling, or try a shorter title.</string>
+    <string name="search_error">Couldn’t reach the game catalogue.</string>
+    <string name="try_again_body">Check your connection and try again.</string>
+    <string name="added_to_library">%1$s added to your backlog</string>
+
     <!-- content descriptions -->
     <string name="cd_back">Back</string>
     <string name="cd_search">Search</string>
@@ -77,6 +99,7 @@
     <string name="cd_add_to_library">Add to library</string>
     <string name="cd_remove">Remove</string>
     <string name="cd_app_logo">Backlog Battlers logo</string>
+    <string name="cd_game_art">Game artwork</string>
 
     <!-- sign in screen -->
     <string name="login_tagline">Track your games, earn points for every achievement, and compete with friends each month.</string>
@@ -211,4 +234,9 @@
     <string name="about_terms_body">Backlog Battlers is a student portfolio project, provided as is and without warranty. Use it to track your own games. Do not attempt to falsify achievements or leaderboard standings, and do not use the app to harass other players. Accounts that do either may be removed. Because this is a coursework build, features can change or disappear between versions and data is not guaranteed to survive a reinstall.</string>
     <string name="about_privacy_body">Signing in with Google gives the app your display name, email address and profile picture. That, along with your library, playtime, achievements and monthly points, is stored on this device and on the project backend so your leaderboard position is accurate.\n\nYour data is never sold or shared with advertisers. Friends can see your display name, picture, points and recent activity. Nobody can see your email address.\n\nSigning out clears your session and your local copy of your profile from this device.</string>
     <string name="about_licences_body">This app is built on open source work released under the Apache License 2.0:\n\n• AndroidX and Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines and kotlinx.serialization\n• Ktor Client\n\nFull licence texts are available from each project\'s repository.</string>
+
+    <plurals name="search_result_count">
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
+    </plurals>
 </resources>

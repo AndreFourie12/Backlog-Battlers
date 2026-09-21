@@ -5,6 +5,29 @@ package com.backlogbattlers.app.util
 
 
 
+// IGDB gives platforms as a family, so a game is on "PlayStation" rather than on
+// a particular console. these are the names those families are written with
+fun platformLabel(platform: String): String = when (platform.uppercase()) {
+    "PC" -> "PC"
+    "PLAYSTATION" -> "PlayStation"
+    "XBOX" -> "Xbox"
+    "SWITCH" -> "Switch"
+    else -> "Other"
+}
+//------------------------------
+
+
+// the grey line under a game name in the search results, e.g. "PlayStation · Adventure".
+// a game missing either half is written with whichever half it has, and an empty
+// string means there is nothing worth showing at all
+fun gameSubtitle(platforms: List<String>, genres: List<String>): String {
+    val platform = platforms.firstOrNull()?.let { platformLabel(it) }
+    val genre = genres.firstOrNull()
+    return listOfNotNull(platform, genre).joinToString(" · ")
+}
+//------------------------------
+
+
 // points are always written with a thousands separator
 fun formatPoints(points: Int): String {
     val text = points.toString()

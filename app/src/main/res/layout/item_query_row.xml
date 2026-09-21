@@ -1,6 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    one row of the resting screen: a search this user ran before, or a game the
+    API is putting forward. the icon and the x at the end tell the two apart.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="@dimen/search_row_height"
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageView
+        android:id="@+id/img_query_icon"
+        android:layout_width="@dimen/search_row_icon"
+        android:layout_height="@dimen/search_row_icon"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_history"
+        app:tint="@color/text_tertiary" />
+
+    <TextView
+        android:id="@+id/tv_query_label"
+        style="@style/Text.SearchRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="elden ring" />
+
+    <ImageView
+        android:id="@+id/btn_remove_query"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:contentDescription="@string/cd_remove"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_close"
+        app:tint="@color/text_tertiary" />
+</LinearLayout>

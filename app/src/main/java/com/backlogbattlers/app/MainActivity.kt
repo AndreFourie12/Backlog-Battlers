@@ -55,6 +55,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.privacyDataFragment,
                 R.id.helpSupportFragment,
                 R.id.aboutFragment,
+                // searching is a drill down of its own: the box needs the whole window
+                R.id.searchFragment,
                 -> {
                     bottomNav.visibility = View.GONE
                     navDivider.visibility = View.GONE

@@ -1,6 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    the search screen. the bar at the top stays put, and the area under it shows
+    one of three states depending on what is in the box: the resting shortcuts
+    when it is empty, live suggestions while the user types, and the full results
+    once a search has been run.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:orientation="vertical"
+    tools:context=".fragments.SearchFragment">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/search_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/page_padding"
+        android:paddingTop="10dp"
+        android:paddingEnd="@dimen/page_padding"
+        android:paddingBottom="10dp">
+
+        <ImageView
+            android:id="@+id/btn_search_back"
+            android:layout_width="@dimen/search_bar_button"
+            android:layout_height="@dimen/search_bar_button"
+            android:background="@drawable/bg_circle_surface"
+            android:contentDescription="@string/cd_back"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/text_primary" />
+
+        <!-- SearchFragment swaps this background for bg_field_active while the box has focus -->
+        <LinearLayout
+            android:id="@+id/search_field"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/search_field_height"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_field"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="13dp"
+            android:paddingEnd="9dp">
+
+            <ImageView
+                android:id="@+id/img_search_icon"
+                android:layout_width="@dimen/search_field_icon"
+                android:layout_height="@dimen/search_field_icon"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_search"
+                app:tint="@color/text_tertiary" />
+
+            <!-- saveEnabled is off because SearchFragment fills the box from the view model
+                 instead, so the words a search was run for survive opening one of its
+                 results and coming back -->
+            <EditText
+                android:id="@+id/et_search"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:gravity="center_vertical"
+                android:hint="@string/search_for_a_game"
+                android:imeOptions="actionSearch"
+                android:importantForAutofill="no"
+                android:includeFontPadding="false"
+                android:inputType="text"
+                android:maxLines="1"
+                android:saveEnabled="false"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_tertiary"
+                android:textSize="15sp"
+                tools:ignore="LabelFor"
+                tools:text="war" />
+
+            <ImageView
+                android:id="@+id/btn_clear_search"
+                android:layout_width="@dimen/search_field_clear"
+                android:layout_height="@dimen/search_field_clear"
+                android:background="@drawable/bg_circle_surface"
+                android:contentDescription="@string/cd_clear"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_close"
+                android:visibility="gone"
+                app:tint="@color/text_secondary"
+                tools:visibility="visible" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- exactly one of these three is visible at a time -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <include
+            android:id="@+id/state_search_resting"
+            layout="@layout/partial_search_resting" />
+
+        <include
+            android:id="@+id/state_search_typing"
+            layout="@layout/partial_search_typing" />
+
+        <include
+            android:id="@+id/state_search_results"
+            layout="@layout/partial_search_result" />
+    </FrameLayout>
+</LinearLayout>

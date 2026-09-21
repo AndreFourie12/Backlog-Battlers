@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    one result on the results screen. the same row as a suggestion, on a card and
+    with more room for the artwork, since these are what the search actually found.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/list_gap"
+    android:background="@drawable/bg_card"
+    android:foreground="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="@dimen/card_padding_tight">
+
+    <ImageView
+        android:id="@+id/img_game_art"
+        android:layout_width="@dimen/search_result_thumb_width"
+        android:layout_height="@dimen/search_result_thumb_height"
+        android:background="@drawable/bg_art_placeholder"
+        android:contentDescription="@string/cd_game_art"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="13dp"
+        android:layout_marginEnd="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_game_title"
+            style="@style/Text.CardTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="2"
+            tools:text="God of War Ragnarök" />
+
+        <TextView
+            android:id="@+id/tv_game_subtitle"
+            style="@style/Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            tools:text="PLAYSTATION · Adventure" />
+    </LinearLayout>
+
+    <!-- a game already in the backlog shows the green tick instead of the pill -->
+    <TextView
+        android:id="@+id/tv_owned"
+        style="@style/Text.OwnedBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/search_action_height"
+        android:text="@string/owned"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/btn_add_to_library"
+        style="@style/Widget.App.AddPill"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/search_action_height"
+        android:contentDescription="@string/cd_add_to_library"
+        android:text="@string/add" />
+</LinearLayout>
