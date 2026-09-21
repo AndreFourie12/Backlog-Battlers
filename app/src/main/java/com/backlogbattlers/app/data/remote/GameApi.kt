@@ -4,6 +4,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.isSuccess
@@ -22,6 +24,7 @@ data class GameDto(
     val coverImageUrl: String? = null,
     val artworkUrl: String? = null,
     val platforms: List<String> = emptyList(),
+    val genres: List<String> = emptyList(),
     val avgCompletionHours: Double? = null,
     val avg100PercentHours: Double? = null,
 )
@@ -40,17 +43,43 @@ class GameApi(
 
 
     suspend fun starterGames(): List<RecommendationDto> {
-        val games = withTimeoutOrNull(REQUEST_TIMEOUT_MS) {
-            val response = httpClient.get("$baseUrl/games/starter") {
+        return await {
+            httpClient.get("$baseUrl/games/starter") {
                 accept(ContentType.Application.Json)
             }
+        }
+    }
+
+    suspend fun searchGames(query: String, limit: Int): List<GameDto> {
+        return await {
+            httpClient.get("$baseUrl/games/search") {
+                accept(ContentType.Application.Json)
+                parameter("q", query)
+                parameter("limit", limit)
+            }
+        }
+    }
+
+    suspend fun browseGames(category: String, limit: Int): List<GameDto> {
+        return await {
+            httpClient.get("$baseUrl/games/search") {
+                accept(ContentType.Application.Json)
+                parameter("category", category)
+                parameter("limit", limit)
+            }
+        }
+    }
+
+    private suspend inline fun <reified T> await(crossinline request: suspend () -> HttpResponse): T {
+        val body = withTimeoutOrNull(REQUEST_TIMEOUT_MS) {
+            val response = request()
             if (!response.status.isSuccess()) {
                 val errorText = runCatching { response.bodyAsText() }.getOrDefault("")
                 throw IllegalStateException("Server returned HTTP ${response.status.value}: ${errorText.take(200)}")
             }
-            response.body<List<RecommendationDto>>()
+            response.body<T>()
         }
-        return games ?: throw IOException("The server did not answer within ${REQUEST_TIMEOUT_MS / 1000} seconds")
+        return body ?: throw IOException("The server did not answer within ${REQUEST_TIMEOUT_MS / 1000} seconds")
     }
 }
 //------------------------------EOF------------------------------\\

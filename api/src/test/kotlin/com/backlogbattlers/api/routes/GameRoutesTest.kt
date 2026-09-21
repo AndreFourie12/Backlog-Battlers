@@ -35,13 +35,16 @@ class GameRoutesTest {
     private val jsonHeaders = headersOf(HttpHeaders.ContentType, "application/json")
     private val tokenJson = """{"access_token":"tok","expires_in":3600,"token_type":"bearer"}"""
     private val hadesJson = """[{"id":113112,"name":"Hades","cover":{"id":1,"image_id":"cob9kr"},
-        "platforms":[{"id":48,"name":"PlayStation 4"},{"id":167,"name":"PlayStation 5"},{"id":6,"name":"PC (Microsoft Windows)"}]}]"""
+        "platforms":[{"id":48,"name":"PlayStation 4"},{"id":167,"name":"PlayStation 5"},{"id":6,"name":"PC (Microsoft Windows)"}],
+        "genres":[{"id":25,"name":"Hack and slash/Beat em up"},{"id":31,"name":"Adventure"}]}]"""
+    private val hadesSteamJson = """[{"id":1740294,"game":113112,"uid":"1145360"}]"""
     private val hadesTimeJson = """[{"id":2005,"game_id":113112,"normally":253600,"completely":542700,"count":13}]"""
 
-    /** A fake IGDB: answers Twitch with a token and the two IGDB endpoints with the given JSON. */
+    /** A fake IGDB: answers Twitch with a token and each IGDB endpoint with the given JSON. */
     private fun fakeIgdb(
         games: String = hadesJson,
         timeToBeats: String = hadesTimeJson,
+        externalGames: String = hadesSteamJson,
         igdbStatus: HttpStatusCode = HttpStatusCode.OK,
     ) = IgdbClient(
         igdbHttpClient(
@@ -50,6 +53,7 @@ class GameRoutesTest {
                     "/oauth2/token" -> respond(tokenJson, HttpStatusCode.OK, jsonHeaders)
                     "/v4/games" -> respond(games, igdbStatus, jsonHeaders)
                     "/v4/game_time_to_beats" -> respond(timeToBeats, igdbStatus, jsonHeaders)
+                    "/v4/external_games" -> respond(externalGames, igdbStatus, jsonHeaders)
                     else -> respond("", HttpStatusCode.NotFound)
                 }
             },
@@ -75,8 +79,67 @@ class GameRoutesTest {
         assertEquals(1, games.size)
         assertEquals("Hades", games[0].title)
         assertEquals(listOf("PLAYSTATION", "PC"), games[0].platforms)
+        assertEquals(listOf("Hack and slash/Beat em up", "Adventure"), games[0].genres)
         assertEquals(null, games[0].avgCompletionHours)
         assertEquals(0, storedGames().size) // searching does not save anything
+    }
+
+    @Test
+    fun `search results carry Steam landscape artwork, and the IGDB cover when Steam has none`() = testApplication {
+        application {
+            install(ContentNegotiation) { json() }
+            configureErrors()
+            routing { gameRoutes(fakeIgdb()) }
+        }
+
+        val withSteam = Json.decodeFromString<List<GameDto>>(client.get("/games/search?q=hades").bodyAsText())
+        assertEquals(
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145360/capsule_616x353.jpg",
+            withSteam[0].artworkUrl,
+        )
+        assertEquals("https://images.igdb.com/igdb/image/upload/t_cover_big/cob9kr.jpg", withSteam[0].coverImageUrl)
+    }
+
+    @Test
+    fun `a game Steam does not carry falls back to no artwork`() = testApplication {
+        application {
+            install(ContentNegotiation) { json() }
+            configureErrors()
+            routing { gameRoutes(fakeIgdb(externalGames = "[]")) }
+        }
+
+        val games = Json.decodeFromString<List<GameDto>>(client.get("/games/search?q=hades").bodyAsText())
+        assertEquals(null, games[0].artworkUrl)
+        assertEquals("https://images.igdb.com/igdb/image/upload/t_cover_big/cob9kr.jpg", games[0].coverImageUrl)
+    }
+
+    @Test
+    fun `a browse category is searched instead of a query`() = testApplication {
+        application {
+            install(ContentNegotiation) { json() }
+            configureErrors()
+            routing { gameRoutes(fakeIgdb()) }
+        }
+
+        val response = client.get("/games/search?category=rpg")
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(1, Json.decodeFromString<List<GameDto>>(response.bodyAsText()).size)
+    }
+
+    @Test
+    fun `search rejects an unknown category and a bad limit`() = testApplication {
+        application {
+            install(ContentNegotiation) { json() }
+            configureErrors()
+            routing { gameRoutes(fakeIgdb()) }
+        }
+
+        assertEquals(HttpStatusCode.BadRequest, client.get("/games/search?category=roguelike").status)
+        assertEquals(HttpStatusCode.BadRequest, client.get("/games/search?q=hades&limit=0").status)
+        assertEquals(HttpStatusCode.BadRequest, client.get("/games/search?q=hades&limit=51").status)
+        assertEquals(HttpStatusCode.BadRequest, client.get("/games/search?q=hades&limit=abc").status)
+        assertEquals(HttpStatusCode.OK, client.get("/games/search?q=hades&limit=5").status)
     }
 
     @Test

@@ -21,6 +21,7 @@ data class Game(
     // landscape art for the wide game tiles, null when the game has none
     val artworkUrl: String? = null,
     val platforms: List<String>,
+    val genres: List<String> = emptyList(),
     val avgCompletionHours: Float?,
     val avg100PercentHours: Float?,
     val cachedAt: Long,
@@ -39,6 +40,20 @@ enum class Platform {
     XBOX,
     SWITCH,
     OTHER,
+}
+
+enum class BrowseCategory(val key: String) {
+    ACTION("action"),
+    RPG("rpg"),
+    PUZZLE("puzzle"),
+    COOP("coop"),
+    STRATEGY("strategy"),
+}
+
+enum class SearchSort {
+    RELEVANCE,
+    NAME_A_Z,
+    NAME_Z_A,
 }
 
 // enum representing backlog library item status

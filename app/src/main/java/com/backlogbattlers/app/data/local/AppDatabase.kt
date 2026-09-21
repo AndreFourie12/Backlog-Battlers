@@ -20,7 +20,7 @@ import com.backlogbattlers.app.data.local.entity.UserEntity
         LibraryEntryEntity::class,
     ],
     // !!!Please increment the version here if you merge from main and wanna test. Current: 1
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {

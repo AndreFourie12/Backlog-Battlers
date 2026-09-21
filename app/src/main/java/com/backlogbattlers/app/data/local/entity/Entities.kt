@@ -37,6 +37,7 @@ data class CachedGameEntity(
     val coverImageUrl: String?,
     val artworkUrl: String? = null,
     val platforms: List<String>,
+    val genres: List<String> = emptyList(),
     val avgCompletionHours: Float?,
     val avg100PercentHours: Float?,
     val cachedAt: Long,

@@ -23,6 +23,7 @@ data class GameDto(
     val avgCompletionHours: Double?,
     val avg100PercentHours: Double?,
     val artworkUrl: String? = null,
+    val genres: List<String> = emptyList(),
 )
 
 /** Builds the picture address from IGDB's image id, or null when the game has no cover. */
@@ -65,5 +66,6 @@ fun IgdbGame.toDto(timeToBeat: IgdbTimeToBeat? = null, artworkUrl: String? = nul
     avgCompletionHours = secondsToHours(timeToBeat?.normally),
     avg100PercentHours = secondsToHours(timeToBeat?.completely),
     artworkUrl = artworkUrl,
+    genres = genres.orEmpty().map { it.name },
 )
 

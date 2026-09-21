@@ -12,6 +12,8 @@ import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.GameRepositoryImpl
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.LibraryRepositoryImpl
+import com.backlogbattlers.app.data.repository.SearchHistoryRepository
+import com.backlogbattlers.app.data.repository.SearchHistoryRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.data.repository.SettingsRepositoryImpl
 import io.ktor.client.HttpClient
@@ -80,6 +82,11 @@ object ServiceLocator {
 
     val libraryRepository: LibraryRepository by lazy {
         LibraryRepositoryImpl(database.libraryEntryDao())
+    }
+
+    val searchHistoryRepository: SearchHistoryRepository by lazy {
+        val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing searchHistoryRepository")
+        SearchHistoryRepositoryImpl(context)
     }
 
     val settingsRepository: SettingsRepository by lazy {

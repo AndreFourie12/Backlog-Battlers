@@ -72,6 +72,16 @@ class IgdbClient(
         return query("games", """search "$cleaned"; $GAME_FIELDS limit $size; offset $offset;""")
     }
 
+    suspend fun browse(category: BrowseCategory, page: Int = 1, pageSize: Int = 20): List<IgdbGame> {
+        val size = pageSize.coerceIn(1, MAX_PAGE_SIZE)
+        val offset = (page.coerceAtLeast(1) - 1) * size
+        return query(
+            "games",
+            "$GAME_FIELDS where ${category.filter} & cover != null & total_rating_count > $MIN_RATING_COUNT; " +
+                "sort total_rating_count desc; limit $size; offset $offset;",
+        )
+    }
+
     /** One game by its IGDB id, or null when IGDB does not know it. */
     suspend fun game(id: Int): IgdbGame? =
         query<List<IgdbGame>>("games", "$GAME_FIELDS where id = $id; limit 1;").firstOrNull()
@@ -83,12 +93,20 @@ class IgdbClient(
             "fields game_id,normally,completely,count; where game_id = $gameId; limit 1;",
         ).firstOrNull()
 
-    /** The game's Steam app id, or null when IGDB has no Steam listing for it. */
-    suspend fun steamAppId(gameId: Int): Int? =
-        query<List<IgdbExternalGame>>(
+    suspend fun steamAppIds(gameIds: List<Int>): Map<Int, Int> {
+        val ids = gameIds.distinct()
+        if (ids.isEmpty()) return emptyMap()
+
+        val limit = (ids.size * 2).coerceAtMost(MAX_ROWS)
+        val listings = query<List<IgdbExternalGame>>(
             "external_games",
-            "fields uid; where game = $gameId & external_game_source = $STEAM_SOURCE_ID; limit 1;",
-        ).firstOrNull()?.uid?.toIntOrNull()
+            "fields game,uid; where game = (${ids.joinToString(",")}) & external_game_source = $STEAM_SOURCE_ID; limit $limit;",
+        )
+        return listings.mapNotNull { listing -> listing.uid.toIntOrNull()?.let { listing.game to it } }.toMap()
+    }
+
+    /** The game's Steam app id, or null when IGDB has no Steam listing for it. */
+    suspend fun steamAppId(gameId: Int): Int? = steamAppIds(listOf(gameId))[gameId]
 
     /** Sends one Apicalypse query to an IGDB endpoint and decodes the JSON list it returns. */
     private suspend inline fun <reified T> query(endpoint: String, apicalypse: String): T {
@@ -140,8 +158,10 @@ class IgdbClient(
     companion object {
         private const val API_URL = "https://api.igdb.com/v4"
         private const val TOKEN_URL = "https://id.twitch.tv/oauth2/token"
-        private const val GAME_FIELDS = "fields name,cover.image_id,platforms.name;"
+        private const val GAME_FIELDS = "fields name,cover.image_id,platforms.name,genres.name;"
         private const val MAX_PAGE_SIZE = 50
+        private const val MAX_ROWS = 500
+        private const val MIN_RATING_COUNT = 5
         private const val STEAM_SOURCE_ID = 1 // IGDB's id for Steam in its external game sources
         private const val TOKEN_MARGIN_SECONDS = 60L
 

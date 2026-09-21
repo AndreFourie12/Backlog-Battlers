@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.privacyDataFragment,
                 R.id.helpSupportFragment,
                 R.id.aboutFragment,
+                R.id.searchFragment,
                 -> {
                     bottomNav.visibility = View.GONE
                     navDivider.visibility = View.GONE

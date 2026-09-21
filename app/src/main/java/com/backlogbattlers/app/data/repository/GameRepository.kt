@@ -16,6 +16,10 @@ interface GameRepository {
     // searches cached games matching query string as a Flow
     fun search(query: String): Flow<List<Game>>
 
+    suspend fun searchOnline(query: String, limit: Int): List<Game>
+
+    suspend fun browse(category: String, limit: Int): List<Game>
+
     // fetches a cached game by game id
     suspend fun getGame(gameId: Int): Game?
 
@@ -42,6 +46,14 @@ class GameRepositoryImpl(
         }
     }
 
+    override suspend fun searchOnline(query: String, limit: Int): List<Game> {
+        return cacheAll(gameApi.searchGames(query, limit))
+    }
+
+    override suspend fun browse(category: String, limit: Int): List<Game> {
+        return cacheAll(gameApi.browseGames(category, limit))
+    }
+
     //------------------------------
     // fetches game by delegating to CachedGameDao and mapping to domain Game
     override suspend fun getGame(gameId: Int): Game? {
@@ -62,17 +74,28 @@ class GameRepositoryImpl(
     //------------------------------
     // caches a domain Game into Room database with current timestamp
     suspend fun cacheGame(game: Game) {
-        val entity = CachedGameEntity(
-            gameId = game.gameId,
-            title = game.title,
-            coverImageUrl = game.coverImageUrl,
-            artworkUrl = game.artworkUrl,
-            platforms = game.platforms,
-            avgCompletionHours = game.avgCompletionHours,
-            avg100PercentHours = game.avg100PercentHours,
+        cachedGameDao.upsert(game.toEntity())
+    }
+
+    private suspend fun cacheAll(dtos: List<GameDto>): List<Game> {
+        val cachedAt = System.currentTimeMillis()
+        val games = dtos.map { it.toDomain(cachedAt) }
+        cachedGameDao.upsertAll(games.map { it.toEntity() })
+        return games
+    }
+
+    private fun Game.toEntity(): CachedGameEntity {
+        return CachedGameEntity(
+            gameId = gameId,
+            title = title,
+            coverImageUrl = coverImageUrl,
+            artworkUrl = artworkUrl,
+            platforms = platforms,
+            genres = genres,
+            avgCompletionHours = avgCompletionHours,
+            avg100PercentHours = avg100PercentHours,
             cachedAt = System.currentTimeMillis(),
         )
-        cachedGameDao.upsert(entity)
     }
 
     //------------------------------
@@ -84,6 +107,7 @@ class GameRepositoryImpl(
             coverImageUrl = coverImageUrl,
             artworkUrl = artworkUrl,
             platforms = platforms,
+            genres = genres,
             avgCompletionHours = avgCompletionHours,
             avg100PercentHours = avg100PercentHours,
             cachedAt = cachedAt,
@@ -99,6 +123,7 @@ class GameRepositoryImpl(
             coverImageUrl = coverImageUrl,
             artworkUrl = artworkUrl,
             platforms = platforms,
+            genres = genres,
             avgCompletionHours = avgCompletionHours?.toFloat(),
             avg100PercentHours = avg100PercentHours?.toFloat(),
             cachedAt = cachedAt,

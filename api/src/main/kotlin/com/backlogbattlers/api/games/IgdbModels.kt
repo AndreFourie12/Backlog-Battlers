@@ -18,6 +18,11 @@ data class IgdbPlatform(
     val name: String,
 )
 
+@Serializable
+data class IgdbGenre(
+    val name: String,
+)
+
 /** One game from `POST /v4/games`. */
 @Serializable
 data class IgdbGame(
@@ -25,6 +30,7 @@ data class IgdbGame(
     val name: String,
     val cover: IgdbCover? = null,
     val platforms: List<IgdbPlatform>? = null,
+    val genres: List<IgdbGenre>? = null,
 )
 
 /** One row from `POST /v4/game_time_to_beats`. Times are in seconds. */
@@ -42,6 +48,7 @@ data class IgdbTimeToBeat(
 /** One row from `POST /v4/external_games`: the id a game has in another store. */
 @Serializable
 data class IgdbExternalGame(
+    val game: Int,
     /** For the Steam source this is the Steam app id, as text. */
     val uid: String,
 )

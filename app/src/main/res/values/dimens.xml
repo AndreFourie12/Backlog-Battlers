@@ -45,6 +45,19 @@
     <dimen name="recommendation_badge_inset">5dp</dimen>
     <dimen name="recommendation_chevron">14dp</dimen>
  
+    <dimen name="search_bar_button">38dp</dimen>
+    <dimen name="search_field_height">46dp</dimen>
+    <dimen name="search_field_icon">18dp</dimen>
+    <dimen name="search_field_clear">20dp</dimen>
+    <dimen name="search_row_height">46dp</dimen>
+    <dimen name="search_row_icon">18dp</dimen>
+    <dimen name="search_chip_height">34dp</dimen>
+    <dimen name="search_suggestion_thumb_width">62dp</dimen>
+    <dimen name="search_suggestion_thumb_height">38dp</dimen>
+    <dimen name="search_result_thumb_width">98dp</dimen>
+    <dimen name="search_result_thumb_height">58dp</dimen>
+    <dimen name="search_action_height">34dp</dimen>
+
     <!-- the faint line between the rows of a list -->
     <dimen name="list_divider_thickness">1dp</dimen>
     <dimen name="list_divider_gap">10dp</dimen>

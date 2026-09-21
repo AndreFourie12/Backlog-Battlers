@@ -5,6 +5,20 @@ package com.backlogbattlers.app.util
 
 
 
+fun platformLabel(platform: String): String = when (platform.uppercase()) {
+    "PC" -> "PC"
+    "PLAYSTATION" -> "PlayStation"
+    "XBOX" -> "Xbox"
+    "SWITCH" -> "Switch"
+    else -> "Other"
+}
+
+fun gameSubtitle(platforms: List<String>, genres: List<String>): String {
+    val platform = platforms.firstOrNull()?.let { platformLabel(it) }
+    val genre = genres.firstOrNull()
+    return listOfNotNull(platform, genre).joinToString(" · ")
+}
+
 // points are always written with a thousands separator
 fun formatPoints(points: Int): String {
     val text = points.toString()
