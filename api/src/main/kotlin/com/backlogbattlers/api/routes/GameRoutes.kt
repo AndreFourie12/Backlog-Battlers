@@ -2,6 +2,7 @@ package com.backlogbattlers.api.routes
 
 import com.backlogbattlers.api.ApiError
 import com.backlogbattlers.api.games.IgdbClient
+import com.backlogbattlers.api.games.StarterGames
 import com.backlogbattlers.api.games.saveGame
 import com.backlogbattlers.api.games.toDto
 import io.ktor.http.HttpStatusCode
@@ -13,6 +14,12 @@ private const val MAX_QUERY_LENGTH = 100
 
 /** Game catalogue: search IGDB, and fetch one game with its time-to-beat. */
 fun Route.gameRoutes(igdb: IgdbClient) {
+    val starterGames = StarterGames(igdb)
+
+    // GET /games/starter
+    get("/games/starter") {
+        call.respond(starterGames.load())
+    }
 
     // GET /games/search?q=hades&page=1
     get("/games/search") {

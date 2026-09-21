@@ -37,4 +37,15 @@
     <dimen name="empty_state_tile">46dp</dimen>
     <dimen name="empty_state_icon">22dp</dimen>
     <dimen name="cta_height">48dp</dimen>
+
+    <dimen name="recommendation_thumb_width">123dp</dimen>
+    <dimen name="recommendation_thumb_height">70dp</dimen>
+    <dimen name="recommendation_thumb_radius">8dp</dimen>
+    <dimen name="recommendation_badge">22dp</dimen>
+    <dimen name="recommendation_badge_inset">5dp</dimen>
+    <dimen name="recommendation_chevron">14dp</dimen>
+
+    <!-- the faint line between the rows of a list -->
+    <dimen name="list_divider_thickness">1dp</dimen>
+    <dimen name="list_divider_gap">10dp</dimen>
 </resources>

@@ -53,6 +53,8 @@
     <string name="competition_body">Beat your friends. Complete more games. Earn more achievements.</string>
     <string name="recommended_for_you">Recommended for you</string>
     <string name="great_games_to_start_with">Great games to start with</string>
+    <string name="recommendations_error">Couldn\'t load games right now.</string>
+    <string name="try_again">Try again</string>
     <string name="recent">Recent</string>
     <string name="trending">Trending</string>
     <string name="browse_by_genre">Browse by genre</string>

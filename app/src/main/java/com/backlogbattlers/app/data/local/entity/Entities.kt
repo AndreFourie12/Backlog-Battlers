@@ -35,6 +35,7 @@ data class CachedGameEntity(
     @PrimaryKey val gameId: Int,
     val title: String,
     val coverImageUrl: String?,
+    val artworkUrl: String? = null,
     val platforms: List<String>,
     val avgCompletionHours: Float?,
     val avg100PercentHours: Float?,

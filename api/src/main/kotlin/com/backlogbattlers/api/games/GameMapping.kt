@@ -22,11 +22,16 @@ data class GameDto(
     val platforms: List<String>,
     val avgCompletionHours: Double?,
     val avg100PercentHours: Double?,
+    val artworkUrl: String? = null,
 )
 
 /** Builds the picture address from IGDB's image id, or null when the game has no cover. */
 fun coverUrl(imageId: String?): String? =
     imageId?.let { "https://images.igdb.com/igdb/image/upload/t_cover_big/$it.jpg" }
+
+fun steamArtUrl(steamAppId: Int?): String? =
+    steamAppId?.let { "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/$it/capsule_616x353.jpg" }
+
 
 /**
  * Converts IGDB platform names ("PlayStation 5", "PC (Microsoft Windows)") into the app's
@@ -52,11 +57,13 @@ fun secondsToHours(seconds: Int?): Double? {
 }
 
 /** Builds the app-facing game. Pass [timeToBeat] when it is known; the search results skip it. */
-fun IgdbGame.toDto(timeToBeat: IgdbTimeToBeat? = null): GameDto = GameDto(
+fun IgdbGame.toDto(timeToBeat: IgdbTimeToBeat? = null, artworkUrl: String? = null): GameDto = GameDto(
     gameId = id,
     title = name,
     coverImageUrl = coverUrl(cover?.imageId),
     platforms = normalisePlatforms(platforms.orEmpty().map { it.name }),
     avgCompletionHours = secondsToHours(timeToBeat?.normally),
     avg100PercentHours = secondsToHours(timeToBeat?.completely),
+    artworkUrl = artworkUrl,
 )
+

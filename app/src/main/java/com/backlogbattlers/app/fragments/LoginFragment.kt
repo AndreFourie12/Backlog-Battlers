@@ -43,7 +43,7 @@ class LoginFragment : Fragment() {
         val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_loading)
 
         btnSignIn.setOnClickListener {
-            viewModel.onSignInClicked()
+            viewModel.onSignInClicked(requireActivity())
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
