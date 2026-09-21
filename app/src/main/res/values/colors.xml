@@ -30,6 +30,9 @@
     <color name="success_tint">#294ADE80</color>
     <color name="gold_tint">#24E8B34C</color>
 
+    <color name="hero_scrim_top">#6C10141C</color>
+    <color name="hero_scrim_clear">#0010141C</color>
+
     <!-- google sign in button, google brand guidelines -->
     <color name="google_surface">#FFFFFFFF</color>
     <color name="google_on_surface">#FF1F1F1F</color>

@@ -74,6 +74,7 @@
     <string name="cd_clear">Clear search</string>
     <string name="cd_add_to_library">Add to library</string>
     <string name="cd_remove">Remove</string>
+    <string name="cd_app_logo">Backlog Battlers logo</string>
 
     <!-- sign in screen -->
     <string name="login_tagline">Track your games, earn points for every achievement, and compete with friends each month.</string>
