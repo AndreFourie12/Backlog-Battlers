@@ -84,7 +84,11 @@
         android:id="@+id/friendsFragment"
         android:name="com.backlogbattlers.app.fragments.FriendsFragment"
         android:label="Friends"
-        tools:layout="@layout/fragment_friends" />
+        tools:layout="@layout/fragment_friends">
+        <action
+            android:id="@+id/action_friendsFragment_to_findFriendsFragment"
+            app:destination="@id/findFriendsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/profileFragment"
@@ -131,5 +135,11 @@
             android:id="@+id/action_searchFragment_to_gameDetailFragment"
             app:destination="@id/gameDetailFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/findFriendsFragment"
+        android:name="com.backlogbattlers.app.fragments.FindFriendsFragment"
+        android:label="Find Friends"
+        tools:layout="@layout/fragment_find_friends" />
 
 </navigation>
