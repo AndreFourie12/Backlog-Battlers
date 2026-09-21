@@ -13,6 +13,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 // main activity of the application hosting fragment navigation and bottom navigation bar
 class MainActivity : AppCompatActivity() {
 
+    // these screens paint artwork behind the status bar, so they keep the top inset themselves
+    private val fullBleedDestinations = setOf(R.id.homeFragment)
+    private var contentDrawsBehindStatusBar = false
+
     //------------------------------
     // Sets up activity layout, edge/edge insets, bottom nav, destination change listeners.\
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,9 +24,11 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        val root = findViewById<View>(R.id.main)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            val top = if (contentDrawsBehindStatusBar) 0 else systemBars.top
+            v.setPadding(systemBars.left, top, systemBars.right, systemBars.bottom)
             insets
         }
 
@@ -34,6 +40,9 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            contentDrawsBehindStatusBar = destination.id in fullBleedDestinations
+            ViewCompat.requestApplyInsets(root)
+
             when (destination.id) {
                 R.id.splashFragment, R.id.loginFragment -> {
                     bottomNav.visibility = View.GONE

@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.ui.login
 
+import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -50,10 +51,10 @@ class LoginViewModel(
 
     //------------------------------
     // initiates google sign in flow via AuthRepository and updates ui state with result
-    fun onSignInClicked() {
+    fun onSignInClicked(activity: Activity) {
         _uiState.value = LoginUiState.Loading
         viewModelScope.launch {
-            when (val result = authRepository.signInWithGoogle()) {
+            when (val result = authRepository.signInWithGoogle(activity)) {
                 is AuthResult.Success -> {
                     _uiState.value = LoginUiState.Success(result.user)
                 }

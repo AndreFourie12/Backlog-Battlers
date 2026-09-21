@@ -24,6 +24,10 @@ import kotlinx.serialization.json.Json
 // dependency locator holding application singletons for database, network, and repository instances
 object ServiceLocator {
 
+    // the android engine defaults both timeouts to 100s, which leaves screens loading for over a minute when the backend is unreachable
+    private const val CONNECT_TIMEOUT_MS = 10_000
+    private const val SOCKET_TIMEOUT_MS = 30_000
+
     @Volatile
     private var applicationContext: Context? = null
 
@@ -89,6 +93,10 @@ object ServiceLocator {
     // builds and configures an HTTP client with Ktor Android engine and JSON content negotiation
     private fun createHttpClient(): HttpClient {
         return HttpClient(Android) {
+            engine {
+                connectTimeout = CONNECT_TIMEOUT_MS
+                socketTimeout = SOCKET_TIMEOUT_MS
+            }
             install(ContentNegotiation) {
                 json(
                     json = Json {

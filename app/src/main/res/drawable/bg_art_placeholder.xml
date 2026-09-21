@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rounded tile behind a game's artwork: shows while the picture loads, and when a game has none.
+     Its outline also rounds the picture itself, through clipToOutline on the ImageView -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/surface_tile" />
+    <corners android:radius="@dimen/recommendation_thumb_radius" />
+</shape>

@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.data.repository
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.credentials.ClearCredentialStateRequest
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import java.net.ConnectException
+import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 //------------------------------
@@ -42,7 +44,7 @@ interface AuthRepository {
     suspend fun getCurrentUser(): User?
 
     // signs in user with Google authentication
-    suspend fun signInWithGoogle(): AuthResult
+    suspend fun signInWithGoogle(activity: Activity): AuthResult
 
     // signs out current user
     suspend fun signOut()
@@ -75,9 +77,9 @@ class AuthRepositoryImpl(
 
     //------------------------------
     // requests googleID token via CredentialManager then verifies with AuthApi, stores tokens, and upserts the user entity
-    override suspend fun signInWithGoogle(): AuthResult {
+    override suspend fun signInWithGoogle(activity: Activity): AuthResult {
         return try {
-            val credentialManager = CredentialManager.create(context)
+            val credentialManager = CredentialManager.create(activity)
 
             //web application OAuth
             val googleIdOption = GetGoogleIdOption.Builder()
@@ -90,7 +92,7 @@ class AuthRepositoryImpl(
                 .addCredentialOption(googleIdOption)
                 .build()
 
-            val response = credentialManager.getCredential(context = context, request = request)
+            val response = credentialManager.getCredential(context = activity, request = request)
             val credential = response.credential
 
             if ((credential is CustomCredential) && (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)) {
@@ -136,7 +138,7 @@ class AuthRepositoryImpl(
         } catch (e: Exception) {
             Log.e("AuthRepository", "Google Sign-In failed: ${e.message}", e)
             val userMessage = when {
-                e is ConnectException || e is UnknownHostException -> "Unable to connect to backend server. Please ensure the backend server is running."
+                e is ConnectException || e is UnknownHostException || e is SocketTimeoutException -> "Unable to connect to backend server. Please ensure the backend server is running."
                 e is SerializationException -> "Received invalid response from backend server. Please check API_BASE_URL setting."
                 else -> e.message ?: "Google Sign-In failed"
             }
