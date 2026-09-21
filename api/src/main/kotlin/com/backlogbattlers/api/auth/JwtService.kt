@@ -3,11 +3,7 @@ package com.backlogbattlers.api.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
-import com.backlogbattlers.api.CurrentUser
-import io.ktor.http.HttpHeaders
-import io.ktor.server.request.header
 import java.util.Date
-import kotlin.uuid.Uuid
 
 // handles jwt access and refresh token generation and verification with HMAC256.
 class JwtService(
@@ -38,25 +34,6 @@ class JwtService(
             .withClaim(CLAIM_TYPE, TYPE_REFRESH)
             .withExpiresAt(Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_MS))
             .sign(algorithm)
-    }
-
-    //------------------------------
-    // verifies a jwt access token, make sure its valid, unexpired, signed correctly,
-    // and carries the access type claim; returns the associated userId
-    fun verifyAccessToken(token: String): String {
-        val verifier = JWT.require(algorithm)
-            .withIssuer(issuer)
-            .withClaim(CLAIM_TYPE, TYPE_ACCESS)
-            .build()
-
-        val decoded = try {
-            verifier.verify(token)
-        } catch (e: JWTVerificationException) {
-            throw IllegalArgumentException("Invalid or expired access token: ${e.message}", e)
-        }
-
-        return decoded.getClaim(CLAIM_USER_ID).asString()
-            ?: throw IllegalArgumentException("Access token is missing required userId claim")
     }
 
     //------------------------------
@@ -102,19 +79,6 @@ class JwtService(
         private const val TYPE_REFRESH = "refresh"
         private const val ACCESS_TOKEN_EXPIRATION_MS = 3_600_000L
         private const val REFRESH_TOKEN_EXPIRATION_MS = 30L * 24 * 3_600_000L
-    }
-}
-
-//------------------------------
-// extracts and verifies the bearer jwt access token from the authorization header
-fun bearerCurrentUser(jwtService: JwtService): CurrentUser = { call ->
-    val authHeader = call.request.header(HttpHeaders.Authorization)
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-        null
-    } else {
-        val token = authHeader.removePrefix("Bearer ").trim()
-        val userIdString = runCatching { jwtService.verifyAccessToken(token) }.getOrNull()
-        if (userIdString == null) null else runCatching { Uuid.parse(userIdString) }.getOrNull()
     }
 }
 //------------------------------EOF------------------------------\\
