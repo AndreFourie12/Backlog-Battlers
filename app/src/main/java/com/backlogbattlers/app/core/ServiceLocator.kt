@@ -5,6 +5,7 @@ import com.backlogbattlers.app.BuildConfig
 import com.backlogbattlers.app.data.local.AppDatabase
 import com.backlogbattlers.app.data.local.TokenStorage
 import com.backlogbattlers.app.data.remote.AuthApi
+import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthRepositoryImpl
 import com.backlogbattlers.app.data.repository.GameRepository
@@ -44,6 +45,10 @@ object ServiceLocator {
         AuthApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
     }
 
+    val gameApi: GameApi by lazy {
+        GameApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
+    }
+
     val authRepository: AuthRepository by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing authRepository")
         AuthRepositoryImpl(
@@ -56,7 +61,7 @@ object ServiceLocator {
     }
 
     val gameRepository: GameRepository by lazy {
-        GameRepositoryImpl(database.cachedGameDao())
+        GameRepositoryImpl(database.cachedGameDao(), gameApi)
     }
 
     val libraryRepository: LibraryRepository by lazy {
