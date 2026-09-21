@@ -1,6 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:scrollbars="none"
+    tools:context=".fragments.HomeFragment">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/bottom_content_inset">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/home_hero_height">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                android:scaleType="centerCrop"
+                android:src="@drawable/img_home_backdrop"
+                tools:ignore="ContentDescription" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/home_hero_scrim_top"
+                android:layout_gravity="top"
+                android:background="@drawable/scrim_hero_top" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/home_hero_scrim_bottom"
+                android:layout_gravity="bottom"
+                android:background="@drawable/scrim_hero_bottom" />
+
+            <!-- HomeFragment adds the status bar inset on top of this margin -->
+            <LinearLayout
+                android:id="@+id/home_top_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_marginTop="14dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/home_bar_padding"
+                android:paddingEnd="@dimen/home_bar_padding">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/home_bar_pill_height"
+                    android:background="@drawable/bg_pill_scrim"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="14dp">
+
+                    <ImageView
+                        android:layout_width="@dimen/home_wordmark_logo"
+                        android:layout_height="@dimen/home_wordmark_logo"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="@string/cd_app_logo"
+                        android:src="@drawable/img_logo_mark" />
+
+                    <TextView
+                        style="@style/Text.Wordmark"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:includeFontPadding="false"
+                        android:text="@string/wordmark" />
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/btn_notifications"
+                    android:layout_width="@dimen/home_bar_button"
+                    android:layout_height="@dimen/home_bar_button"
+                    android:background="@drawable/bg_circle_scrim"
+                    android:contentDescription="@string/cd_notifications"
+                    android:padding="8dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_bell" />
+
+                <ImageView
+                    android:id="@+id/btn_settings"
+                    android:layout_width="@dimen/home_bar_button"
+                    android:layout_height="@dimen/home_bar_button"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_circle_scrim"
+                    android:contentDescription="@string/cd_settings"
+                    android:padding="8dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_gear" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tv_welcome_title"
+            style="@style/Text.HeroTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="17dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:includeFontPadding="false"
+            android:text="@string/welcome_title" />
+
+        <TextView
+            android:id="@+id/tv_welcome_body"
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="9dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/welcome_body" />
+
+        <include
+            layout="@layout/partial_no_friends_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="@dimen/section_spacing"
+            android:layout_marginEnd="@dimen/page_padding" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="@dimen/section_spacing"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.SectionTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:includeFontPadding="false"
+                android:text="@string/great_games_to_start_with" />
+
+            <TextView
+                android:id="@+id/btn_add_game"
+                style="@style/Text.SectionAction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="@string/add_game" />
+        </LinearLayout>
+
+        <!-- recommendation rows are added here once /games is wired into the app -->
+        <LinearLayout
+            android:id="@+id/container_recommendations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="14dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:orientation="vertical" />
+    </LinearLayout>
+</ScrollView>

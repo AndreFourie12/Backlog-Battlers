@@ -37,4 +37,6 @@
     <color name="google_surface">#FFFFFFFF</color>
     <color name="google_on_surface">#FF1F1F1F</color>
     <color name="google_ripple">#1F1F1F1F</color>
+
+    <color name="surface_tile">#FF202839</color>
 </resources>

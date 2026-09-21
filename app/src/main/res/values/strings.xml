@@ -84,4 +84,6 @@
     <string name="login_terms_notice">By continuing you agree to the Terms and Privacy Policy.</string>
     <string name="login_terms_link">Terms</string>
     <string name="login_privacy_link">Privacy Policy</string>
+
+    <string name="cd_home_backdrop">Rolling hills under a bright sky</string>
 </resources>
