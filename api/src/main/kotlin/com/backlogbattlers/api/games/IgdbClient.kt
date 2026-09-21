@@ -1,5 +1,6 @@
 package com.backlogbattlers.api.games
 
+import com.backlogbattlers.api.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
@@ -145,13 +146,13 @@ class IgdbClient(
         private const val TOKEN_MARGIN_SECONDS = 60L
 
         /**
-         * Builds the real client from IGDB_CLIENT_ID and IGDB_CLIENT_SECRET.
+         * Builds the real client from IGDB_CLIENT_ID and IGDB_CLIENT_SECRET (see [Config]).
          * Missing keys do not stop the API from starting; only game requests fail, with a clear message.
          */
-        fun fromEnvironment(): IgdbClient = IgdbClient(
+        fun fromConfig(): IgdbClient = IgdbClient(
             http = igdbHttpClient(),
-            clientId = System.getenv("IGDB_CLIENT_ID").orEmpty(),
-            clientSecret = System.getenv("IGDB_CLIENT_SECRET").orEmpty(),
+            clientId = Config.default.get("IGDB_CLIENT_ID").orEmpty(),
+            clientSecret = Config.default.get("IGDB_CLIENT_SECRET").orEmpty(),
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.backlogbattlers.api.db
 
+import com.backlogbattlers.api.Config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -10,7 +11,8 @@ import org.slf4j.LoggerFactory
 /**
  * Opens the database connection pool and makes sure every table exists.
  *
- * Configuration comes from environment variables so no secret is ever committed:
+ * Configuration comes from environment variables or apikey.properties (see [Config]), so no
+ * secret is ever committed:
  *   DB_URL, DB_USER, DB_PASSWORD  (e.g. jdbc:postgresql://host/dbname?sslmode=require)
  */
 object DatabaseFactory {
@@ -25,9 +27,9 @@ object DatabaseFactory {
      * Tests pass their own [memoryName] so each test class gets an isolated database.
      */
     fun init(
-        jdbcUrl: String? = System.getenv("DB_URL"),
-        user: String? = System.getenv("DB_USER"),
-        password: String? = System.getenv("DB_PASSWORD"),
+        jdbcUrl: String? = Config.default.get("DB_URL"),
+        user: String? = Config.default.get("DB_USER"),
+        password: String? = Config.default.get("DB_PASSWORD"),
         memoryName: String = "backlog",
     ): Database {
         if (jdbcUrl == null) {

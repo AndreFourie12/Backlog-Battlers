@@ -28,20 +28,20 @@ fun Application.module() {
     configureErrors()
 
     // jwt throw states
-    val jwtSecret = System.getenv("JWT_SECRET").orEmpty().ifBlank {
+    val jwtSecret = Config.default.get("JWT_SECRET").orEmpty().ifBlank {
         throw IllegalStateException("JWT_SECRET environment variable not set. The server won't start without a JWT secret.")
     }
-    val jwtIssuer = System.getenv("JWT_ISSUER").orEmpty().ifBlank {
+    val jwtIssuer = Config.default.get("JWT_ISSUER").orEmpty().ifBlank {
         throw IllegalStateException("JWT_ISSUER environment variable is not set. The server won't start without explicit JWT issuer.")
     }
-    val googleClientId = System.getenv("GOOGLE_OAUTH_CLIENT_ID").orEmpty().ifBlank {
+    val googleClientId = Config.default.get("GOOGLE_OAUTH_CLIENT_ID").orEmpty().ifBlank {
         throw IllegalStateException("GOOGLE_OAUTH_CLIENT_ID environment variable not set. The server won't start with hardcoded fallback client ID")
     }
 
     val httpClient = igdbHttpClient()
     val googleVerifier = GoogleIdTokenVerifier(httpClient, googleClientId)
     val jwtService = JwtService(jwtSecret, jwtIssuer)
-    val igdb = IgdbClient.fromEnvironment()
+    val igdb = IgdbClient.fromConfig()
 
     // @Dylan, @Andre
     // To add a feature, create : routes/YourFeatureRoutes.kt with `fun Route.yourFeatureRoutes()`,
@@ -49,7 +49,7 @@ fun Application.module() {
     routing {
         healthRoutes()
         gameRoutes(igdb)
-        achievementRoutes(igdb, SteamClient.fromEnvironment())
+        achievementRoutes(igdb, SteamClient.fromConfig())
         authRoutes(googleVerifier, jwtService)
         // Until login is built nobody can be identified, so every library request answers 401.
         // The login feature replaces `{ null }` with the real "who is calling" function.

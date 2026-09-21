@@ -1,0 +1,18 @@
+# Copy this file to "apikey.properties" in the same folder (api/) and fill in your own values.
+# apikey.properties is ignored by git. Never put real keys in this example file.
+# A real environment variable with the same name always takes priority over this file.
+# Leave a value empty (or delete the line) to leave that setting unset.
+
+# IGDB game catalogue: free application at https://dev.twitch.tv/console
+IGDB_CLIENT_ID=
+IGDB_CLIENT_SECRET=
+
+# Optional: a free Steam Web API key gives achievements their real names and descriptions.
+# Without it they keep Steam's internal codes.
+STEAM_API_KEY=
+
+# Optional: a database. Without DB_URL the API uses an in-memory database and loses its data on restart.
+# Use forward slashes in file paths, for example jdbc:h2:file:./data/backlog;MODE=PostgreSQL
+# DB_URL=jdbc:postgresql://host/dbname?sslmode=require
+# DB_USER=
+# DB_PASSWORD=
