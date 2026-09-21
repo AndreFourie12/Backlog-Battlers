@@ -5,8 +5,11 @@ import com.backlogbattlers.app.BuildConfig
 import com.backlogbattlers.app.data.local.AppDatabase
 import com.backlogbattlers.app.data.local.TokenStorage
 import com.backlogbattlers.app.data.remote.AuthApi
+import com.backlogbattlers.app.data.remote.FriendsApi
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthRepositoryImpl
+import com.backlogbattlers.app.data.repository.FriendsRepository
+import com.backlogbattlers.app.data.repository.FriendsRepositoryImpl
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.GameRepositoryImpl
 import com.backlogbattlers.app.data.repository.LibraryRepository
@@ -53,6 +56,14 @@ object ServiceLocator {
             tokenStorage = tokenStorage,
             serverClientId = BuildConfig.GOOGLE_SERVER_CLIENT_ID,
         )
+    }
+
+    val friendsApi: FriendsApi by lazy {
+        FriendsApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokenStorage = tokenStorage)
+    }
+
+    val friendsRepository: FriendsRepository by lazy {
+        FriendsRepositoryImpl(friendsApi)
     }
 
     val gameRepository: GameRepository by lazy {
