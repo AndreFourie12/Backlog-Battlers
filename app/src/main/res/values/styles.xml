@@ -34,6 +34,12 @@
         <item name="android:textColor">@color/text_primary</item>
     </style>
 
+    <style name="Text.SectionAction">
+        <item name="android:textSize">13.5sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+
     <style name="Text.CardTitle">
         <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
