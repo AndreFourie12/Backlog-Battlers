@@ -55,6 +55,23 @@ class JwtService(
             ?: throw IllegalArgumentException("Refresh token is missing required userId claim")
     }
 
+    //------------------------------
+    // verifies a jwt access token: valid signature, right issuer, unexpired and marked as an access token
+    // returns the associated userId, or null for any invalid token so callers can answer 401
+    // a refresh token is rejected here, because it carries the refresh type claim
+    fun verifyAccessToken(token: String): String? {
+        val verifier = JWT.require(algorithm)
+            .withIssuer(issuer)
+            .withClaim(CLAIM_TYPE, TYPE_ACCESS)
+            .build()
+
+        return try {
+            verifier.verify(token).getClaim(CLAIM_USER_ID).asString()
+        } catch (e: JWTVerificationException) {
+            null
+        }
+    }
+
     companion object {
         private const val CLAIM_USER_ID = "userId"
         private const val CLAIM_TYPE = "type"
