@@ -157,7 +157,6 @@ class IgdbClientTest {
         val ids = client.steamAppIds(listOf(113112, 7344, 113112))
 
         assertEquals(mapOf(113112 to 1145360, 7344 to 261570), ids)
-        // One IGDB request for the whole page, and the repeated id is only asked for once
         assertEquals(1, seen.count { it.url.encodedPath == "/v4/external_games" })
         assertTrue(bodyOf(seen.last()).contains("where game = (113112,7344)"))
     }

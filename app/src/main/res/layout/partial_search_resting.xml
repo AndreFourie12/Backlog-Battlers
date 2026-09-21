@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    what the search screen shows while the box is still empty: the searches this
-    user ran before, the games the API puts forward, and the genre chips.
--->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -20,8 +16,6 @@
         android:paddingEnd="@dimen/page_padding"
         android:paddingBottom="@dimen/bottom_content_inset">
 
-        <!-- the whole recent block goes away once the list is empty, so a new
-             user never sees a heading with nothing under it -->
         <LinearLayout
             android:id="@+id/group_recent"
             android:layout_width="match_parent"
@@ -47,7 +41,6 @@
                 tools:listitem="@layout/item_query_row" />
         </LinearLayout>
 
-        <!-- the trending games come from the API's starter picks -->
         <LinearLayout
             android:id="@+id/group_trending"
             android:layout_width="match_parent"
@@ -83,7 +76,6 @@
             android:includeFontPadding="false"
             android:text="@string/browse_by_genre" />
 
-        <!-- SearchFragment fills this with one chip per browse category -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

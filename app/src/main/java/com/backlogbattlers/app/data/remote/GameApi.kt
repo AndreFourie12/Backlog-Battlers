@@ -50,9 +50,6 @@ class GameApi(
         }
     }
 
-    //------------------------------
-    // searches the whole IGDB catalogue by title. the server answers with the games themselves,
-    // so anything IGDB knows about can be found, not only the games already cached on this device
     suspend fun searchGames(query: String, limit: Int): List<GameDto> {
         return await {
             httpClient.get("$baseUrl/games/search") {
@@ -63,9 +60,6 @@ class GameApi(
         }
     }
 
-    //------------------------------
-    // the games behind one of the "Browse by genre" chips, most talked about first.
-    // category is one of the keys the server knows: action, rpg, puzzle, coop, strategy
     suspend fun browseGames(category: String, limit: Int): List<GameDto> {
         return await {
             httpClient.get("$baseUrl/games/search") {
@@ -76,9 +70,6 @@ class GameApi(
         }
     }
 
-    //------------------------------
-    // runs one request under the shared timeout and turns a non 2xx answer into an error the
-    // repositories above can report, rather than letting the screen wait out the engine default
     private suspend inline fun <reified T> await(crossinline request: suspend () -> HttpResponse): T {
         val body = withTimeoutOrNull(REQUEST_TIMEOUT_MS) {
             val response = request()
@@ -91,4 +82,4 @@ class GameApi(
         return body ?: throw IOException("The server did not answer within ${REQUEST_TIMEOUT_MS / 1000} seconds")
     }
 }
-//------------------------------EOF------------------------------\
+//------------------------------EOF------------------------------\\

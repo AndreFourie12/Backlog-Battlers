@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    what the search screen shows once a search has actually been run: the filters
-    that narrow what came back, how many are left, and the results themselves.
--->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -13,7 +9,6 @@
     android:visibility="gone"
     tools:visibility="visible">
 
-    <!-- SearchFragment fills this with the platform, genre and sort chips -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -70,8 +65,6 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <!-- stands in for the list when the search found nothing, the filters
-             left nothing, or the catalogue could not be reached -->
         <LinearLayout
             android:id="@+id/state_results_message"
             android:layout_width="match_parent"

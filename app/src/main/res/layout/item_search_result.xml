@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    one result on the results screen. the same row as a suggestion, on a card and
-    with more room for the artwork, since these are what the search actually found.
--->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -53,7 +49,6 @@
             tools:text="PLAYSTATION · Adventure" />
     </LinearLayout>
 
-    <!-- a game already in the backlog shows the green tick instead of the pill -->
     <TextView
         android:id="@+id/tv_owned"
         style="@style/Text.OwnedBadge"

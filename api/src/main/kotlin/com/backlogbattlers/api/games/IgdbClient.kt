@@ -72,13 +72,6 @@ class IgdbClient(
         return query("games", """search "$cleaned"; $GAME_FIELDS limit $size; offset $offset;""")
     }
 
-    /**
-     * The games of one browse category, most talked about first. [page] starts at 1.
-     *
-     * Games without a cover or with almost no ratings are left out: the app shows these in a
-     * list of artwork, and IGDB carries a long tail of unreleased and obscure entries that
-     * would otherwise fill the first page.
-     */
     suspend fun browse(category: BrowseCategory, page: Int = 1, pageSize: Int = 20): List<IgdbGame> {
         val size = pageSize.coerceIn(1, MAX_PAGE_SIZE)
         val offset = (page.coerceAtLeast(1) - 1) * size
@@ -100,17 +93,10 @@ class IgdbClient(
             "fields game_id,normally,completely,count; where game_id = $gameId; limit 1;",
         ).firstOrNull()
 
-    /**
-     * The Steam app ids for a whole page of games, keyed by IGDB game id, in one request.
-     *
-     * Search results are shown with Steam's landscape artwork, and asking per game would cost
-     * one IGDB call each, which the rate limit of four requests a second does not allow.
-     */
     suspend fun steamAppIds(gameIds: List<Int>): Map<Int, Int> {
         val ids = gameIds.distinct()
         if (ids.isEmpty()) return emptyMap()
 
-        // A game can have more than one Steam listing, so the limit allows for a few each
         val limit = (ids.size * 2).coerceAtMost(MAX_ROWS)
         val listings = query<List<IgdbExternalGame>>(
             "external_games",
@@ -174,8 +160,8 @@ class IgdbClient(
         private const val TOKEN_URL = "https://id.twitch.tv/oauth2/token"
         private const val GAME_FIELDS = "fields name,cover.image_id,platforms.name,genres.name;"
         private const val MAX_PAGE_SIZE = 50
-        private const val MAX_ROWS = 500 // IGDB's hard ceiling on the rows one request may return
-        private const val MIN_RATING_COUNT = 5 // keeps unreleased and barely known games off the browse lists
+        private const val MAX_ROWS = 500
+        private const val MIN_RATING_COUNT = 5
         private const val STEAM_SOURCE_ID = 1 // IGDB's id for Steam in its external game sources
         private const val TOKEN_MARGIN_SECONDS = 60L
 

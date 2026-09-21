@@ -121,7 +121,6 @@ class GameRoutesTest {
             routing { gameRoutes(fakeIgdb()) }
         }
 
-        // No q at all: the category stands in for it
         val response = client.get("/games/search?category=rpg")
 
         assertEquals(HttpStatusCode.OK, response.status)

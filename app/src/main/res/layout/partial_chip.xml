@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    one outlined pill, e.g. a genre under "Browse by genre". SearchFragment
-    inflates one of these per browse category and sets its label.
--->
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/Text.Chip"

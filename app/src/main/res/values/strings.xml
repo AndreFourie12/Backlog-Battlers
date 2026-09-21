@@ -64,7 +64,6 @@
 
 
 
-    <!-- search screen -->
     <string name="genre_action">Action</string>
     <string name="genre_rpg">RPG</string>
     <string name="genre_puzzle">Puzzle</string>

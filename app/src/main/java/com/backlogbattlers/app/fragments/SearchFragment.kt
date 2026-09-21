@@ -41,15 +41,8 @@ import com.backlogbattlers.app.viewmodels.SearchUiState
 import com.backlogbattlers.app.viewmodels.SearchViewModel
 import kotlinx.coroutines.launch
 
-// which of the three filter chips above the results a menu belongs to
 private enum class FilterChip { PLATFORM, GENRE, SORT }
 
-// the search screen.
-//
-// the box at the top drives everything: empty shows the resting shortcuts, typing
-// shows live matches from the API, and running a search shows the full results with
-// the filters over them. every game listed comes from the API, so anything in the
-// IGDB catalogue can be found and added to the backlog from here
 class SearchFragment : Fragment() {
 
     private val viewModel: SearchViewModel by viewModels()
@@ -67,15 +60,10 @@ class SearchFragment : Fragment() {
     private lateinit var suggestionAdapter: SearchResultAdapter
     private lateinit var resultAdapter: SearchResultAdapter
 
-    // the three chips above the results, kept so their labels can follow the choices made
     private val filterChips = mutableMapOf<FilterChip, View>()
 
-    // set while the fragment is writing to the box itself, e.g. after a recent search is
-    // tapped, so the watcher does not treat that as the user typing
     private var updatingInput = false
 
-    //------------------------------
-    // inflates the search fragment layout
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -84,8 +72,6 @@ class SearchFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
-    //------------------------------
-    // wires the search box and the three states under it, then follows the view model
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -113,20 +99,14 @@ class SearchFragment : Fragment() {
             }
         }
 
-        // a fresh view is filled from the view model, so opening one of the results and
-        // coming back leaves the search that found it still in the box
         setSearchText(viewModel.uiState.value.query)
 
-        // nothing to come back to means the screen was opened to search, so the box
-        // takes focus and the keyboard comes up with it
         if (searchInput.text.isEmpty()) {
             searchInput.requestFocus()
             showKeyboard()
         }
     }
 
-    //------------------------------
-    // the back button, the box itself and the x that empties it
     private fun bindSearchBar(view: View) {
         view.findViewById<View>(R.id.btn_search_back).setOnClickListener {
             hideKeyboard()
@@ -168,8 +148,6 @@ class SearchFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // the recent list, the trending list and the genre chips
     private fun bindRestingState() {
         recentAdapter = QueryRowAdapter(
             onClick = { row -> replaySearch(row.label) },
@@ -191,7 +169,6 @@ class SearchFragment : Fragment() {
                 setSearchText("")
                 viewModel.browse(category)
             }
-            // the first chip sits flush with the page edge, the rest are spaced off it
             if (container.isNotEmpty()) {
                 (chip.layoutParams as LinearLayout.LayoutParams).marginStart =
                     resources.getDimensionPixelSize(R.dimen.list_gap)
@@ -200,8 +177,6 @@ class SearchFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // the "search for what was typed" row and the live matches under it
     private fun bindTypingState() {
         suggestionAdapter = SearchResultAdapter(
             itemLayout = R.layout.item_search_suggestion,
@@ -216,8 +191,6 @@ class SearchFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // the filter chips, and the results they narrow
     private fun bindResultsState() {
         resultAdapter = SearchResultAdapter(
             itemLayout = R.layout.item_search_result,
@@ -241,13 +214,10 @@ class SearchFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // draws whichever of the three states the box is currently in
     private fun render(state: SearchUiState) {
         restingState.setVisible(state.mode == SearchMode.RESTING)
         typingState.setVisible(state.mode == SearchMode.TYPING)
         resultsState.setVisible(state.mode == SearchMode.RESULTS)
-        // browsing a genre leaves the box empty, but the x is still the way back out of it
         clearButton.setVisible(state.query.isNotEmpty() || state.browsedCategory != null)
         updateFieldOutline()
 
@@ -258,8 +228,6 @@ class SearchFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // the recent searches and the trending games, each section hidden while it is empty
     private fun renderResting(state: SearchUiState) {
         val recent = state.recentSearches.map { QueryRow(it, QueryRow.Kind.RECENT) }
         recentAdapter.submitList(recent)
@@ -272,8 +240,6 @@ class SearchFragment : Fragment() {
         restingState.findViewById<View>(R.id.group_trending).setVisible(trending.isNotEmpty())
     }
 
-    //------------------------------
-    // the live matches for what has been typed so far
     private fun renderTyping(state: SearchUiState) {
         typingState.findViewById<TextView>(R.id.tv_search_for).text =
             getString(R.string.search_for_quoted, state.query)
@@ -288,14 +254,10 @@ class SearchFragment : Fragment() {
         list.setVisible(games.isNotEmpty())
         suggestionAdapter.submitList(games.map { SearchResult(it, it.gameId in state.ownedGameIds) })
 
-        // nothing found is not worth a message here: the row above still offers the
-        // full search, and the user is most likely still halfway through a title
         message.setVisible(state.suggestions is GameListState.Error)
         message.setText(R.string.search_error)
     }
 
-    //------------------------------
-    // the filters, the count and the results a finished search came back with
     private fun renderResults(state: SearchUiState) {
         renderFilterChips(state)
 
@@ -317,7 +279,6 @@ class SearchFragment : Fragment() {
 
         count.text = resources.getQuantityString(R.plurals.search_result_count, visible.size, visible.size)
 
-        // one message stands in for the list whichever way it came up empty
         val showMessage = !loading && visible.isEmpty()
         messageGroup.setVisible(showMessage)
         if (!showMessage) return
@@ -329,7 +290,6 @@ class SearchFragment : Fragment() {
                 retry.setVisible(true)
             }
 
-            // the search itself found games, the chips are what left nothing
             state.filters.isNarrowing -> {
                 message.setText(R.string.search_no_results_filtered)
                 messageBody.setText(R.string.search_no_results_filtered_body)
@@ -344,9 +304,6 @@ class SearchFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // keeps each chip showing the choice made on it, and outlined in the accent
-    // colour while that choice is narrowing the list
     private fun renderFilterChips(state: SearchUiState) {
         bindFilterChip(
             kind = FilterChip.PLATFORM,
@@ -369,8 +326,6 @@ class SearchFragment : Fragment() {
         )
     }
 
-    //------------------------------
-    // writes one chip's label and marks whether it is currently doing anything
     private fun bindFilterChip(kind: FilterChip, label: String, active: Boolean) {
         val chip = filterChips[kind] ?: return
         val text = chip.findViewById<TextView>(R.id.tv_filter_label)
@@ -383,10 +338,6 @@ class SearchFragment : Fragment() {
         )
     }
 
-    //------------------------------
-    // opens the menu behind one of the filter chips. the platform and genre menus are
-    // built from what this particular search turned up, so they never offer a choice
-    // that would empty the list
     private fun showFilterMenu(kind: FilterChip, anchor: View) {
         val state = viewModel.uiState.value
         val menu = PopupMenu(requireContext(), anchor)
@@ -431,24 +382,17 @@ class SearchFragment : Fragment() {
         menu.show()
     }
 
-    //------------------------------
-    // what the "nothing found" message names: the genre chip that was tapped, or the
-    // words that were typed
     private fun resultsSubject(state: SearchUiState): String {
         val category = state.browsedCategory ?: return state.query
         return getString(browseCategoryLabel(category))
     }
 
-    //------------------------------
-    // replays a recent search: the box is filled in and the search run straight away
     private fun replaySearch(query: String) {
         setSearchText(query)
         hideKeyboard()
         viewModel.runSearch(query)
     }
 
-    //------------------------------
-    // writes to the box without the watcher treating it as the user typing
     private fun setSearchText(text: String) {
         updatingInput = true
         searchInput.setText(text)
@@ -456,16 +400,11 @@ class SearchFragment : Fragment() {
         updatingInput = false
     }
 
-    //------------------------------
-    // the box is outlined in the accent colour while it is in use: either it has the
-    // cursor, or it still holds the words a search was run for
     private fun updateFieldOutline() {
         val active = searchInput.hasFocus() || searchInput.text.isNotEmpty()
         searchField.setBackgroundResource(if (active) R.drawable.bg_field_active else R.drawable.bg_field)
     }
 
-    //------------------------------
-    // opens a game's detail screen
     private fun openGame(gameId: Int) {
         hideKeyboard()
         findNavController().navigate(
@@ -474,24 +413,17 @@ class SearchFragment : Fragment() {
         )
     }
 
-    //------------------------------
-    // brings the keyboard up for the search box
     private fun showKeyboard() {
         searchInput.post {
             insetsController()?.show(WindowInsetsCompat.Type.ime())
         }
     }
 
-    //------------------------------
-    // the handle on the window the keyboard is shown and hidden through
     private fun insetsController() =
         view?.let { WindowCompat.getInsetsController(requireActivity().window, it) }
 
-    //------------------------------
-    // puts the keyboard away, e.g. once a search has been run and there are results to read
     private fun hideKeyboard() {
         insetsController()?.hide(WindowInsetsCompat.Type.ime())
         searchInput.clearFocus()
     }
 }
-//------------------------------EOF------------------------------\

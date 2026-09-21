@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    what the search screen shows while the user is still typing: the option to
-    run the search as typed, and the first few matches the API found for it.
--->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -13,7 +9,6 @@
     android:visibility="gone"
     tools:visibility="visible">
 
-    <!-- tapping this runs the full search for exactly what was typed -->
     <LinearLayout
         android:id="@+id/row_search_for"
         android:layout_width="match_parent"

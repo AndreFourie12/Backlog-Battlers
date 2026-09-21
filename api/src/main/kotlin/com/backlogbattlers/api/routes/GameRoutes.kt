@@ -27,11 +27,7 @@ fun Route.gameRoutes(igdb: IgdbClient) {
         call.respond(starterGames.load())
     }
 
-    // GET /games/search?q=hades&page=1&limit=20
-    // GET /games/search?category=rpg&page=1&limit=20
-    //
-    // The app sends `q` when the user types, and `category` when they tap one of the
-    // "Browse by genre" chips. A small `limit` keeps the suggestions under the search box quick.
+    // GET /games/search?q=hades&page=1
     get("/games/search") {
         val pageParam = call.request.queryParameters["page"]
         val page = if (pageParam == null) 1 else pageParam.toIntOrNull()
@@ -81,13 +77,6 @@ fun Route.gameRoutes(igdb: IgdbClient) {
     }
 }
 
-/**
- * Turns IGDB games into the app's games, each with Steam's landscape artwork where Steam has it.
- *
- * IGDB's own picture is a portrait cover, but the app lists search results on wide tiles, so
- * Steam's capsule art fits them far better. The Steam ids for the whole page are looked up in a
- * single request; games Steam does not carry simply fall back to the IGDB cover.
- */
 private suspend fun withSteamArt(igdb: IgdbClient, games: List<IgdbGame>): List<GameDto> {
     val steamAppIds = igdb.steamAppIds(games.map { it.id })
     return games.map { it.toDto(artworkUrl = steamArtUrl(steamAppIds[it.id])) }

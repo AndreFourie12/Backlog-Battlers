@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    one match under the search box while the user is still typing. flat against
-    the page, so the suggestions read as a list rather than a set of cards.
--->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -54,7 +50,6 @@
             tools:text="PC · Adventure" />
     </LinearLayout>
 
-    <!-- a game already in the backlog shows the green tick instead of the pill -->
     <TextView
         android:id="@+id/tv_owned"
         style="@style/Text.OwnedBadge"
