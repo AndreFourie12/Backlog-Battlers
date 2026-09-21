@@ -1,5 +1,10 @@
 package com.backlogbattlers.api
 
+import com.backlogbattlers.api.auth.GoogleIdTokenVerifier
+import com.backlogbattlers.api.auth.JwtService
+import com.backlogbattlers.api.db.DatabaseFactory
+import com.backlogbattlers.api.games.IgdbClient
+import com.backlogbattlers.api.games.igdbHttpClient
 import com.backlogbattlers.api.routes.authRoutes
 import com.backlogbattlers.api.routes.gameRoutes
 import com.backlogbattlers.api.routes.healthRoutes
