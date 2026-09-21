@@ -3,12 +3,16 @@ package com.backlogbattlers.app.util
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import com.backlogbattlers.app.R
 
 
-// the small view helpers the fragments share
 
 fun View.applySystemBarPadding(
     top: Boolean = false,
@@ -39,6 +43,22 @@ fun ViewGroup.inflateChild(layoutId: Int): View =
 
 fun View.setVisible(visible: Boolean) {
     visibility = if (visible) View.VISIBLE else View.GONE
+}
+
+fun RecyclerView.addRowDividers() {
+    addItemDecoration(
+        RowDividerDecoration(
+            color = ContextCompat.getColor(context, R.color.border),
+            thickness = resources.getDimensionPixelSize(R.dimen.list_divider_thickness),
+            gap = resources.getDimensionPixelSize(R.dimen.list_divider_gap),
+        ),
+    )
+}
+
+fun ImageView.loadArtwork(url: String?) {
+    load(url) {
+        crossfade(true)
+    }
 }
 
 //------------------------------End Of File------------------------------\\

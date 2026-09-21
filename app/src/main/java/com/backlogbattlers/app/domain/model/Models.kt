@@ -16,11 +16,20 @@ data class User(
 data class Game(
     val gameId: Int,
     val title: String,
+    // portrait box art from IGDB
     val coverImageUrl: String?,
+    // landscape art for the wide game tiles, null when the game has none
+    val artworkUrl: String? = null,
     val platforms: List<String>,
     val avgCompletionHours: Float?,
     val avg100PercentHours: Float?,
     val cachedAt: Long,
+)
+
+// Recommendation data class pairs a game with the line shown under its name, e.g. on the home screen
+data class Recommendation(
+    val game: Game,
+    val reason: String,
 )
 
 // enum representing gaming platforms

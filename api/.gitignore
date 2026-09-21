@@ -10,3 +10,6 @@ out/
 
 # Local keys file (copy apikey.properties.example to apikey.properties). Never commit it.
 apikey.properties
+
+# Local file database (DB_URL=jdbc:h2:file:./data/backlog...). It holds real user data; never commit it.
+data/

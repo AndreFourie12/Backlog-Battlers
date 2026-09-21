@@ -3,6 +3,18 @@
 # A real environment variable with the same name always takes priority over this file.
 # Leave a value empty (or delete the line) to leave that setting unset.
 
+# Login: the API will NOT start without these three.
+#
+# JWT_SECRET signs the login tokens. Use a long random string and keep it private. You can make one
+# in PowerShell with:
+#   $b = New-Object byte[] 48; [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)
+# It does not have to match anyone else's: each person runs their own copy of the API.
+JWT_SECRET=
+# JWT_ISSUER is any fixed label, for example backlog-battlers-api. Tokens from another issuer are rejected.
+JWT_ISSUER=
+# The Google OAuth client ID the Android app signs in with (ask Dylan). It is public, not a secret.
+GOOGLE_OAUTH_CLIENT_ID=
+
 # IGDB game catalogue: free application at https://dev.twitch.tv/console
 IGDB_CLIENT_ID=
 IGDB_CLIENT_SECRET=

@@ -4,8 +4,22 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ConfigTest {
+
+    @Test
+    fun `the example file lists every setting the API reads and holds no real values`() {
+        val example = Config.readFile(File("apikey.properties.example"))
+
+        // If the code starts needing a new setting, this fails until the example file mentions it
+        val expected = setOf(
+            "JWT_SECRET", "JWT_ISSUER", "GOOGLE_OAUTH_CLIENT_ID",
+            "IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET", "STEAM_API_KEY",
+        )
+        assertEquals(expected, example.keys)
+        assertTrue(example.values.all { it.isBlank() }, "the example file must never contain real keys")
+    }
 
     private val file = mapOf("IGDB_CLIENT_ID" to "from-file", "ONLY_IN_FILE" to "file-value")
 

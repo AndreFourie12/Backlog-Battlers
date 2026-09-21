@@ -5,6 +5,7 @@ import com.backlogbattlers.app.BuildConfig
 import com.backlogbattlers.app.data.local.AppDatabase
 import com.backlogbattlers.app.data.local.TokenStorage
 import com.backlogbattlers.app.data.remote.AuthApi
+import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthRepositoryImpl
 import com.backlogbattlers.app.data.repository.GameRepository
@@ -25,6 +26,10 @@ import kotlinx.serialization.json.Json
 
 // dependency locator holding application singletons for database, network, and repository instances
 object ServiceLocator {
+
+    // the android engine defaults both timeouts to 100s, which leaves screens loading for over a minute when the backend is unreachable
+    private const val CONNECT_TIMEOUT_MS = 10_000
+    private const val SOCKET_TIMEOUT_MS = 30_000
 
     @Volatile
     private var applicationContext: Context? = null
@@ -54,6 +59,10 @@ object ServiceLocator {
         AuthApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
     }
 
+    val gameApi: GameApi by lazy {
+        GameApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
+    }
+
     val authRepository: AuthRepository by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing authRepository")
         AuthRepositoryImpl(
@@ -66,7 +75,7 @@ object ServiceLocator {
     }
 
     val gameRepository: GameRepository by lazy {
-        GameRepositoryImpl(database.cachedGameDao())
+        GameRepositoryImpl(database.cachedGameDao(), gameApi)
     }
 
     val libraryRepository: LibraryRepository by lazy {
@@ -94,6 +103,10 @@ object ServiceLocator {
     // builds and configures an HTTP client with Ktor Android engine and JSON content negotiation
     private fun createHttpClient(): HttpClient {
         return HttpClient(Android) {
+            engine {
+                connectTimeout = CONNECT_TIMEOUT_MS
+                socketTimeout = SOCKET_TIMEOUT_MS
+            }
             install(ContentNegotiation) {
                 json(
                     json = Json {
