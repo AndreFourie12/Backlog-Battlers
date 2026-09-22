@@ -67,6 +67,9 @@ object Achievements : Table("achievements")
     val name = varchar("name", 255)
     val description = text("description").nullable()
     val rarityPercent = double("rarity_percent").nullable()
+    // absolute Steam CDN urls, null without a STEAM_API_KEY (same condition as name/description)
+    val iconUrl = varchar("icon_url", 500).nullable()
+    val iconGrayUrl = varchar("icon_gray_url", 500).nullable()
 
     // reason we have a composite primary key is because ids can repeat acorss different games
     override val primaryKey = PrimaryKey(gameId, achievementId)

@@ -71,6 +71,10 @@ interface LibraryEntryDao {
     @Query("SELECT * FROM library_entries WHERE libraryEntryId = :id LIMIT 1")
     suspend fun getById(id: String): LibraryEntryEntity?
 
+    // observes the entry for one game, e.g. for the game detail screen. Null once removed, or if it was never added
+    @Query("SELECT * FROM library_entries WHERE gameId = :gameId LIMIT 1")
+    fun observeByGameId(gameId: Int): Flow<LibraryEntryEntity?>
+
     // fetches all library entries marked as pending sync
     @Query("SELECT * FROM library_entries WHERE pendingSync = 1")
     suspend fun getPendingSync(): List<LibraryEntryEntity>

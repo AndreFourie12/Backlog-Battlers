@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card"
+    android:padding="@dimen/card_padding">
+
+    <!-- Icon Tile Background -->
+    <FrameLayout
+        android:id="@+id/icon_container"
+        android:layout_width="@dimen/empty_state_tile"
+        android:layout_height="@dimen/empty_state_tile"
+        android:background="@drawable/bg_thumb_clip"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="@dimen/empty_state_icon"
+            android:layout_height="@dimen/empty_state_icon"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_users"
+            app:tint="@color/accent" />
+    </FrameLayout>
+
+    <!-- Title and Subtitle Container -->
+    <LinearLayout
+        android:id="@+id/text_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/icon_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon_container"
+        app:layout_constraintTop_toTopOf="@+id/icon_container">
+
+        <TextView
+            android:id="@+id/tv_empty_title"
+            style="@style/Text.CardTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_friends_yet" />
+
+        <TextView
+            android:id="@+id/tv_empty_body"
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/no_friends_body" />
+    </LinearLayout>
+
+    <!-- Invite Friends Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_invite_friends"
+        style="@style/Widget.App.AccentButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/cta_height"
+        android:layout_marginTop="16dp"
+        android:text="@string/invite_friends"
+        app:icon="@drawable/ic_arrow_right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/icon_container" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

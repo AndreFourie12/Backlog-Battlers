@@ -202,6 +202,16 @@ class SearchViewModel(
                 Log.e(TAG, "Adding ${game.title} to the library failed", e)
             }
         }
+        // so its achievements are already cached, with a real total, by the time the games tab shows it
+        viewModelScope.launch {
+            try {
+                gameRepository.getAchievements(game.gameId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Caching achievements for ${game.title} failed", e)
+            }
+        }
     }
 
     private fun loadResults(query: String, category: BrowseCategory?) {
