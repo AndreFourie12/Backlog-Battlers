@@ -20,9 +20,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="A" />
+        tools:text="S" />
 
-    <!-- Sender Name -->
+    <!-- User Display Name -->
     <TextView
         android:id="@+id/tv_friend_name"
         style="@style/Text.CardTitle"
@@ -33,39 +33,22 @@
         android:ellipsize="end"
         android:singleLine="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btn_accept"
+        app:layout_constraintEnd_toStartOf="@+id/btn_send_request"
         app:layout_constraintStart_toEndOf="@+id/tv_avatar_initial"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Alice" />
+        tools:text="Sam" />
 
-    <!-- Accept Button -->
+    <!-- Send Request / Action Button -->
     <Button
-        android:id="@+id/btn_accept"
+        android:id="@+id/btn_send_request"
         style="@style/Text.CaptionStrong"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
-        android:layout_marginEnd="6dp"
         android:background="@drawable/bg_button_accent"
         android:minWidth="0dp"
-        android:paddingHorizontal="14dp"
-        android:text="@string/accept"
+        android:paddingHorizontal="16dp"
+        android:text="@string/add"
         android:textColor="@color/page_background"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btn_reject"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Reject Button -->
-    <Button
-        android:id="@+id/btn_reject"
-        style="@style/Text.CaptionStrong"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:background="@drawable/bg_pill_outline"
-        android:contentDescription="@string/cd_reject_request"
-        android:minWidth="0dp"
-        android:paddingHorizontal="14dp"
-        android:text="@string/reject"
-        android:textColor="@color/text_secondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
