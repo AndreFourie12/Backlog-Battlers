@@ -11,7 +11,9 @@ import com.backlogbattlers.api.routes.achievementRoutes
 import com.backlogbattlers.api.routes.authRoutes
 import com.backlogbattlers.api.routes.friendRoutes
 import com.backlogbattlers.api.routes.gameRoutes
+import com.backlogbattlers.api.routes.completionRoutes
 import com.backlogbattlers.api.routes.healthRoutes
+import com.backlogbattlers.api.routes.leaderboardRoutes
 import com.backlogbattlers.api.routes.libraryRoutes
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -54,6 +56,8 @@ fun Application.module() {
         authRoutes(googleVerifier, jwtService)
         libraryRoutes(igdb, currentUser = bearerCurrentUser(jwtService))
         friendRoutes(currentUser = bearerCurrentUser(jwtService))
+        completionRoutes(currentUser = bearerCurrentUser(jwtService))
+        leaderboardRoutes(currentUser = bearerCurrentUser(jwtService))
     }
 }
 //------------------------------EOF------------------------------\\

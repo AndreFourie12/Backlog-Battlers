@@ -102,7 +102,53 @@ object UnlockedAchievements : Table("unlocked_achievements")
     val achievementId = varchar("achievement_id", 64)
     val unlockedAt = timestamp("unlocked_at").clientDefault { Instant.now() }
 
+    // Set true by /complete once this unlock's points have been counted, so completing the same
+    // entry twice (e.g. story then 100%) never pays out for the same achievement twice.
+    val countedForPoints = bool("counted_for_points").default(false)
+
     override val primaryKey = PrimaryKey(libraryEntryId, achievementId)
+}
+
+// CompletionRecords Table: one row per (library entry, completion type), e.g. a game can be
+// completed once for its story and again later for 100%.
+object CompletionRecords : Table("completion_records")
+{
+    val id = uuid("id").clientDefault { Uuid.random() }
+    val userId = reference("user_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val libraryEntryId = reference("library_entry_id", LibraryEntries.id, onDelete = ReferenceOption.CASCADE)
+    val completionType = enumerationByName<CompletionType>("completion_type", 20)
+    val achievementPoints = integer("achievement_points")
+    val completionTimePoints = integer("completion_time_points")
+    // A bonus for finishing faster than IGDB's average for this milestone; see scoring/PointsCalculator.kt
+    val speedBonusPoints = integer("speed_bonus_points")
+    val pointsAwarded = integer("points_awarded")
+    // e.g. "2026-09"; ties this record to one monthly competition cycle
+    val monthPeriod = varchar("month_period", 7)
+    val awardedAt = timestamp("awarded_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(id)
+
+    init
+    {
+        // stops the same completion type on the same entry from ever paying out twice
+        uniqueIndex(libraryEntryId, completionType)
+    }
+}
+
+// MonthlyLeaderboardEntries Table: one row per user per month, holding their running points total.
+object MonthlyLeaderboardEntries : Table("monthly_leaderboard_entries")
+{
+    val userId = reference("user_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val monthPeriod = varchar("month_period", 7)
+    val monthlyPoints = integer("monthly_points").default(0)
+
+    override val primaryKey = PrimaryKey(userId, monthPeriod)
+
+    init
+    {
+        // speeds up "top N for this month" reads
+        index(false, monthPeriod, monthlyPoints)
+    }
 }
 
 // friendrequests table
@@ -149,5 +195,7 @@ val ALL_TABLES: Array<Table> = arrayOf(
     UnlockedAchievements,
     FriendRequests,
     Friendships,
+    CompletionRecords,
+    MonthlyLeaderboardEntries,
 )
 //------------------------------EOF------------------------------\\
