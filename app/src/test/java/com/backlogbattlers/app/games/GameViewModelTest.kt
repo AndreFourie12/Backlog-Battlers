@@ -2,6 +2,8 @@ package com.backlogbattlers.app.games
 
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.domain.model.Game
+import com.backlogbattlers.app.domain.model.LibrarySort
+import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.search.FakeGameRepository
 import com.backlogbattlers.app.search.FakeLibraryRepository
@@ -120,6 +122,98 @@ class GameViewModelTest {
         advanceUntilIdle()
 
         assertEquals(Platform.PC, library.observeLibrary().first().single().platform)
+    }
+
+    @Test
+    fun `the library list pairs each entry with its cached game`() = runTest {
+        val hades = game(1, "Hades")
+        games.fake.cachedGames = mapOf(1 to hades)
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.addToLibrary(hades)
+        advanceUntilIdle()
+
+        val libraryGame = viewModel.uiState.value.libraryGames.single()
+        assertEquals("Hades", libraryGame.game.title)
+        assertEquals(LibraryStatus.BACKLOG, libraryGame.entry.status)
+    }
+
+    @Test
+    fun `a game the cache has not seen yet is counted but left out of the library list`() = runTest {
+        val hades = game(1, "Hades") // deliberately not put in games.fake.cachedGames
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.addToLibrary(hades)
+        advanceUntilIdle()
+
+        assertEquals(1, viewModel.uiState.value.libraryCount)
+        assertEquals(emptyList<Any>(), viewModel.uiState.value.libraryGames)
+    }
+
+    @Test
+    fun `the status chips filter the library list, and All keeps everything`() = runTest {
+        val hades = game(1, "Hades")
+        val celeste = game(2, "Celeste")
+        games.fake.cachedGames = mapOf(1 to hades, 2 to celeste)
+        val viewModel = viewModel()
+        advanceUntilIdle()
+        viewModel.addToLibrary(hades)
+        viewModel.addToLibrary(celeste)
+        advanceUntilIdle()
+
+        // both are BACKLOG: adding a game does not offer any other starting status yet
+        viewModel.setStatusFilter(LibraryStatus.BACKLOG)
+        assertEquals(
+            setOf("Hades", "Celeste"),
+            viewModel.uiState.value.visibleLibraryGames.map { it.game.title }.toSet(),
+        )
+
+        viewModel.setStatusFilter(LibraryStatus.COMPLETED)
+        assertEquals(emptyList<String>(), viewModel.uiState.value.visibleLibraryGames.map { it.game.title })
+
+        viewModel.setStatusFilter(null)
+        assertEquals(2, viewModel.uiState.value.visibleLibraryGames.size)
+    }
+
+    @Test
+    fun `the search box narrows the library list by title, and clears back to everything`() = runTest {
+        val hades = game(1, "Hades")
+        val hollow = game(2, "Hollow Knight")
+        games.fake.cachedGames = mapOf(1 to hades, 2 to hollow)
+        val viewModel = viewModel()
+        advanceUntilIdle()
+        viewModel.addToLibrary(hades)
+        viewModel.addToLibrary(hollow)
+        advanceUntilIdle()
+
+        viewModel.onLibraryQueryChanged("hol")
+        assertEquals(listOf("Hollow Knight"), viewModel.uiState.value.visibleLibraryGames.map { it.game.title })
+
+        viewModel.onLibraryQueryChanged("")
+        assertEquals(2, viewModel.uiState.value.visibleLibraryGames.size)
+    }
+
+    @Test
+    fun `the library list is newest first by default, and can be sorted by name`() = runTest {
+        val alpha = game(1, "Alpha")
+        val zulu = game(2, "Zulu")
+        games.fake.cachedGames = mapOf(1 to alpha, 2 to zulu)
+        val viewModel = viewModel()
+        advanceUntilIdle()
+        viewModel.addToLibrary(alpha)
+        advanceUntilIdle()
+        viewModel.addToLibrary(zulu)
+        advanceUntilIdle()
+
+        assertEquals(listOf("Zulu", "Alpha"), viewModel.uiState.value.visibleLibraryGames.map { it.game.title })
+
+        viewModel.setLibrarySort(LibrarySort.NAME_A_Z)
+        assertEquals(listOf("Alpha", "Zulu"), viewModel.uiState.value.visibleLibraryGames.map { it.game.title })
+
+        viewModel.setLibrarySort(LibrarySort.NAME_Z_A)
+        assertEquals(listOf("Zulu", "Alpha"), viewModel.uiState.value.visibleLibraryGames.map { it.game.title })
     }
 
     @Test
