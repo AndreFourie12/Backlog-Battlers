@@ -66,6 +66,7 @@
 </ol>
 
 ## Project Overview
+To see full commit history, pipeline, and tests go to -> https://github.com/AndreFourie12/Backlog-Battlers.git
 
 ### Built With
 - Kotlin (Both the Android app and the REST API)
