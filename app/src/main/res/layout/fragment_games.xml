@@ -39,40 +39,64 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/library_field_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="15.5dp"
-            android:background="@drawable/bg_field_compact"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="15dp"
-            android:paddingEnd="12dp">
+            android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="@dimen/search_field_icon"
-                android:layout_height="@dimen/search_field_icon"
-                android:importantForAccessibility="no"
-                android:src="@drawable/ic_search"
-                app:tint="@color/text_tertiary" />
-
-            <EditText
-                android:id="@+id/et_library_search"
+            <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="7dp"
+                android:layout_height="@dimen/library_field_height"
                 android:layout_weight="1"
-                android:background="@null"
+                android:background="@drawable/bg_field_compact"
                 android:gravity="center_vertical"
-                android:hint="@string/search_library"
-                android:imeOptions="actionSearch"
-                android:importantForAutofill="no"
-                android:includeFontPadding="false"
-                android:inputType="text"
-                android:maxLines="1"
-                android:saveEnabled="false"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_tertiary"
-                android:textSize="14sp"
-                tools:ignore="LabelFor" />
+                android:orientation="horizontal"
+                android:paddingStart="15dp"
+                android:paddingEnd="12dp">
+
+                <ImageView
+                    android:layout_width="@dimen/search_field_icon"
+                    android:layout_height="@dimen/search_field_icon"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/text_tertiary" />
+
+                <EditText
+                    android:id="@+id/et_library_search"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="7dp"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:gravity="center_vertical"
+                    android:hint="@string/search_library"
+                    android:imeOptions="actionSearch"
+                    android:importantForAutofill="no"
+                    android:includeFontPadding="false"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:saveEnabled="false"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_tertiary"
+                    android:textSize="14sp"
+                    tools:ignore="LabelFor" />
+            </LinearLayout>
+
+            <!-- sorts the library list; there is nothing to sort while it is empty -->
+            <ImageView
+                android:id="@+id/btn_library_sort"
+                android:layout_width="@dimen/library_field_height"
+                android:layout_height="@dimen/library_field_height"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_field_compact"
+                android:contentDescription="@string/cd_sort"
+                android:foreground="?attr/selectableItemBackground"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_filter"
+                android:visibility="gone"
+                app:tint="@color/text_secondary"
+                tools:visibility="visible" />
         </LinearLayout>
 
         <!-- shown while the library has no games, hidden once it has some -->
@@ -120,7 +144,68 @@
                 app:iconPadding="10dp" />
         </LinearLayout>
 
+        <!-- filters the library list below by status; hidden along with it while the library is empty -->
+        <HorizontalScrollView
+            android:id="@+id/scroll_library_filters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:scrollbars="none"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:id="@+id/container_library_filters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <!-- the user's own games, filtered by the chips above and the search box. Shown once the
+             library has games in it, in place of the empty state and the popular games below -->
+        <FrameLayout
+            android:id="@+id/state_library_games"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list_library_games"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_library_game" />
+
+            <LinearLayout
+                android:id="@+id/state_library_no_matches"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingTop="28dp"
+                android:visibility="gone"
+                tools:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_library_no_matches"
+                    style="@style/Text.BodyStrong"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:includeFontPadding="false"
+                    tools:text="No games match “abc”" />
+            </LinearLayout>
+        </FrameLayout>
+
         <TextView
+            android:id="@+id/tv_popular_title"
             style="@style/Text.SectionTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -131,6 +216,7 @@
         <!-- the games come from the API, the same starter games as the home screen. The spinner and the
              retry message stand in for the list while it loads or if the request fails -->
         <FrameLayout
+            android:id="@+id/section_popular"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10.5dp">
