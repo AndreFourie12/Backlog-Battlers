@@ -10,16 +10,16 @@ class ConfigTest {
 
     @Test
     fun `the example file lists every setting the API reads and holds no real values`() {
-        val targetFile = listOf(File("apikey.properties.example"), File("api/apikey.properties.example"))
-            .firstOrNull { it.isFile } ?: File("apikey.properties.example")
-        val example = Config.readFile(targetFile)
+        val exampleFile = Config.findConfigFile("apikey.properties.example")
+        assertTrue(exampleFile.isFile, "apikey.properties.example file must exist at ${exampleFile.absolutePath}")
+        val example = Config.readFile(exampleFile)
 
         // If the code starts needing a new setting, this fails until the example file mentions it
         val expected = setOf(
             "JWT_SECRET", "JWT_ISSUER", "GOOGLE_OAUTH_CLIENT_ID",
             "IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET", "STEAM_API_KEY",
         )
-        assertEquals(expected, example.keys)
+        assertEquals(expected, example.keys, "Keys in apikey.properties.example do not match expected settings")
         assertTrue(example.values.all { it.isBlank() }, "the example file must never contain real keys")
     }
 

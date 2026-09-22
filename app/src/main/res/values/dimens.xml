@@ -58,10 +58,30 @@
     <dimen name="search_result_thumb_height">58dp</dimen>
     <dimen name="search_action_height">34dp</dimen>
 
+    <!-- games screen, measured from the design -->
+    <dimen name="library_top_inset">21.5dp</dimen>
+    <dimen name="library_field_height">44dp</dimen>
+    <dimen name="library_row_padding">12.5dp</dimen>
+    <dimen name="library_row_gap">10.5dp</dimen>
+    <dimen name="library_thumb_width">102dp</dimen>
+    <dimen name="library_thumb_height">59dp</dimen>
+    <dimen name="library_action_height">27.5dp</dimen>
+
     <!-- the faint line between the rows of a list -->
     <dimen name="list_divider_thickness">1dp</dimen>
     <dimen name="list_divider_gap">10dp</dimen>
  
+    <!-- game detail screen -->
+    <dimen name="achievement_icon_size">28dp</dimen>
+    <dimen name="achievement_icon_padding">6dp</dimen>
+    <dimen name="detail_hero_scrim_top">64dp</dimen>
+    <dimen name="detail_hero_scrim_bottom">110dp</dimen>
+    <dimen name="detail_bar_button">34dp</dimen>
+    <dimen name="detail_bar_icon">17dp</dimen>
+    <dimen name="detail_cover_width">72dp</dimen>
+    <dimen name="detail_cover_height">96dp</dimen>
+    <dimen name="detail_cover_overlap">20dp</dimen>
+
     <!-- settings screens -->
     <dimen name="settings_bar_height">56dp</dimen>
     <dimen name="settings_bar_button">36dp</dimen>

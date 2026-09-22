@@ -3,6 +3,7 @@ package com.backlogbattlers.app.search
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
+import com.backlogbattlers.app.domain.model.Achievement
 import com.backlogbattlers.app.domain.model.CompletionType
 import com.backlogbattlers.app.domain.model.Game
 import com.backlogbattlers.app.domain.model.LibraryEntry
@@ -20,6 +21,8 @@ fun game(
     title: String,
     platforms: List<String> = listOf("PC"),
     genres: List<String> = listOf("Adventure"),
+    avgCompletionHours: Float? = null,
+    totalAchievements: Int? = null,
 ) = Game(
     gameId = id,
     title = title,
@@ -27,15 +30,34 @@ fun game(
     artworkUrl = "https://shared.akamai.steamstatic.com/$id/capsule_616x353.jpg",
     platforms = platforms,
     genres = genres,
-    avgCompletionHours = null,
+    avgCompletionHours = avgCompletionHours,
     avg100PercentHours = null,
     cachedAt = 0L,
+    totalAchievements = totalAchievements,
+)
+
+fun achievement(
+    id: String,
+    name: String = id,
+    rarityPercent: Double? = 50.0,
+) = Achievement(
+    achievementId = id,
+    name = name,
+    description = "$name description",
+    rarityPercent = rarityPercent,
 )
 
 class FakeGameRepository : GameRepository {
 
     var searchResults: List<Game> = emptyList()
     var browseResults: List<Game> = emptyList()
+    var popularGames: List<Game> = emptyList()
+    // stands in for the cached_games table: what GameViewModel's library list looks games up by id from
+    var cachedGames: Map<Int, Game> = emptyMap()
+    // what refreshGame returns, when it differs from what is already cached (e.g. a real time-to-beat)
+    var refreshedGames: Map<Int, Game> = emptyMap()
+    // stands in for the API's achievements endpoint, keyed by game id
+    var achievementsByGame: Map<Int, List<Achievement>> = emptyMap()
 
     var failing = false
 
@@ -56,10 +78,26 @@ class FakeGameRepository : GameRepository {
         return browseResults
     }
 
-    override suspend fun getGame(gameId: Int): Game? = null
+    override suspend fun getGame(gameId: Int): Game? = cachedGames[gameId]
+
+    override suspend fun refreshGame(gameId: Int): Game {
+        if (failing) throw IOException("no connection")
+        val fresh = refreshedGames[gameId] ?: cachedGames[gameId] ?: error("no game $gameId configured on this fake")
+        cachedGames = cachedGames + (gameId to fresh)
+        return fresh
+    }
 
     override suspend fun getStarterGames(): List<Recommendation> =
         browseResults.map { Recommendation(it, "Trending with new players") }
+
+    override suspend fun getPopularGames(): List<Game> = popularGames
+
+    override suspend fun getAchievements(gameId: Int): List<Achievement> {
+        if (failing) throw IOException("no connection")
+        val achievements = achievementsByGame[gameId].orEmpty()
+        cachedGames[gameId]?.let { cachedGames = cachedGames + (gameId to it.copy(totalAchievements = achievements.size)) }
+        return achievements
+    }
 }
 
 class FakeLibraryRepository : LibraryRepository {
@@ -71,7 +109,13 @@ class FakeLibraryRepository : LibraryRepository {
     override fun observeByStatus(status: LibraryStatus): Flow<List<LibraryEntry>> =
         entries.map { list -> list.filter { it.status == status } }
 
+    override fun observeByGameId(gameId: Int): Flow<LibraryEntry?> =
+        entries.map { list -> list.firstOrNull { it.gameId == gameId } }
+
     override suspend fun addToLibrary(gameId: Int, platform: Platform, status: LibraryStatus) {
+        // a stand-in clock: each entry added is one "tick" later than the last, so tests can
+        // check the library list's default newest-first order without a real timestamp
+        val addedAt = entries.value.size.toLong()
         entries.value = entries.value + LibraryEntry(
             libraryEntryId = UUID.randomUUID().toString(),
             gameId = gameId,
@@ -80,14 +124,22 @@ class FakeLibraryRepository : LibraryRepository {
             hoursPlayed = 0f,
             unlockedAchievementIds = emptyList(),
             completionType = null as CompletionType?,
-            addedAt = 0L,
-            updatedAt = 0L,
+            addedAt = addedAt,
+            updatedAt = addedAt,
         )
     }
 
     override suspend fun updateStatus(libraryEntryId: String, status: LibraryStatus) = Unit
 
     override suspend fun updateHoursPlayed(libraryEntryId: String, hours: Float) = Unit
+
+    override suspend fun setAchievementUnlocked(libraryEntryId: String, achievementId: String, unlocked: Boolean) {
+        val entry = entries.value.firstOrNull { it.libraryEntryId == libraryEntryId } ?: return
+        val ids = if (unlocked) entry.unlockedAchievementIds + achievementId else entry.unlockedAchievementIds - achievementId
+        entries.value = entries.value.map {
+            if (it.libraryEntryId == libraryEntryId) it.copy(unlockedAchievementIds = ids) else it
+        }
+    }
 
     override suspend fun remove(libraryEntryId: String) {
         entries.value = entries.value.filterNot { it.libraryEntryId == libraryEntryId }

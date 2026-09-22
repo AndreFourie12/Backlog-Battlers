@@ -41,6 +41,7 @@ data class CachedGameEntity(
     val avgCompletionHours: Float?,
     val avg100PercentHours: Float?,
     val cachedAt: Long,
+    val totalAchievements: Int? = null,
 )
 
 //------------------------------

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- one tile of the games tab's library grid: portrait cover art with a completion pill overlaid
+     near the bottom, a "Platform · Genre" line underneath. The completion is hardcoded to 50% for
+     now: nothing tracks a real one yet -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/img_game_art"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_art_placeholder_square"
+        android:clipToOutline="true"
+        android:contentDescription="@string/cd_game_art"
+        android:foreground="?attr/selectableItemBackground"
+        android:scaleType="centerCrop"
+        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- straddles the art's bottom edge on purpose: a top AND a bottom constraint to that same
+         edge centers the pill on it, half over the art and half over the page below.
+         Hardcoded to 50% for now: nothing tracks a game's real completion yet -->
+    <TextView
+        android:id="@+id/tv_game_completion"
+        style="@style/Text.CardBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_pill_scrim_slate"
+        android:paddingStart="10dp"
+        android:paddingTop="7dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="7dp"
+        app:layout_constraintBottom_toBottomOf="@id/img_game_art"
+        app:layout_constraintEnd_toEndOf="@id/img_game_art"
+        app:layout_constraintStart_toStartOf="@id/img_game_art"
+        app:layout_constraintTop_toBottomOf="@id/img_game_art"
+        tools:text="50% Complete" />
+
+    <!-- below the pill, not the art: the pill now hangs past the art's own bottom edge -->
+    <TextView
+        android:id="@+id/tv_game_subtitle"
+        style="@style/Text.CaptionMuted"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintEnd_toEndOf="@id/img_game_art"
+        app:layout_constraintStart_toStartOf="@id/img_game_art"
+        app:layout_constraintTop_toBottomOf="@id/tv_game_completion"
+        tools:text="PC · Action RPG" />
+</androidx.constraintlayout.widget.ConstraintLayout>

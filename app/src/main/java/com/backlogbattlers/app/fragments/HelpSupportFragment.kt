@@ -25,8 +25,6 @@ class HelpSupportFragment : Fragment() {
         R.string.help_faq_friends_q to R.string.help_faq_friends_a,
     )
 
-    //------------------------------
-    // inflates the help and support layout
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,8 +33,7 @@ class HelpSupportFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_help_support, container, false)
     }
 
-    //------------------------------
-    // builds the faq list
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -50,9 +47,8 @@ class HelpSupportFragment : Fragment() {
 
         buildFaqList(view.findViewById(R.id.containerFaq))
     }
+    //--------------------------------------------------------------------------
 
-    //------------------------------
-    // one collapsible row per question, with a hairline between them
     private fun buildFaqList(container: LinearLayout) {
         container.removeAllViews()
 

@@ -1,5 +1,8 @@
 package com.backlogbattlers.app.util
 
+import com.backlogbattlers.app.domain.model.LibraryStatus
+import com.backlogbattlers.app.domain.model.Platform
+
 //------------------------------
 // the display formatting the screens share
 
@@ -13,10 +16,45 @@ fun platformLabel(platform: String): String = when (platform.uppercase()) {
     else -> "Other"
 }
 
+// the API lists a game's platforms in no set order, so the one a game is shown and filed under is picked
+// by rank instead, following the order of Platform: PC first, then the consoles, "other" last.
+// Null when the game lists none
+fun primaryPlatform(platforms: List<String>): Platform? {
+    return platforms
+        .map { name -> runCatching { Platform.valueOf(name.uppercase()) }.getOrDefault(Platform.OTHER) }
+        .minOrNull()
+}
+
 fun gameSubtitle(platforms: List<String>, genres: List<String>): String {
-    val platform = platforms.firstOrNull()?.let { platformLabel(it) }
+    val platform = primaryPlatform(platforms)?.let { platformLabel(it.name) }
     val genre = genres.firstOrNull()
     return listOfNotNull(platform, genre).joinToString(" · ")
+}
+
+// how a library entry's status reads inline, e.g. under a game's progress bar
+fun libraryStatusLabel(status: LibraryStatus): String = when (status) {
+    LibraryStatus.BACKLOG -> "Not started"
+    LibraryStatus.PLAYING -> "In progress"
+    LibraryStatus.COMPLETED -> "Completed"
+    LibraryStatus.ABANDONED -> "Abandoned"
+}
+
+// the line under a library game's progress bar: its platform, its status, and — once the game has
+// a known average completion time — how long it usually takes to beat. No percentage yet: that
+// needs the app to track time played against time to beat, which is a later piece of this feature
+fun libraryStatusCaption(platform: Platform, status: LibraryStatus, avgCompletionHours: Float?): String {
+    val parts = mutableListOf(platformLabel(platform.name), libraryStatusLabel(status))
+    if (avgCompletionHours != null && avgCompletionHours > 0f) {
+        parts += "${kotlin.math.round(avgCompletionHours).toInt()}h to beat"
+    }
+    return parts.joinToString(" · ")
+}
+
+// a game's average time to beat, for the detail screen's stat tile. Rounded to the nearest hour;
+// a dash when IGDB has no usable figure for it, rather than showing "0h"
+fun formatHours(hours: Float?): String {
+    if (hours == null || hours <= 0f) return "—"
+    return "${kotlin.math.round(hours).toInt()}h"
 }
 
 // points are always written with a thousands separator

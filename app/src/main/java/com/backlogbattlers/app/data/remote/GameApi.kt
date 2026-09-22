@@ -35,6 +35,16 @@ data class RecommendationDto(
     val reason: String,
 )
 
+@Serializable
+data class AchievementDto(
+    val achievementId: String,
+    val name: String,
+    val description: String? = null,
+    val rarityPercent: Double? = null,
+    val iconUrl: String? = null,
+    val iconGrayUrl: String? = null,
+)
+
 
 class GameApi(
     private val httpClient: HttpClient,
@@ -66,6 +76,24 @@ class GameApi(
                 accept(ContentType.Application.Json)
                 parameter("category", category)
                 parameter("limit", limit)
+            }
+        }
+    }
+
+    // GET /games/{id}: the one call that includes real IGDB time-to-beat, at the cost of one extra
+    // IGDB request, so only the detail screen pays for it - search and browse skip it
+    suspend fun getGame(gameId: Int): GameDto {
+        return await {
+            httpClient.get("$baseUrl/games/$gameId") {
+                accept(ContentType.Application.Json)
+            }
+        }
+    }
+
+    suspend fun achievementsFor(gameId: Int): List<AchievementDto> {
+        return await {
+            httpClient.get("$baseUrl/games/$gameId/achievements") {
+                accept(ContentType.Application.Json)
             }
         }
     }

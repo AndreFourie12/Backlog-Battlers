@@ -55,6 +55,10 @@ fun RecyclerView.addRowDividers() {
     )
 }
 
+fun RecyclerView.addGridSpacing(spanCount: Int, gap: Int = resources.getDimensionPixelSize(R.dimen.list_gap)) {
+    addItemDecoration(GridSpacingDecoration(spanCount, gap))
+}
+
 fun ImageView.loadArtwork(url: String?) {
     load(url) {
         crossfade(true)

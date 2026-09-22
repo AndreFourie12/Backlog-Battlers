@@ -39,7 +39,14 @@
     <string name="achievements">Achievements</string>
     <string name="points">Points</string>
     <string name="playtime">Playtime</string>
+    <string name="avg_completion_time">Avg Completion Time</string>
+    <!-- the big number on a detail stat tile: earned points, or achievements unlocked, out of the total -->
+    <string name="detail_stat_ratio">%1$s / %2$s</string>
+    <string name="detail_completion_value">%1$d%%</string>
     <string name="locked">Locked</string>
+    <string name="unlocked">Unlocked</string>
+    <string name="rarity_unknown">—</string>
+    <string name="achievements_error">Couldn\'t load achievements right now.</string>
     <string name="badges">Badges</string>
     <string name="showcase_title">Rarest Achievement Showcase</string>
     <string name="recent_activity">Recent Activity</string>
@@ -85,6 +92,24 @@
     <string name="search_error">Couldn’t reach the game catalogue.</string>
     <string name="try_again_body">Check your connection and try again.</string>
     <string name="added_to_library">%1$s added to your backlog</string>
+
+    <!-- games screen -->
+    <string name="search_library">Search your library</string>
+    <string name="library_empty_title">Your library is empty</string>
+    <string name="library_empty_body">Add games you own or want to play. Each one tracks its achievements and shows how many points are still left to earn.</string>
+    <string name="add_first_game">Add your first game</string>
+    <string name="popular_to_start_with">Popular to start with</string>
+
+    <!-- games screen, the library list once it has games in it -->
+    <string name="library_filter_all">All</string>
+    <string name="library_filter_in_progress">In Progress</string>
+    <string name="library_filter_completed">Completed</string>
+    <string name="library_filter_not_started">Not Started</string>
+    <string name="sort_recently_added">Recently added</string>
+    <string name="library_no_matches">No games match “%1$s”</string>
+    <!-- the pill on a library tile: achievements unlocked over the game's total, once known -->
+    <string name="library_completion_percent">%1$d%% Complete</string>
+    <string name="library_no_results">No games in your library match this filter</string>
 
     <!-- content descriptions -->
     <string name="cd_back">Back</string>
@@ -258,8 +283,36 @@
     <string name="about_privacy_body">Signing in with Google gives the app your display name, email address and profile picture. That, along with your library, playtime, achievements and monthly points, is stored on this device and on the project backend so your leaderboard position is accurate.\n\nYour data is never sold or shared with advertisers. Friends can see your display name, picture, points and recent activity. Nobody can see your email address.\n\nSigning out clears your session and your local copy of your profile from this device.</string>
     <string name="about_licences_body">This app is built on open source work released under the Apache License 2.0:\n\n• AndroidX and Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines and kotlinx.serialization\n• Ktor Client\n\nFull licence texts are available from each project\'s repository.</string>
 
+    <!-- activity feed -->
+    <string name="activity_no_standings_title">No standings yet</string>
+    <string name="activity_no_standings_body">Add a friend and you\'ll both be ranked by points earned this month.</string>
+    <string name="view_standings">View Standings</string>
+    <string name="activity_today">Today</string>
+    <string name="activity_event_joined">You joined <b>Backlog Battlers</b></string>
+    <string name="activity_just_now">Just now</string>
+    <string name="activity_feed_hint" formatted="false">Achievement unlocks, 100% completions and rank changes from you and your friends will show up here, grouped by day.</string>
+    <string name="profile_avatar_initial">A</string>
+
+    <!-- profile -->
+    <string name="profile_display_name">Alex</string>
+    <string name="profile_level">Level 1</string>
+    <string name="profile_xp_progress">0 / 500 XP · unlock an achievement to start</string>
+    <string name="badges_earned_count">0 of 4 earned</string>
+    <string name="badge_completionist">Completionist</string>
+    <string name="badge_achievement_hunter">Achievement Hunter</string>
+    <string name="badge_monthly_competitor">Monthly Competitor</string>
+    <string name="badge_early_bird">Early Bird</string>
+    <string name="showcase_body">Showcase your rarest unlocks, completed games, and average completion percentage</string>
+    <string name="recent_activity_empty">Games you play will show up here</string>
+    <string name="add_a_game">Add a game →</string>
+
     <plurals name="search_result_count">
         <item quantity="one">%1$d result</item>
         <item quantity="other">%1$d results</item>
+    </plurals>
+
+    <plurals name="library_game_count">
+        <item quantity="one">%1$d game in your library</item>
+        <item quantity="other">%1$d games in your library</item>
     </plurals>
 </resources>

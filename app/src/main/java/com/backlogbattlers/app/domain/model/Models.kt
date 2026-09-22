@@ -25,12 +25,26 @@ data class Game(
     val avgCompletionHours: Float?,
     val avg100PercentHours: Float?,
     val cachedAt: Long,
+    // null until this game's achievements have been fetched at least once
+    val totalAchievements: Int? = null,
 )
 
 // Recommendation data class pairs a game with the line shown under its name, e.g. on the home screen
 data class Recommendation(
     val game: Game,
     val reason: String,
+)
+
+// Achievement data class represents domain model for one of a game's achievements.
+// rarityPercent is the share of players who have unlocked it globally, null when unknown
+data class Achievement(
+    val achievementId: String,
+    val name: String,
+    val description: String?,
+    val rarityPercent: Double?,
+    // Steam's own icons, null when no STEAM_API_KEY is configured server side
+    val iconUrl: String? = null,
+    val iconGrayUrl: String? = null,
 )
 
 // enum representing gaming platforms
@@ -52,6 +66,13 @@ enum class BrowseCategory(val key: String) {
 
 enum class SearchSort {
     RELEVANCE,
+    NAME_A_Z,
+    NAME_Z_A,
+}
+
+// enum representing how the games tab's library list can be sorted
+enum class LibrarySort {
+    RECENTLY_ADDED,
     NAME_A_Z,
     NAME_Z_A,
 }
@@ -107,6 +128,13 @@ data class LibraryEntry(
     val addedAt: Long,
     val updatedAt: Long,
     val pendingSync: Boolean = false,
+)
+
+//------------------------------
+// LibraryGame data class pairs a library entry with its game, for the games tab's library list
+data class LibraryGame(
+    val entry: LibraryEntry,
+    val game: Game,
 )
 
 //------------------------------
