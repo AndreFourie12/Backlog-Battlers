@@ -2,8 +2,10 @@ package com.backlogbattlers.app.data.repository
 
 import com.backlogbattlers.app.data.local.dao.CachedGameDao
 import com.backlogbattlers.app.data.local.entity.CachedGameEntity
+import com.backlogbattlers.app.data.remote.AchievementDto
 import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.remote.GameDto
+import com.backlogbattlers.app.domain.model.Achievement
 import com.backlogbattlers.app.domain.model.Game
 import com.backlogbattlers.app.domain.model.Recommendation
 import kotlinx.coroutines.flow.Flow
@@ -23,11 +25,18 @@ interface GameRepository {
     // fetches a cached game by game id
     suspend fun getGame(gameId: Int): Game?
 
+    // fetches one game fresh from the API, with its real IGDB time-to-beat, and re-caches it.
+    // Existing cached artwork is kept: this endpoint does not carry Steam art the way search does
+    suspend fun refreshGame(gameId: Int): Game
+
     // fetches the hand picked games for new players from the API and caches each one
     suspend fun getStarterGames(): List<Recommendation>
 
     // the hand picked games offered under an empty library, cached so other screens can find them by id
     suspend fun getPopularGames(): List<Game>
+
+    // fetches a game's achievements with their global rarity, rarest first, straight from the API
+    suspend fun getAchievements(gameId: Int): List<Achievement>
 }
 
 
@@ -64,6 +73,12 @@ class GameRepositoryImpl(
     }
 
     //------------------------------
+    // refreshes one game from the API for its real time-to-beat, which search and browse skip
+    override suspend fun refreshGame(gameId: Int): Game {
+        return cacheGame(gameApi.getGame(gameId).toDomain(System.currentTimeMillis()))
+    }
+
+    //------------------------------
     // asks the API for the starter games, then caches every game so other screens can show it without another request
     override suspend fun getStarterGames(): List<Recommendation> {
         val cachedAt = System.currentTimeMillis()
@@ -72,6 +87,18 @@ class GameRepositoryImpl(
         }
         recommendations.forEach { cacheGame(it.game) }
         return recommendations
+    }
+
+    //------------------------------
+    // fetches a game's achievements straight from the API; the achievements themselves are not
+    // cached, but the game's total count is, so the library grid can show a real completion percent
+    override suspend fun getAchievements(gameId: Int): List<Achievement> {
+        val achievements = gameApi.achievementsFor(gameId).map { it.toDomain() }
+        val cached = cachedGameDao.getGame(gameId)
+        if (cached != null && cached.totalAchievements != achievements.size) {
+            cachedGameDao.upsert(cached.copy(totalAchievements = achievements.size))
+        }
+        return achievements
     }
 
     //------------------------------
@@ -87,16 +114,23 @@ class GameRepositoryImpl(
     }
 
     //------------------------------
-    // caches a domain Game into Room database with current timestamp
-    suspend fun cacheGame(game: Game) {
-        cachedGameDao.upsert(game.toEntity())
+    // caches a domain Game into Room, keeping its artwork and known achievement total when the
+    // incoming copy does not carry one (search, starter and the single-game endpoint each leave
+    // out fields the others have), rather than letting a partial response clear good cached data.
+    // Returns the Game as it was actually stored
+    suspend fun cacheGame(game: Game): Game {
+        val existing = cachedGameDao.getGame(game.gameId)
+        val merged = game.copy(
+            artworkUrl = game.artworkUrl ?: existing?.artworkUrl,
+            totalAchievements = game.totalAchievements ?: existing?.totalAchievements,
+        )
+        cachedGameDao.upsert(merged.toEntity())
+        return merged
     }
 
     private suspend fun cacheAll(dtos: List<GameDto>): List<Game> {
         val cachedAt = System.currentTimeMillis()
-        val games = dtos.map { it.toDomain(cachedAt) }
-        cachedGameDao.upsertAll(games.map { it.toEntity() })
-        return games
+        return dtos.map { cacheGame(it.toDomain(cachedAt)) }
     }
 
     private fun Game.toEntity(): CachedGameEntity {
@@ -110,6 +144,7 @@ class GameRepositoryImpl(
             avgCompletionHours = avgCompletionHours,
             avg100PercentHours = avg100PercentHours,
             cachedAt = System.currentTimeMillis(),
+            totalAchievements = totalAchievements,
         )
     }
 
@@ -126,6 +161,20 @@ class GameRepositoryImpl(
             avgCompletionHours = avgCompletionHours,
             avg100PercentHours = avg100PercentHours,
             cachedAt = cachedAt,
+            totalAchievements = totalAchievements,
+        )
+    }
+
+    //------------------------------
+    // converts the API's AchievementDto to domain Achievement
+    private fun AchievementDto.toDomain(): Achievement {
+        return Achievement(
+            achievementId = achievementId,
+            name = name,
+            description = description,
+            rarityPercent = rarityPercent,
+            iconUrl = iconUrl,
+            iconGrayUrl = iconGrayUrl,
         )
     }
 

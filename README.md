@@ -68,31 +68,59 @@
 ## Project Overview
 
 ### Built With
+- Kotlin (Both the Android app and the REST API)
+- [Ktor] (https://ktor.io) - served as the framework for the API server and it's HTTP client
+- [Exposed](https://www.jetbrains.com/help/exposed/home.html) - Enables access to the SQL for the API
+- [IGDB API](https://api-docs.igdb.com/) - provided the game catalogue and average time to complete a game
+- [Steam Web API](https://partner.steamgames.com/doc/webapi/ISteamUserStats) - provided the achievements and their rarity
+- Google Sign-In, which is verified server-side with JWT
+- Github Actions - CI was used for both the API and the App
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 ## Core Purpose and Scope
+
+Backlog Battlers' provides a rarity and time to complete-weighted scoring for it's users. Meaning that if someone were to acquire an achievement only 0.8% of players have, they will be awarded more points compared to an achievement 40% of players have. Similarly, if a user finished a game in 70 hours, whereas the average time to beat is 100 hours, that user will be awarded more points than someone who finished the same game in 95 hours. To accomplish this a REST API did most of the heavy lifting. 
+
+The scope for this part was the Google sign in, settings, the REST API and database, game search, library management, achievement scoring and the leaderboard. More features are to come in the final POE.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 ## Design Consideration and Architectural Choices
+**Two separate Gradle builds.** The API (`api/`) is its own Ktor project, to prevent the Android Gradle Plugin and the JVM/Kotlin toolchain from conflicting. Each of which have its own CI job.
+
+**Authentication.** The app signs in with Google, which the API verifies the resulting ID token and issues its own short-lived JWT access token plus a longer-lived refresh token. Additionally, every endpoint that needs a signed-in user reads that token from the `Authorization: Bearer` header. If invalid, expired, or wrong-type token is rejected without leaking why and a deleted user's still-valid token is also rejected.
+
+**Scoring.** Achievement points come from five rarity tiers (Common through Ultra Rare), which we sourced from Steam's global unlock percentages. Completion points scale with IGDB's average time-to-beat for that game, and a separate speed bonus rewards finishing faster than that average. An entry can be completed twice (story, then 100%) without ever being paid for the same achievement twice.
+
+**Data.** Exposed tables mirror the domain closely: users, games, achievements, library entries, unlocked achievements, completion records and monthly leaderboard entries. Games and achievements are fetched from IGDB/Steam once and cached in our own database, so repeat requests never re-hit those APIs.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 ## Comprehensive Summary
 
 ### Implementation of Version Control
+
+The format of branches were `feat/<initials>/<topic>`, then merged into `main` via pull requests which were reviewed before merging. 
+
+**<img width="1283" height="569" alt="image" src="https://github.com/user-attachments/assets/217b2679-00fd-4e73-94d9-eccd71695334" />**
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
 ### GitHub Actions
+
+There are two independent workflows run on every push: `api-ci.yml` builds the API tehn runs its unit and integration tests, `android-ci.yml`, similarly, builds the ANdroid app and runs its unit tests. Keeping the two separate matches the previously described Gradle builds.
+
+**<img width="1352" height="571" alt="image" src="https://github.com/user-attachments/assets/11478388-1659-45cf-9ecd-93622960c4bb" />**
+
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 ## Video Demonstration
 
+** add unlisted video link here chuds **
 
 ## References 
 
@@ -128,6 +156,36 @@ SHOUT (2025). What makes a successful mobile app? | Shout Digital. [online] Shou
 
 ---
 
+Ktor, 2026. Ktor Documentation. [Online] Available at: https://ktor.io/docs/ [Accessed 22 September 2026].
+
+---
+
+JetBrains, 2026. Exposed - Kotlin SQL Framework. [Online] Available at: https://www.jetbrains.com/help/exposed/home.html [Accessed 22 September 2026].
+
+---
+
+IGDB, 2026. IGDB API Documentation. [Online] Available at: https://api-docs.igdb.com/ [Accessed 22 September 2026].
+
+---
+
+Steam, 2026. Steam Web API - ISteamUserStats. [Online] Available at: https://partner.steamgames.com/doc/webapi/ISteamUserStats [Accessed 22 September 2026].
+
+---
+
+Twitch, 2026. Client Credentials Grant Flow. [Online] Available at: https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#client-credentials-grant-flow [Accessed 22 September 2026].
+
+---
+
+HikariCP, 2026. HikariCP - A solid, high-performance, JDBC connection pool. [Online] Available at: https://github.com/brettwooldridge/HikariCP [Accessed 22 September 2026].
+
+---
+
+GitHub, 2026. GitHub Actions Documentation. [Online] Available at: https://docs.github.com/en/actions [Accessed 22 September 2026].
+
+---
+
+Gradle, 2026. Gradle User Manual. [Online] Available at: https://docs.gradle.org/current/userguide/userguide.html [Accessed 22 September 2026].
+
 ## Declaration of AI Usage:
 
 Throughout this project, members of our team utilised ChatGPT 5.0 LLM to assist with planning, brainstorming, architecture structuring, feature implementation, debugging and code review. All work involving AI usage has, to the best of our abilities, been credited where due or reworked to be made our own. 
@@ -142,3 +200,8 @@ https://chatgpt.com/share/6ab25643-70c0-83ea-89db-eef5f5e47bd7
 Google SSO assitance:<br>
 SSO implementation planning, assistance, snippet design, API routing and debugging within: GoogleIdTokenVerifier.kt, JwtService.kt, AuthRoutes.kt <br>
 https://chatgpt.com/share/6ab25b54-4b38-83ea-a847-3833c2b818a5
+
+Ktor Setup and miscellaneous: <br>
+REST API structure, Android Studio, GitHub, README <br>
+https://chatgpt.com/share/6ab2832b-ffe8-83ea-acc4-661d38f2964a
+

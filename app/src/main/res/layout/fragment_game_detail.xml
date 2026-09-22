@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- the game detail screen. This RecyclerView IS the scroll container for the whole page - the
+     header (hero art through the "Achievements" label), the loading/error row and every
+     achievement row are all items in one ConcatAdapter (see GameDetailFragment). A header
+     inside a separate outer ScrollView was tried first and does not reliably grow past its
+     first measured height once achievements arrive asynchronously; see partial_detail_header.xml -->
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/list_detail_content"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:clipToPadding="false"
+    android:overScrollMode="never"
+    android:paddingBottom="@dimen/bottom_content_inset"
+    android:scrollbars="none"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    tools:context=".fragments.GameDetailFragment"
+    tools:itemCount="6"
+    tools:listitem="@layout/item_achievement" />

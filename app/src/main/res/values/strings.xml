@@ -18,6 +18,7 @@
     <string name="title_friends">Friends</string>
     <string name="title_activity">Activity</string>
     <string name="title_leaderboard">Leaderboard</string>
+    <string name="standings_empty_body">Nobody has scored any points yet this month. Complete a game to take the top spot.</string>
     <string name="title_settings">Settings</string>
 
 
@@ -38,7 +39,14 @@
     <string name="achievements">Achievements</string>
     <string name="points">Points</string>
     <string name="playtime">Playtime</string>
+    <string name="avg_completion_time">Avg Completion Time</string>
+    <!-- the big number on a detail stat tile: earned points, or achievements unlocked, out of the total -->
+    <string name="detail_stat_ratio">%1$s / %2$s</string>
+    <string name="detail_completion_value">%1$d%%</string>
     <string name="locked">Locked</string>
+    <string name="unlocked">Unlocked</string>
+    <string name="rarity_unknown">—</string>
+    <string name="achievements_error">Couldn\'t load achievements right now.</string>
     <string name="badges">Badges</string>
     <string name="showcase_title">Rarest Achievement Showcase</string>
     <string name="recent_activity">Recent Activity</string>
@@ -99,7 +107,7 @@
     <string name="library_filter_not_started">Not Started</string>
     <string name="sort_recently_added">Recently added</string>
     <string name="library_no_matches">No games match “%1$s”</string>
-    <!-- the pill on a library tile. Hardcoded to 50 for now: nothing tracks real completion yet -->
+    <!-- the pill on a library tile: achievements unlocked over the game's total, once known -->
     <string name="library_completion_percent">%1$d%% Complete</string>
     <string name="library_no_results">No games in your library match this filter</string>
 

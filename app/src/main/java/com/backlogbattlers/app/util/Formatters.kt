@@ -50,6 +50,13 @@ fun libraryStatusCaption(platform: Platform, status: LibraryStatus, avgCompletio
     return parts.joinToString(" · ")
 }
 
+// a game's average time to beat, for the detail screen's stat tile. Rounded to the nearest hour;
+// a dash when IGDB has no usable figure for it, rather than showing "0h"
+fun formatHours(hours: Float?): String {
+    if (hours == null || hours <= 0f) return "—"
+    return "${kotlin.math.round(hours).toInt()}h"
+}
+
 // points are always written with a thousands separator
 fun formatPoints(points: Int): String {
     val text = points.toString()

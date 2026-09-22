@@ -7,12 +7,15 @@ import com.backlogbattlers.app.data.local.TokenStorage
 import com.backlogbattlers.app.data.remote.AuthApi
 import com.backlogbattlers.app.data.remote.FriendsApi
 import com.backlogbattlers.app.data.remote.GameApi
+import com.backlogbattlers.app.data.remote.LeaderboardApi
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthRepositoryImpl
 import com.backlogbattlers.app.data.repository.FriendsRepository
 import com.backlogbattlers.app.data.repository.FriendsRepositoryImpl
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.GameRepositoryImpl
+import com.backlogbattlers.app.data.repository.LeaderboardRepository
+import com.backlogbattlers.app.data.repository.LeaderboardRepositoryImpl
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.LibraryRepositoryImpl
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
@@ -87,6 +90,14 @@ object ServiceLocator {
 
     val friendsRepository: FriendsRepository by lazy {
         FriendsRepositoryImpl(friendsApi)
+    }
+
+    val leaderboardApi: LeaderboardApi by lazy {
+        LeaderboardApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokenStorage = tokenStorage)
+    }
+
+    val leaderboardRepository: LeaderboardRepository by lazy {
+        LeaderboardRepositoryImpl(leaderboardApi)
     }
 
     val gameRepository: GameRepository by lazy {

@@ -71,6 +71,17 @@
     <dimen name="list_divider_thickness">1dp</dimen>
     <dimen name="list_divider_gap">10dp</dimen>
  
+    <!-- game detail screen -->
+    <dimen name="achievement_icon_size">28dp</dimen>
+    <dimen name="achievement_icon_padding">6dp</dimen>
+    <dimen name="detail_hero_scrim_top">64dp</dimen>
+    <dimen name="detail_hero_scrim_bottom">110dp</dimen>
+    <dimen name="detail_bar_button">34dp</dimen>
+    <dimen name="detail_bar_icon">17dp</dimen>
+    <dimen name="detail_cover_width">72dp</dimen>
+    <dimen name="detail_cover_height">96dp</dimen>
+    <dimen name="detail_cover_overlap">20dp</dimen>
+
     <!-- settings screens -->
     <dimen name="settings_bar_height">56dp</dimen>
     <dimen name="settings_bar_button">36dp</dimen>

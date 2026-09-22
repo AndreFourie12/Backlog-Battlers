@@ -84,6 +84,10 @@ dependencies {
     implementation("androidx.room:room-runtime:2.8.0")
     implementation("androidx.room:room-ktx:2.8.0")
     ksp("androidx.room:room-compiler:2.8.0")
+    // explicit, newer than what appcompat/material pull in transitively (1.1.0): needed for
+    // ConcatAdapter (1.2.0+), which the game detail screen uses to join its header, its
+    // achievements-loading row and its achievement list into a single RecyclerView
+    implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 

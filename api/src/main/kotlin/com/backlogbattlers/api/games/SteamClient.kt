@@ -15,8 +15,13 @@ import kotlinx.serialization.json.JsonPrimitive
 /** Thrown when Steam cannot be reached or rejects a request. */
 class SteamException(message: String) : RuntimeException(message)
 
-/** What Steam's schema says about one achievement. */
-data class SteamAchievementInfo(val displayName: String, val description: String?)
+/** What Steam's schema says about one achievement. Icon urls are absolute and need no key to load. */
+data class SteamAchievementInfo(
+    val displayName: String,
+    val description: String?,
+    val iconUrl: String?,
+    val iconGrayUrl: String?,
+)
 
 // The parts of Steam's JSON that we read. Steam sends `percent` as text ("81.9"), so it is
 // read as a primitive and converted, which also works if Steam ever switches to a number.
@@ -43,6 +48,9 @@ private data class SchemaAchievement(
     val name: String,
     val displayName: String? = null,
     val description: String? = null,
+    // absolute urls to the unlocked and locked (greyed out) icons, 64x64
+    val icon: String? = null,
+    val icongray: String? = null,
 )
 
 /**
@@ -91,7 +99,14 @@ class SteamClient(
 
         return json.decodeFromString<SchemaResponse>(response.bodyAsText())
             .game.availableGameStats?.achievements.orEmpty()
-            .associate { it.name to SteamAchievementInfo(it.displayName ?: it.name, it.description) }
+            .associate {
+                it.name to SteamAchievementInfo(
+                    displayName = it.displayName ?: it.name,
+                    description = it.description,
+                    iconUrl = it.icon,
+                    iconGrayUrl = it.icongray,
+                )
+            }
     }
 
     companion object {
