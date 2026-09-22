@@ -72,8 +72,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     //------------------------------
-    // signs the user out and clears tokens, then hands control back so the
-    // fragment can navigate to login
+    // signs the user out and clears tokens
     fun logOut(onDone: () -> Unit) {
         viewModelScope.launch {
             authRepository.signOut()

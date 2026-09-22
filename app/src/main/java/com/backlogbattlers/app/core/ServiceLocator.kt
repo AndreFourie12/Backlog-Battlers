@@ -19,6 +19,8 @@ import com.backlogbattlers.app.data.repository.SearchHistoryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.data.repository.SettingsRepositoryImpl
+import com.backlogbattlers.app.util.AndroidBiometricAvailabilityChecker
+import com.backlogbattlers.app.util.BiometricAvailabilityChecker
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -103,6 +105,11 @@ object ServiceLocator {
     val settingsRepository: SettingsRepository by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing settingsRepository")
         SettingsRepositoryImpl(context)
+    }
+
+    val biometricAvailabilityChecker: BiometricAvailabilityChecker by lazy {
+        val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing biometricAvailabilityChecker")
+        AndroidBiometricAvailabilityChecker(context)
     }
 
     //------------------------------
