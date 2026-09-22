@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.util
 
+import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
 
 //------------------------------
@@ -28,6 +29,25 @@ fun gameSubtitle(platforms: List<String>, genres: List<String>): String {
     val platform = primaryPlatform(platforms)?.let { platformLabel(it.name) }
     val genre = genres.firstOrNull()
     return listOfNotNull(platform, genre).joinToString(" · ")
+}
+
+// how a library entry's status reads inline, e.g. under a game's progress bar
+fun libraryStatusLabel(status: LibraryStatus): String = when (status) {
+    LibraryStatus.BACKLOG -> "Not started"
+    LibraryStatus.PLAYING -> "In progress"
+    LibraryStatus.COMPLETED -> "Completed"
+    LibraryStatus.ABANDONED -> "Abandoned"
+}
+
+// the line under a library game's progress bar: its platform, its status, and — once the game has
+// a known average completion time — how long it usually takes to beat. No percentage yet: that
+// needs the app to track time played against time to beat, which is a later piece of this feature
+fun libraryStatusCaption(platform: Platform, status: LibraryStatus, avgCompletionHours: Float?): String {
+    val parts = mutableListOf(platformLabel(platform.name), libraryStatusLabel(status))
+    if (avgCompletionHours != null && avgCompletionHours > 0f) {
+        parts += "${kotlin.math.round(avgCompletionHours).toInt()}h to beat"
+    }
+    return parts.joinToString(" · ")
 }
 
 // points are always written with a thousands separator
