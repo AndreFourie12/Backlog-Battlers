@@ -18,6 +18,7 @@
     <string name="title_friends">Friends</string>
     <string name="title_activity">Activity</string>
     <string name="title_leaderboard">Leaderboard</string>
+    <string name="standings_empty_body">Nobody has scored any points yet this month. Complete a game to take the top spot.</string>
     <string name="title_settings">Settings</string>
 
 

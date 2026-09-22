@@ -128,6 +128,18 @@
             android:lineSpacingExtra="3dp"
             android:text="@string/welcome_body" />
 
+        <!-- Basic prototype entry point for the leaderboard: not the "Monthly Competition" card
+             with a countdown from the Part 1 design doc yet, just a way to reach the screen. -->
+        <TextView
+            android:id="@+id/btn_view_leaderboard"
+            style="@style/Text.SectionAction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="@dimen/section_spacing"
+            android:includeFontPadding="false"
+            android:text="@string/view_leaderboard" />
+
         <include
             layout="@layout/partial_home_no_friends_card"
             android:layout_width="match_parent"
