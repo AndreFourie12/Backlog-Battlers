@@ -128,6 +128,36 @@ SHOUT (2025). What makes a successful mobile app? | Shout Digital. [online] Shou
 
 ---
 
+Ktor, 2026. Ktor Documentation. [Online] Available at: https://ktor.io/docs/ [Accessed 22 September 2026].
+
+---
+
+JetBrains, 2026. Exposed - Kotlin SQL Framework. [Online] Available at: https://www.jetbrains.com/help/exposed/home.html [Accessed 22 September 2026].
+
+---
+
+IGDB, 2026. IGDB API Documentation. [Online] Available at: https://api-docs.igdb.com/ [Accessed 22 September 2026].
+
+---
+
+Steam, 2026. Steam Web API - ISteamUserStats. [Online] Available at: https://partner.steamgames.com/doc/webapi/ISteamUserStats [Accessed 22 September 2026].
+
+---
+
+Twitch, 2026. Client Credentials Grant Flow. [Online] Available at: https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#client-credentials-grant-flow [Accessed 22 September 2026].
+
+---
+
+HikariCP, 2026. HikariCP - A solid, high-performance, JDBC connection pool. [Online] Available at: https://github.com/brettwooldridge/HikariCP [Accessed 22 September 2026].
+
+---
+
+GitHub, 2026. GitHub Actions Documentation. [Online] Available at: https://docs.github.com/en/actions [Accessed 22 September 2026].
+
+---
+
+Gradle, 2026. Gradle User Manual. [Online] Available at: https://docs.gradle.org/current/userguide/userguide.html [Accessed 22 September 2026].
+
 ## Declaration of AI Usage:
 
 Throughout this project, members of our team utilised ChatGPT 5.0 LLM to assist with planning, brainstorming, architecture structuring, feature implementation, debugging and code review. All work involving AI usage has, to the best of our abilities, been credited where due or reworked to be made our own. 
