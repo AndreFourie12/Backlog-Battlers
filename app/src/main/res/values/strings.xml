@@ -99,6 +99,7 @@
     <string name="library_filter_not_started">Not Started</string>
     <string name="sort_recently_added">Recently added</string>
     <string name="library_no_matches">No games match “%1$s”</string>
+    <string name="library_no_results">No games in your library match this filter</string>
 
     <!-- content descriptions -->
     <string name="cd_back">Back</string>
