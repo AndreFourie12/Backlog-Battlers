@@ -30,6 +30,7 @@ import com.backlogbattlers.app.adapters.SearchResultAdapter
 import com.backlogbattlers.app.domain.model.LibraryGame
 import com.backlogbattlers.app.domain.model.LibrarySort
 import com.backlogbattlers.app.domain.model.LibraryStatus
+import com.backlogbattlers.app.util.addGridSpacing
 import com.backlogbattlers.app.util.inflateChild
 import com.backlogbattlers.app.util.librarySortLabel
 import com.backlogbattlers.app.util.setVisible
@@ -124,7 +125,10 @@ class GamesFragment : Fragment() {
         libraryAdapter = LibraryGameAdapter(
             onClick = { libraryGame -> openGame(libraryGame.game.gameId) },
         )
-        view.findViewById<RecyclerView>(R.id.list_library_games).adapter = libraryAdapter
+        view.findViewById<RecyclerView>(R.id.list_library_games).apply {
+            adapter = libraryAdapter
+            addGridSpacing(spanCount = 2)
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

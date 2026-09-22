@@ -30,9 +30,18 @@ class Config(
         /** The real configuration, read once: environment variables, then [FILE_NAME]. */
         val default: Config by lazy { Config(System::getenv, readFile(findConfigFile(FILE_NAME))) }
 
-        /** Resolves configuration files whether running from the api subfolder or repository root. */
-        fun findConfigFile(name: String): File =
-            listOf(File(name), File("api", name), File("..", name)).firstOrNull { it.isFile } ?: File(name)
+        /** Resolves configuration files whether running from the api subfolder, repository root, or build directory. */
+        fun findConfigFile(name: String): File {
+            var dir: File? = File(".").canonicalFile
+            while (dir != null) {
+                val direct = File(dir, name)
+                if (direct.isFile) return direct
+                val inApi = File(dir, "api/$name")
+                if (inApi.isFile) return inApi
+                dir = dir.parentFile
+            }
+            return File(name)
+        }
 
         /** The settings in [file], or none when it does not exist. */
         fun readFile(file: File): Map<String, String> {

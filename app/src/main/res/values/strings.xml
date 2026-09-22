@@ -99,6 +99,8 @@
     <string name="library_filter_not_started">Not Started</string>
     <string name="sort_recently_added">Recently added</string>
     <string name="library_no_matches">No games match “%1$s”</string>
+    <!-- the pill on a library tile. Hardcoded to 50 for now: nothing tracks real completion yet -->
+    <string name="library_completion_percent">%1$d%% Complete</string>
     <string name="library_no_results">No games in your library match this filter</string>
 
     <!-- content descriptions -->

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- the completion label on a library grid tile: a fixed slate fill (not the app's theme colours)
+     so it reads the same straddling any game's cover art, in either light or dark mode. Square
+     corners on purpose, unlike the other pills -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FF3D4450" />
+</shape>

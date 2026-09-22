@@ -46,6 +46,15 @@
         <item name="android:textColor">@color/text_primary</item>
     </style>
 
+    <!-- the completion pill on a library grid tile. Always white: it sits on a fixed dark backing
+         that does not follow the app's own light/dark theme -->
+    <style name="Text.CardBadge">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
     <style name="Text.StatValue">
         <item name="android:textSize">20sp</item>
         <item name="android:textStyle">bold</item>
