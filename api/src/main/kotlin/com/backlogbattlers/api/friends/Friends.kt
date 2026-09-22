@@ -5,6 +5,7 @@ import com.backlogbattlers.api.db.Friendships
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.db.Users
+import com.backlogbattlers.api.scoring.monthlyPointsFor
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
@@ -115,12 +116,11 @@ fun listFriends(owner: Uuid): List<FriendDto> = transaction {
         val friendId = if (userA == owner) userB else userA
         val friendUser = Users.selectAll().where { Users.id eq friendId }.single()
 
-        // monthly points must be connected once @Mihir's done leaderboards
         FriendDto(
             userId = friendId.toString(),
             displayName = friendUser[Users.displayName],
             avatarUrl = friendUser[Users.avatarUrl],
-            monthlyPoints = 0,
+            monthlyPoints = monthlyPointsFor(friendId),
             achievementCount = achievementCountFor(friendId),
             isOnline = friendUser[Users.lastLoginDate] == LocalDate.now(),
         )
@@ -250,13 +250,12 @@ fun acceptRequest(owner: Uuid, requestId: Uuid): RespondToRequestResult = transa
 
     val senderUser = Users.selectAll().where { Users.id eq sender }.single()
 
-    //monthly points needed
     RespondToRequestResult.Accepted(
         FriendDto(
             userId = sender.toString(),
             displayName = senderUser[Users.displayName],
             avatarUrl = senderUser[Users.avatarUrl],
-            monthlyPoints = 0,
+            monthlyPoints = monthlyPointsFor(sender),
             achievementCount = achievementCountFor(sender),
             isOnline = senderUser[Users.lastLoginDate] == LocalDate.now(),
         ),
