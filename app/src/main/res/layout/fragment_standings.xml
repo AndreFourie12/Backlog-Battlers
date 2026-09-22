@@ -1,6 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:padding="@dimen/page_padding">
+
+    <!-- Back Button -->
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/cd_back"
+        android:src="@drawable/ic_chevron_left"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_standings_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_standings_title"
+        app:tint="@color/text_primary" />
+
+    <!-- Screen Title -->
+    <TextView
+        android:id="@+id/tv_standings_title"
+        style="@style/Text.BarTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/title_leaderboard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_back"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Ranked list. Basic prototype UI: a plain list, no podium graphic yet -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_standings"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/section_spacing"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/section_spacing"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_standings_title"
+        tools:listitem="@layout/item_friend" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_standings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_standings_title" />
+
+    <!-- Shown instead of the list on an error, or when nobody has scored any points yet -->
+    <TextView
+        android:id="@+id/tv_standings_message"
+        style="@style/Text.Body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:gravity="center"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_standings_title"
+        tools:text="@string/standings_empty_body"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
