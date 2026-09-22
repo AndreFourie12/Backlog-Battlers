@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- one row of the games tab's library list: art, title and chevron on top, a progress bar and a
+     status line ("Platform · status · Nh to beat") underneath. LibraryGameAdapter picks the bar's
+     colour and fills in the status line, since both depend on the entry's LibraryStatus -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/library_row_gap"
+    android:background="@drawable/bg_card"
+    android:foreground="?attr/selectableItemBackground"
+    android:paddingStart="13dp"
+    android:paddingTop="@dimen/library_row_padding"
+    android:paddingEnd="12dp"
+    android:paddingBottom="@dimen/library_row_padding">
+
+    <ImageView
+        android:id="@+id/img_game_art"
+        android:layout_width="@dimen/library_thumb_width"
+        android:layout_height="@dimen/library_thumb_height"
+        android:background="@drawable/bg_art_placeholder"
+        android:clipToOutline="true"
+        android:contentDescription="@string/cd_game_art"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/img_chevron"
+        android:layout_width="@dimen/recommendation_chevron"
+        android:layout_height="@dimen/recommendation_chevron"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_right"
+        app:layout_constraintBottom_toBottomOf="@id/tv_game_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_game_title"
+        app:tint="@color/text_tertiary"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/tv_game_title"
+        style="@style/Text.CardTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:maxLines="2"
+        app:layout_constraintBottom_toTopOf="@id/progress_game"
+        app:layout_constraintEnd_toStartOf="@id/img_chevron"
+        app:layout_constraintStart_toEndOf="@id/img_game_art"
+        app:layout_constraintTop_toTopOf="@id/img_game_art"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Hollow Knight" />
+
+    <ProgressBar
+        android:id="@+id/progress_game"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/progress_height"
+        android:layout_marginTop="9dp"
+        android:indeterminate="false"
+        android:max="100"
+        android:progressDrawable="@drawable/progress_bar_accent"
+        app:layout_constraintBottom_toTopOf="@id/tv_game_status"
+        app:layout_constraintEnd_toEndOf="@id/tv_game_title"
+        app:layout_constraintStart_toStartOf="@id/tv_game_title"
+        app:layout_constraintTop_toBottomOf="@id/tv_game_title"
+        tools:progress="56" />
+
+    <TextView
+        android:id="@+id/tv_game_status"
+        style="@style/Text.CaptionMuted"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="@id/img_game_art"
+        app:layout_constraintEnd_toEndOf="@id/tv_game_title"
+        app:layout_constraintStart_toStartOf="@id/tv_game_title"
+        app:layout_constraintTop_toBottomOf="@id/progress_game"
+        tools:text="Steam · In progress · 25h to beat" />
+</androidx.constraintlayout.widget.ConstraintLayout>
