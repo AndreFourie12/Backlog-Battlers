@@ -27,9 +27,11 @@ import io.ktor.server.routing.routing
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.jetbrains.exposed.v1.jdbc.upsert
 import java.time.LocalDate
 import kotlin.test.Test
@@ -74,6 +76,7 @@ class CompletionRoutesTest {
         }
         Achievements.insert { it[gameId] = 113112; it[achievementId] = "A_RARE"; it[name] = "Rare"; it[rarityPercent] = 5.9 }
         Achievements.insert { it[gameId] = 113112; it[achievementId] = "A_COMMON"; it[name] = "Common"; it[rarityPercent] = 81.9 }
+        Achievements.insert { it[gameId] = 113112; it[achievementId] = "A_VERY_RARE"; it[name] = "Very Rare"; it[rarityPercent] = 2.0 }
         Achievements.insert { it[gameId] = 113112; it[achievementId] = "A_UNKNOWN"; it[name] = "Unknown"; it[rarityPercent] = null }
     }
 
@@ -89,6 +92,11 @@ class CompletionRoutesTest {
         achievementIds.forEach { id ->
             UnlockedAchievements.insert { it[libraryEntryId] = entry; it[achievementId] = id }
         }
+    }
+
+    /** Sets the entry's logged hours directly; the app would normally do this via PATCH. */
+    private fun setHoursPlayed(entry: Uuid, hours: Double) = transaction(db) {
+        LibraryEntries.update({ LibraryEntries.id eq entry }) { it[hoursPlayed] = hours }
     }
 
     private suspend fun HttpClient.complete(entry: Uuid, type: CompletionType): HttpResponse =
@@ -111,6 +119,7 @@ class CompletionRoutesTest {
         val body = Json.decodeFromString<CompleteResponseDto>(response.bodyAsText())
         assertEquals(20 + 5, body.achievementPoints) // Rare tier (20) + Common tier (5), not the locked/unknown one
         assertEquals(70, body.completionTimePoints) // Hades' avgCompletionHours, rounded
+        assertEquals(0, body.speedBonusPoints) // hoursPlayed was never set, so there is nothing to compare
         assertEquals(25 + 70, body.pointsAwarded)
         assertEquals(body.pointsAwarded, body.monthlyPoints) // this was the user's first completion
         assertEquals(body.monthlyPoints, monthlyPointsFor(caller!!, month))
@@ -157,14 +166,60 @@ class CompletionRoutesTest {
         unlock(entry, "A_RARE") // counted on the first completion
         client.complete(entry, CompletionType.MAIN_STORY)
 
-        unlock(entry, "A_UNKNOWN") // only this one is new for the second completion
+        unlock(entry, "A_VERY_RARE") // only this one is new for the second completion
         val second = client.complete(entry, CompletionType.COMPLETIONIST)
 
         val body = Json.decodeFromString<CompleteResponseDto>(second.bodyAsText())
-        assertEquals(20, body.achievementPoints) // A_UNKNOWN's flat fallback only, not A_RARE again
+        assertEquals(40, body.achievementPoints) // A_VERY_RARE's own tier only, not A_RARE again
         assertEquals(151, body.completionTimePoints) // Hades' avg100PercentHours, rounded
         // total for the month is both completions added together
-        assertEquals((20 + 70) + (20 + 151), monthlyPointsFor(caller!!, month))
+        assertEquals((20 + 70) + (40 + 151), monthlyPointsFor(caller!!, month))
+    }
+
+    @Test
+    fun `an achievement with no rarity data earns no points, per the team's decision to only score what Steam actually reports`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_UNKNOWN")
+
+        val response = client.complete(entry, CompletionType.MAIN_STORY)
+
+        val body = Json.decodeFromString<CompleteResponseDto>(response.bodyAsText())
+        assertEquals(0, body.achievementPoints)
+        assertEquals(70, body.completionTimePoints) // completion-time points are unaffected
+        assertEquals(70, body.pointsAwarded)
+    }
+
+    @Test
+    fun `finishing well ahead of the average adds a speed bonus on top of the base points`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        setHoursPlayed(entry, 15.0) // Hades' story averages 70.44h; 15h is about 79% faster
+
+        val response = client.complete(entry, CompletionType.MAIN_STORY)
+
+        val body = Json.decodeFromString<CompleteResponseDto>(response.bodyAsText())
+        assertEquals(0, body.achievementPoints) // nothing unlocked
+        assertEquals(70, body.completionTimePoints)
+        assertEquals(75, body.speedBonusPoints) // Ultra Fast tier
+        assertEquals(70 + 75, body.pointsAwarded)
+    }
+
+    @Test
+    fun `never having logged any hours earns no speed bonus, even though that looks fastest of all`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!) // hoursPlayed defaults to 0.0, never set
+
+        val response = client.complete(entry, CompletionType.MAIN_STORY)
+
+        val body = Json.decodeFromString<CompleteResponseDto>(response.bodyAsText())
+        assertEquals(0, body.speedBonusPoints)
     }
 
     @Test

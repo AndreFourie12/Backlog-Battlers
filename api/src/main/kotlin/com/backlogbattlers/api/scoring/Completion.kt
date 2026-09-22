@@ -30,6 +30,7 @@ data class CompleteResponseDto(
     val completionType: CompletionType,
     val achievementPoints: Int,
     val completionTimePoints: Int,
+    val speedBonusPoints: Int,
     val pointsAwarded: Int,
     val monthlyPoints: Int,
 )
@@ -46,7 +47,8 @@ sealed interface CompletionResult {
  * Achievement points are paid only for unlocks that have never been counted before (see
  * [UnlockedAchievements.countedForPoints]), so completing an entry twice - once for its story,
  * later for 100% - never pays out the same unlock a second time. Completion-time points use the
- * game's average hours for that milestone, with a flat fallback when IGDB has no figure.
+ * game's average hours for that milestone, with a flat fallback when IGDB has no figure. A speed
+ * bonus tops that up when the player's own logged hours beat that average (see [speedBonusPoints]).
  *
  * The same (entry, completionType) pair can only ever be completed once; a repeat call returns
  * [CompletionResult.AlreadyCompleted] rather than awarding points again.
@@ -100,7 +102,9 @@ fun completeLibraryEntry(
         game[Games.avgCompletionHours]
     }
     val timePoints = completionTimePoints(hours)
-    val totalPoints = achievementPointsTotal + timePoints
+    // Rewards the player's own logged hours beating that average, on top of the base points above
+    val speedPoints = speedBonusPoints(actualHours = entry[LibraryEntries.hoursPlayed], averageHours = hours)
+    val totalPoints = achievementPointsTotal + timePoints + speedPoints
 
     CompletionRecords.insert {
         it[CompletionRecords.userId] = owner
@@ -108,6 +112,7 @@ fun completeLibraryEntry(
         it[CompletionRecords.completionType] = completionType
         it[CompletionRecords.achievementPoints] = achievementPointsTotal
         it[CompletionRecords.completionTimePoints] = timePoints
+        it[CompletionRecords.speedBonusPoints] = speedPoints
         it[CompletionRecords.pointsAwarded] = totalPoints
         it[CompletionRecords.monthPeriod] = monthPeriod
     }
@@ -128,6 +133,7 @@ fun completeLibraryEntry(
             completionType = completionType,
             achievementPoints = achievementPointsTotal,
             completionTimePoints = timePoints,
+            speedBonusPoints = speedPoints,
             pointsAwarded = totalPoints,
             monthlyPoints = newMonthlyTotal,
         ),

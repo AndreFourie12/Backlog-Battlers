@@ -119,6 +119,8 @@ object CompletionRecords : Table("completion_records")
     val completionType = enumerationByName<CompletionType>("completion_type", 20)
     val achievementPoints = integer("achievement_points")
     val completionTimePoints = integer("completion_time_points")
+    // A bonus for finishing faster than IGDB's average for this milestone; see scoring/PointsCalculator.kt
+    val speedBonusPoints = integer("speed_bonus_points")
     val pointsAwarded = integer("points_awarded")
     // e.g. "2026-09"; ties this record to one monthly competition cycle
     val monthPeriod = varchar("month_period", 7)

@@ -12,8 +12,8 @@ class PointsCalculatorTest {
     }
 
     @Test
-    fun `no rarity data gives a flat fallback so the feature still works`() {
-        assertEquals(20, achievementPoints(null)) // the middle tier, Rare
+    fun `no rarity data earns nothing, rather than a guessed value`() {
+        assertEquals(0, achievementPoints(null))
     }
 
     @Test
@@ -42,5 +42,29 @@ class PointsCalculatorTest {
         assertEquals(20, completionTimePoints(null))
         assertEquals(20, completionTimePoints(0.0))
         assertEquals(20, completionTimePoints(-5.0))
+    }
+
+    @Test
+    fun `finishing further ahead of the average earns a bigger speed bonus`() {
+        // A 100-hour average game: 5% faster, 15% faster, 30% faster, 55% faster, 80% faster
+        assertEquals(5, speedBonusPoints(actualHours = 95.0, averageHours = 100.0))
+        assertEquals(10, speedBonusPoints(actualHours = 85.0, averageHours = 100.0))
+        assertEquals(20, speedBonusPoints(actualHours = 70.0, averageHours = 100.0))
+        assertEquals(40, speedBonusPoints(actualHours = 45.0, averageHours = 100.0))
+        assertEquals(75, speedBonusPoints(actualHours = 20.0, averageHours = 100.0))
+    }
+
+    @Test
+    fun `exactly average or slower earns the baseline, never a penalty`() {
+        assertEquals(5, speedBonusPoints(actualHours = 100.0, averageHours = 100.0)) // same as average
+        assertEquals(5, speedBonusPoints(actualHours = 150.0, averageHours = 100.0)) // slower than average
+    }
+
+    @Test
+    fun `no bonus without real data on both sides`() {
+        assertEquals(0, speedBonusPoints(actualHours = 10.0, averageHours = null))
+        assertEquals(0, speedBonusPoints(actualHours = 10.0, averageHours = 0.0))
+        // 0 logged hours means the entry was never really played, not a free "instant" speedrun
+        assertEquals(0, speedBonusPoints(actualHours = 0.0, averageHours = 100.0))
     }
 }
