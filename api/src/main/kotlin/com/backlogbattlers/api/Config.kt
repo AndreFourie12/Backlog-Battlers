@@ -28,7 +28,11 @@ class Config(
         private val log = LoggerFactory.getLogger(Config::class.java)
 
         /** The real configuration, read once: environment variables, then [FILE_NAME]. */
-        val default: Config by lazy { Config(System::getenv, readFile(File(FILE_NAME))) }
+        val default: Config by lazy { Config(System::getenv, readFile(findConfigFile(FILE_NAME))) }
+
+        /** Resolves configuration files whether running from the api subfolder or repository root. */
+        fun findConfigFile(name: String): File =
+            listOf(File(name), File("api", name), File("..", name)).firstOrNull { it.isFile } ?: File(name)
 
         /** The settings in [file], or none when it does not exist. */
         fun readFile(file: File): Map<String, String> {
