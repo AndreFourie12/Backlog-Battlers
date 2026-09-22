@@ -99,3 +99,12 @@ https://pictogrammers.com/library/mdi/
 
 
 https://medium.com/design-bootcamp/enhancing-steams-navigation-to-increase-user-retention-product-design-case-study-72a165d9572f
+
+
+https://www.scribd.com/document/805328183/The-UI-UX-Playbook-Tips-Tricks-for-Exceptional-Design
+
+
+https://www.shoutdigital.com/insights/what-makes-a-successful-mobile-app/
+
+
+https://www.gleap.ai/blog/7-best-practices-to-help-you-build-better-mobile-apps
