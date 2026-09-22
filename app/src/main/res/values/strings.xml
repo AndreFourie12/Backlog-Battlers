@@ -275,6 +275,16 @@
     <string name="about_privacy_body">Signing in with Google gives the app your display name, email address and profile picture. That, along with your library, playtime, achievements and monthly points, is stored on this device and on the project backend so your leaderboard position is accurate.\n\nYour data is never sold or shared with advertisers. Friends can see your display name, picture, points and recent activity. Nobody can see your email address.\n\nSigning out clears your session and your local copy of your profile from this device.</string>
     <string name="about_licences_body">This app is built on open source work released under the Apache License 2.0:\n\n• AndroidX and Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines and kotlinx.serialization\n• Ktor Client\n\nFull licence texts are available from each project\'s repository.</string>
 
+    <!-- activity feed -->
+    <string name="activity_no_standings_title">No standings yet</string>
+    <string name="activity_no_standings_body">Add a friend and you\'ll both be ranked by points earned this month.</string>
+    <string name="view_standings">View Standings</string>
+    <string name="activity_today">Today</string>
+    <string name="activity_event_joined">You joined <b>Backlog Battlers</b></string>
+    <string name="activity_just_now">Just now</string>
+    <string name="activity_feed_hint" formatted="false">Achievement unlocks, 100% completions and rank changes from you and your friends will show up here, grouped by day.</string>
+    <string name="profile_avatar_initial">A</string>
+
     <plurals name="search_result_count">
         <item quantity="one">%1$d result</item>
         <item quantity="other">%1$d results</item>
