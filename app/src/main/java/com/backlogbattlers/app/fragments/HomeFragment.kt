@@ -58,6 +58,8 @@ class HomeFragment : Fragment() {
 
         view.findViewById<View>(R.id.btn_view_leaderboard).setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_standingsFragment)
+        }
+
         view.findViewById<View>(R.id.btn_invite_friends).setOnClickListener {
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
