@@ -1,6 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_friend"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/list_gap"
+    android:background="@drawable/bg_card"
+    android:padding="@dimen/card_padding">
+
+    <!-- Rank or Ring Container -->
+    <FrameLayout
+        android:id="@+id/layout_avatar_container"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Avatar Ring for Top 3 -->
+        <ImageView
+            android:id="@+id/iv_avatar_ring"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@null"
+            android:visibility="gone"
+            tools:src="@drawable/bg_ring_gold"
+            tools:visibility="visible" />
+
+        <!-- Initial Avatar Circle -->
+        <TextView
+            android:id="@+id/tv_avatar_initial"
+            style="@style/Text.BarTitle"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_circle_surface"
+            android:gravity="center"
+            android:textColor="@color/text_primary"
+            tools:text="D" />
+    </FrameLayout>
+
+    <!-- Plain Rank Text (for ranks 4+) -->
+    <TextView
+        android:id="@+id/tv_rank"
+        style="@style/Text.CaptionStrong"
+        android:layout_width="24dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/text_tertiary"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/layout_avatar_container"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="4"
+        tools:visibility="visible" />
+
+    <!-- Friend Display Name -->
+    <TextView
+        android:id="@+id/tv_friend_name"
+        style="@style/Text.CardTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toStartOf="@+id/tv_you_suffix"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toEndOf="@+id/tv_rank"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Dylan" />
+
+    <!-- You Suffix -->
+    <TextView
+        android:id="@+id/tv_you_suffix"
+        style="@style/Text.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/you_suffix"
+        android:textColor="@color/accent"
+        android:visibility="gone"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_friend_name"
+        app:layout_constraintEnd_toStartOf="@+id/layout_stats"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/tv_friend_name"
+        tools:visibility="visible" />
+
+    <!-- Online Status Text -->
+    <TextView
+        android:id="@+id/tv_online_status"
+        style="@style/Text.Micro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/success"
+        app:layout_constraintStart_toStartOf="@+id/tv_friend_name"
+        app:layout_constraintTop_toBottomOf="@+id/tv_friend_name"
+        tools:text="Online" />
+
+    <!-- Stats Column (Points & Achievements) -->
+    <LinearLayout
+        android:id="@+id/layout_stats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_points"
+            style="@style/Text.CardTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            tools:text="1,250 pts" />
+
+        <TextView
+            android:id="@+id/tv_achievement_count"
+            style="@style/Text.Micro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/text_secondary"
+            tools:text="🏆 42 achievements" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

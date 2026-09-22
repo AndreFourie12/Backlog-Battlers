@@ -1,62 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- empty state shown until the user has friends to compete with -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/card_no_friends"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_card"
-    android:orientation="vertical"
-    android:padding="@dimen/page_padding">
+    android:padding="@dimen/card_padding">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Empty State Title -->
+    <TextView
+        android:id="@+id/tv_empty_title"
+        style="@style/Text.CardTitle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:gravity="center"
+        android:text="@string/no_friends_yet"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/no_friends_title_empty" />
 
-        <ImageView
-            android:layout_width="@dimen/empty_state_tile"
-            android:layout_height="@dimen/empty_state_tile"
-            android:background="@drawable/bg_tile_surface"
-            android:importantForAccessibility="no"
-            android:padding="12dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_users"
-            app:tint="@color/accent"
-            tools:ignore="ContentDescription" />
+    <!-- Empty State Body -->
+    <TextView
+        android:id="@+id/tv_empty_body"
+        style="@style/Text.Body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:text="@string/no_friends_body"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_empty_title"
+        tools:text="@string/no_friends_body_empty" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                style="@style/Text.CardTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:includeFontPadding="false"
-                android:text="@string/no_friends_yet" />
-
-            <TextView
-                style="@style/Text.Caption"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:includeFontPadding="false"
-                android:text="@string/no_friends_body" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_invite_friends"
-        style="@style/Widget.App.AccentButton"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/cta_height"
+    <!-- Share Invite Link Button -->
+    <Button
+        android:id="@+id/btn_share_invite"
+        style="@style/Text.CaptionStrong"
+        android:layout_width="0dp"
+        android:layout_height="42dp"
         android:layout_marginTop="14dp"
-        android:text="@string/invite_friends"
-        app:icon="@drawable/ic_arrow_right" />
-</LinearLayout>
+        android:background="@drawable/bg_button_accent"
+        android:text="@string/share_invite_link"
+        android:textColor="@color/page_background"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_empty_body"
+        tools:visibility="visible" />
+
+    <!-- Find By Username Button -->
+    <Button
+        android:id="@+id/btn_find_by_username"
+        style="@style/Text.CaptionStrong"
+        android:layout_width="0dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_pill_outline"
+        android:text="@string/find_by_username"
+        android:textColor="@color/text_primary"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_share_invite"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
