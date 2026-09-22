@@ -242,6 +242,13 @@
     <string name="privacy_what_we_store_body">Your display name, email and avatar come from the Google account you sign in with. Your library, playtime and achievement progress are kept on this device and synced to your account so your leaderboard position stays accurate.</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_terms">Terms of Use</string>
+    <string name="biometric_lock_title">Fingerprint required</string>
+    <string name="biometric_lock_body">Confirm it\'s you to open Backlog Battlers</string>
+    <string name="biometric_prompt_title">Unlock Backlog Battlers</string>
+    <string name="biometric_prompt_subtitle">Scan your fingerprint to continue</string>
+    <string name="biometric_prompt_negative_button">Cancel</string>
+    <string name="biometric_signed_out_message">Fingerprint check cancelled. Please sign in again.</string>
+    <string name="cd_fingerprint_icon">Fingerprint icon</string>
 
 
 

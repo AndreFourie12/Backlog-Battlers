@@ -20,6 +20,11 @@
             app:destination="@id/homeFragment"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_splashFragment_to_biometricLockFragment"
+            app:destination="@id/biometricLockFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -206,5 +211,22 @@
         android:name="com.backlogbattlers.app.fragments.FindFriendsFragment"
         android:label="Find Friends"
         tools:layout="@layout/fragment_find_friends" />
+
+    <fragment
+        android:id="@+id/biometricLockFragment"
+        android:name="com.backlogbattlers.app.fragments.BiometricLockFragment"
+        android:label="Biometric Lock"
+        tools:layout="@layout/fragment_biometric_lock">
+        <action
+            android:id="@+id/action_biometricLockFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/biometricLockFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_biometricLockFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 </navigation>
