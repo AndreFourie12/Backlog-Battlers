@@ -101,7 +101,6 @@ class GamesFragment : Fragment() {
         }
     }
 
-    // shows the library count, the empty state card while there are no games, and the popular list
     private fun render(state: GamesUiState) {
         val count = state.libraryCount
 

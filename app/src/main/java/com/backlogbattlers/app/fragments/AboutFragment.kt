@@ -14,12 +14,8 @@ import com.backlogbattlers.app.util.bindSettingsHeader
 import com.backlogbattlers.app.util.bindSettingsRow
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-// version details and the legal text, all read from the build rather than
-// hard coded so it cannot drift
 class AboutFragment : Fragment() {
 
-    //------------------------------
-    // inflates the about layout
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -28,8 +24,6 @@ class AboutFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_about, container, false)
     }
 
-    //------------------------------
-    // fills the version rows and opens the legal text in a dialog
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

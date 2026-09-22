@@ -26,8 +26,6 @@ class EditProfileFragment : Fragment() {
 
     private var nameLoaded = false
 
-    //------------------------------
-    // inflates the edit profile fragment layout
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,8 +34,6 @@ class EditProfileFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_edit_profile, container, false)
     }
 
-    //------------------------------
-    // fills the form from the signed in user and saves changes back to room
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -70,8 +66,6 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // validates the name then writes it, the screen closes on success
     private fun save(nameField: EditText) {
         val name = nameField.text.toString().trim()
 
@@ -101,8 +95,6 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // drops the keyboard before the screen closes
     private fun hideKeyboard(field: View) {
         requireContext().getSystemService<InputMethodManager>()
             ?.hideSoftInputFromWindow(field.windowToken, 0)

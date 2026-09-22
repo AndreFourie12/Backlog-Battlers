@@ -30,11 +30,8 @@ class AppearanceFragment : Fragment() {
 
     private val viewModel: SettingsViewModel by viewModels()
 
-    // one tile per HomeBackdrop, kept so the tick can move without rebuilding
     private val backdropTiles = mutableMapOf<HomeBackdrop, View>()
 
-    //------------------------------
-    // inflates the appearance fragment layout
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,8 +40,6 @@ class AppearanceFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_appearance, container, false)
     }
 
-    //------------------------------
-    // builds both pickers then follows stored settings for the selection
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -90,8 +85,6 @@ class AppearanceFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // the tiles belong to the view, not the fragment, so they go with it
     override fun onDestroyView() {
         backdropTiles.clear()
         super.onDestroyView()
@@ -113,8 +106,6 @@ class AppearanceFragment : Fragment() {
         }
     }
 
-    //------------------------------
-    // accent ring and tick on the appearance that is applied
     private fun markThemeSelection(option: View, selected: Boolean) {
         option.setBackgroundResource(
             if (selected) R.drawable.bg_card_selected else R.drawable.bg_card
