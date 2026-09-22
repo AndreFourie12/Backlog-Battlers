@@ -140,6 +140,23 @@ data class Friend(
     val isOnline: Boolean,
 )
 
+// one row of the monthly leaderboard. rank comes from the backend (ties share a rank),
+// unlike Friend's rank which the app works out itself from list position
+data class LeaderboardEntry(
+    val rank: Int,
+    val userId: String,
+    val displayName: String,
+    val avatarUrl: String?,
+    val monthlyPoints: Int,
+)
+
+// this month's leaderboard: the current page of ranked entries, plus the signed in user's own
+// row (me), which the backend always includes even when it falls outside that page
+data class LeaderboardBoard(
+    val entries: List<LeaderboardEntry>,
+    val me: LeaderboardEntry?,
+)
+
 // one incoming, not yet answered friend request
 data class FriendRequest(
     val requestId: String,
