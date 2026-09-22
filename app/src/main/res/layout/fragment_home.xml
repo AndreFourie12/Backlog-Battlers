@@ -20,8 +20,6 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/home_hero_height">
 
-            <!-- HomeFragment swaps this for whichever backdrop is chosen
-                 under Settings > Appearance -->
             <ImageView
                 android:id="@+id/iv_home_backdrop"
                 android:layout_width="match_parent"
@@ -43,7 +41,6 @@
                 android:layout_gravity="bottom"
                 android:background="@drawable/scrim_hero_bottom" />
 
-            <!-- HomeFragment adds the status bar inset on top of this margin -->
             <LinearLayout
                 android:id="@+id/home_top_bar"
                 android:layout_width="match_parent"
@@ -165,8 +162,6 @@
                 android:text="@string/add_game" />
         </LinearLayout>
 
-        <!-- the games come from the API: RecommendationAdapter fills the list, and the spinner and the
-             retry message stand in for it while it loads or if the request fails -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -58,6 +58,15 @@
     <dimen name="search_result_thumb_height">58dp</dimen>
     <dimen name="search_action_height">34dp</dimen>
 
+    <!-- games screen, measured from the design -->
+    <dimen name="library_top_inset">21.5dp</dimen>
+    <dimen name="library_field_height">44dp</dimen>
+    <dimen name="library_row_padding">12.5dp</dimen>
+    <dimen name="library_row_gap">10.5dp</dimen>
+    <dimen name="library_thumb_width">102dp</dimen>
+    <dimen name="library_thumb_height">59dp</dimen>
+    <dimen name="library_action_height">27.5dp</dimen>
+
     <!-- the faint line between the rows of a list -->
     <dimen name="list_divider_thickness">1dp</dimen>
     <dimen name="list_divider_gap">10dp</dimen>

@@ -56,6 +56,13 @@ enum class SearchSort {
     NAME_Z_A,
 }
 
+// enum representing how the games tab's library list can be sorted
+enum class LibrarySort {
+    RECENTLY_ADDED,
+    NAME_A_Z,
+    NAME_Z_A,
+}
+
 // enum representing backlog library item status
 enum class LibraryStatus {
     BACKLOG,
@@ -107,6 +114,13 @@ data class LibraryEntry(
     val addedAt: Long,
     val updatedAt: Long,
     val pendingSync: Boolean = false,
+)
+
+//------------------------------
+// LibraryGame data class pairs a library entry with its game, for the games tab's library list
+data class LibraryGame(
+    val entry: LibraryEntry,
+    val game: Game,
 )
 
 //------------------------------

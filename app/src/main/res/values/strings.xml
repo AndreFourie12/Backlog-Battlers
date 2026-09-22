@@ -85,6 +85,24 @@
     <string name="try_again_body">Check your connection and try again.</string>
     <string name="added_to_library">%1$s added to your backlog</string>
 
+    <!-- games screen -->
+    <string name="search_library">Search your library</string>
+    <string name="library_empty_title">Your library is empty</string>
+    <string name="library_empty_body">Add games you own or want to play. Each one tracks its achievements and shows how many points are still left to earn.</string>
+    <string name="add_first_game">Add your first game</string>
+    <string name="popular_to_start_with">Popular to start with</string>
+
+    <!-- games screen, the library list once it has games in it -->
+    <string name="library_filter_all">All</string>
+    <string name="library_filter_in_progress">In Progress</string>
+    <string name="library_filter_completed">Completed</string>
+    <string name="library_filter_not_started">Not Started</string>
+    <string name="sort_recently_added">Recently added</string>
+    <string name="library_no_matches">No games match “%1$s”</string>
+    <!-- the pill on a library tile. Hardcoded to 50 for now: nothing tracks real completion yet -->
+    <string name="library_completion_percent">%1$d%% Complete</string>
+    <string name="library_no_results">No games in your library match this filter</string>
+
     <!-- content descriptions -->
     <string name="cd_back">Back</string>
     <string name="cd_search">Search</string>
@@ -260,5 +278,10 @@
     <plurals name="search_result_count">
         <item quantity="one">%1$d result</item>
         <item quantity="other">%1$d results</item>
+    </plurals>
+
+    <plurals name="library_game_count">
+        <item quantity="one">%1$d game in your library</item>
+        <item quantity="other">%1$d games in your library</item>
     </plurals>
 </resources>

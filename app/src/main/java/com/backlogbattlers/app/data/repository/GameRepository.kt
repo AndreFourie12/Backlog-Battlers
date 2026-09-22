@@ -25,6 +25,9 @@ interface GameRepository {
 
     // fetches the hand picked games for new players from the API and caches each one
     suspend fun getStarterGames(): List<Recommendation>
+
+    // the hand picked games offered under an empty library, cached so other screens can find them by id
+    suspend fun getPopularGames(): List<Game>
 }
 
 
@@ -69,6 +72,18 @@ class GameRepositoryImpl(
         }
         recommendations.forEach { cacheGame(it.game) }
         return recommendations
+    }
+
+    //------------------------------
+    // the popular games are built in, so this needs no request. Each one is cached so other screens can find it by id,
+    // unless a copy is already cached, which can hold more than the built in one does (time to beat)
+    override suspend fun getPopularGames(): List<Game> {
+        val cachedAt = System.currentTimeMillis()
+        val games = POPULAR_GAMES.map { it.copy(cachedAt = cachedAt) }
+        games.forEach { game ->
+            if (cachedGameDao.getGame(game.gameId) == null) cacheGame(game)
+        }
+        return games
     }
 
     //------------------------------

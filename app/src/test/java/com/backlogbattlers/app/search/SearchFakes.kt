@@ -36,6 +36,9 @@ class FakeGameRepository : GameRepository {
 
     var searchResults: List<Game> = emptyList()
     var browseResults: List<Game> = emptyList()
+    var popularGames: List<Game> = emptyList()
+    // stands in for the cached_games table: what GameViewModel's library list looks games up by id from
+    var cachedGames: Map<Int, Game> = emptyMap()
 
     var failing = false
 
@@ -56,10 +59,12 @@ class FakeGameRepository : GameRepository {
         return browseResults
     }
 
-    override suspend fun getGame(gameId: Int): Game? = null
+    override suspend fun getGame(gameId: Int): Game? = cachedGames[gameId]
 
     override suspend fun getStarterGames(): List<Recommendation> =
         browseResults.map { Recommendation(it, "Trending with new players") }
+
+    override suspend fun getPopularGames(): List<Game> = popularGames
 }
 
 class FakeLibraryRepository : LibraryRepository {
@@ -72,6 +77,9 @@ class FakeLibraryRepository : LibraryRepository {
         entries.map { list -> list.filter { it.status == status } }
 
     override suspend fun addToLibrary(gameId: Int, platform: Platform, status: LibraryStatus) {
+        // a stand-in clock: each entry added is one "tick" later than the last, so tests can
+        // check the library list's default newest-first order without a real timestamp
+        val addedAt = entries.value.size.toLong()
         entries.value = entries.value + LibraryEntry(
             libraryEntryId = UUID.randomUUID().toString(),
             gameId = gameId,
@@ -80,8 +88,8 @@ class FakeLibraryRepository : LibraryRepository {
             hoursPlayed = 0f,
             unlockedAchievementIds = emptyList(),
             completionType = null as CompletionType?,
-            addedAt = 0L,
-            updatedAt = 0L,
+            addedAt = addedAt,
+            updatedAt = addedAt,
         )
     }
 
