@@ -285,6 +285,19 @@
     <string name="activity_feed_hint" formatted="false">Achievement unlocks, 100% completions and rank changes from you and your friends will show up here, grouped by day.</string>
     <string name="profile_avatar_initial">A</string>
 
+    <!-- profile -->
+    <string name="profile_display_name">Alex</string>
+    <string name="profile_level">Level 1</string>
+    <string name="profile_xp_progress">0 / 500 XP · unlock an achievement to start</string>
+    <string name="badges_earned_count">0 of 4 earned</string>
+    <string name="badge_completionist">Completionist</string>
+    <string name="badge_achievement_hunter">Achievement Hunter</string>
+    <string name="badge_monthly_competitor">Monthly Competitor</string>
+    <string name="badge_early_bird">Early Bird</string>
+    <string name="showcase_body">Showcase your rarest unlocks, completed games, and average completion percentage</string>
+    <string name="recent_activity_empty">Games you play will show up here</string>
+    <string name="add_a_game">Add a game →</string>
+
     <plurals name="search_result_count">
         <item quantity="one">%1$d result</item>
         <item quantity="other">%1$d results</item>
