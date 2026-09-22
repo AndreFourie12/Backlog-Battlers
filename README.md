@@ -202,6 +202,6 @@ SSO implementation planning, assistance, snippet design, API routing and debuggi
 https://chatgpt.com/share/6ab25b54-4b38-83ea-a847-3833c2b818a5
 
 Ktor Setup and miscellaneous: <br>
-REST API structure, Android Studio, GitHub, README
+REST API structure, Android Studio, GitHub, README <br>
 https://chatgpt.com/share/6ab2832b-ffe8-83ea-acc4-661d38f2964a
 
