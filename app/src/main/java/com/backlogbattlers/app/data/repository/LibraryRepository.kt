@@ -20,6 +20,9 @@ interface LibraryRepository {
     // observes library entries filtered by LibraryStatus as a Flow
     fun observeByStatus(status: LibraryStatus): Flow<List<LibraryEntry>>
 
+    // observes the entry for one game, for the game detail screen. Null while the game has not been added
+    fun observeByGameId(gameId: Int): Flow<LibraryEntry?>
+
     // adds a new game entry to the library with initial values
     suspend fun addToLibrary(gameId: Int, platform: Platform, status: LibraryStatus)
 
@@ -28,6 +31,9 @@ interface LibraryRepository {
 
     // updates the hours played for an existing library entry
     suspend fun updateHoursPlayed(libraryEntryId: String, hours: Float)
+
+    // locks or unlocks one achievement on an existing library entry
+    suspend fun setAchievementUnlocked(libraryEntryId: String, achievementId: String, unlocked: Boolean)
 
     // removes a library entry by id
     suspend fun remove(libraryEntryId: String)
@@ -55,6 +61,12 @@ class LibraryRepositoryImpl(
         return dao.observeByStatus(status.name).map { entities ->
             entities.map { it.toDomain() }
         }
+    }
+
+    //------------------------------
+    // observes the entry for one game by delegating to LibraryEntryDao and mapping to domain
+    override fun observeByGameId(gameId: Int): Flow<LibraryEntry?> {
+        return dao.observeByGameId(gameId).map { it?.toDomain() }
     }
 
     //------------------------------
@@ -104,6 +116,29 @@ class LibraryRepositoryImpl(
         val existing = dao.getById(libraryEntryId) ?: return
         val updated = existing.copy(
             hoursPlayed = hours,
+            updatedAt = System.currentTimeMillis(),
+            pendingSync = true,
+        )
+        dao.upsert(updated)
+    }
+
+    //------------------------------
+    // adds or removes one achievement from the entry's unlocked set and marks it for sync
+    override suspend fun setAchievementUnlocked(
+        libraryEntryId: String,
+        achievementId: String,
+        unlocked: Boolean,
+    ) {
+        val existing = dao.getById(libraryEntryId) ?: return
+        val ids = if (unlocked) {
+            if (achievementId in existing.unlockedAchievementIds) return
+            existing.unlockedAchievementIds + achievementId
+        } else {
+            if (achievementId !in existing.unlockedAchievementIds) return
+            existing.unlockedAchievementIds - achievementId
+        }
+        val updated = existing.copy(
+            unlockedAchievementIds = ids,
             updatedAt = System.currentTimeMillis(),
             pendingSync = true,
         )

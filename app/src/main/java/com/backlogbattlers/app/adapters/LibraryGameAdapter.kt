@@ -9,12 +9,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.domain.model.LibraryGame
+import com.backlogbattlers.app.util.completionPercent
 import com.backlogbattlers.app.util.gameSubtitle
 import com.backlogbattlers.app.util.inflateChild
 import com.backlogbattlers.app.util.loadArtwork
-
-// the completion pill is hardcoded until the app tracks a real one
-private const val PLACEHOLDER_COMPLETION_PERCENT = 50
 
 // adapter for the games tab's library grid: one tile per game the user has added, portrait cover
 // art with its completion overlaid. Tapping a tile opens the game's detail screen
@@ -55,10 +53,8 @@ class LibraryGameAdapter(
 
             // portrait cover art first, the landscape capsule only if a game has no cover
             art.loadArtwork(game.coverImageUrl ?: game.artworkUrl)
-            completion.text = completion.context.getString(
-                R.string.library_completion_percent,
-                PLACEHOLDER_COMPLETION_PERCENT,
-            )
+            val percent = completionPercent(libraryGame.entry.unlockedAchievementIds.size, game.totalAchievements)
+            completion.text = completion.context.getString(R.string.library_completion_percent, percent)
             subtitle.text = gameSubtitle(game.platforms, game.genres)
 
             itemView.setOnClickListener { onClick(libraryGame) }

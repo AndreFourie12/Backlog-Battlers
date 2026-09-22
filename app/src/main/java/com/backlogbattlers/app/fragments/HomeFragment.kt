@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -53,6 +54,14 @@ class HomeFragment : Fragment() {
 
         view.findViewById<View>(R.id.btn_add_game).setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_searchFragment)
+        }
+
+        view.findViewById<View>(R.id.btn_invite_friends).setOnClickListener {
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.invite_share_text))
+            }
+            startActivity(Intent.createChooser(shareIntent, null))
         }
 
         val backdrop = view.findViewById<ImageView>(R.id.iv_home_backdrop)

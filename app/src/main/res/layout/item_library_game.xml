@@ -12,7 +12,7 @@
         android:id="@+id/img_game_art"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/bg_art_placeholder"
+        android:background="@drawable/bg_art_placeholder_square"
         android:clipToOutline="true"
         android:contentDescription="@string/cd_game_art"
         android:foreground="?attr/selectableItemBackground"

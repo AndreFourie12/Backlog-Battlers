@@ -7,6 +7,7 @@ import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.search.FakeGameRepository
 import com.backlogbattlers.app.search.FakeLibraryRepository
+import com.backlogbattlers.app.search.achievement
 import com.backlogbattlers.app.search.game
 import com.backlogbattlers.app.viewmodels.GameListState
 import com.backlogbattlers.app.viewmodels.GameViewModel
@@ -137,6 +138,33 @@ class GameViewModelTest {
         val libraryGame = viewModel.uiState.value.libraryGames.single()
         assertEquals("Hades", libraryGame.game.title)
         assertEquals(LibraryStatus.BACKLOG, libraryGame.entry.status)
+    }
+
+    @Test
+    fun `adding a game fetches its achievements, so the library tile knows a real total`() = runTest {
+        val hades = game(1, "Hades")
+        games.fake.cachedGames = mapOf(1 to hades)
+        games.fake.achievementsByGame = mapOf(1 to listOf(achievement("a"), achievement("b"), achievement("c")))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.addToLibrary(hades)
+        advanceUntilIdle()
+
+        assertEquals(3, viewModel.uiState.value.libraryGames.single().game.totalAchievements)
+    }
+
+    @Test
+    fun `a library game added before achievement totals were tracked catches up on the next load`() = runTest {
+        val hades = game(1, "Hades") // no totalAchievements set, as if added before this existed
+        games.fake.cachedGames = mapOf(1 to hades)
+        games.fake.achievementsByGame = mapOf(1 to listOf(achievement("a"), achievement("b")))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+        library.addToLibrary(gameId = 1, platform = Platform.PC, status = LibraryStatus.BACKLOG)
+        advanceUntilIdle()
+
+        assertEquals(2, viewModel.uiState.value.libraryGames.single().game.totalAchievements)
     }
 
     @Test

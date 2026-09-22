@@ -123,6 +123,31 @@ class GameViewModel(
                 Log.e(TAG, "Adding ${game.title} to the library failed", e)
             }
         }
+        // so its achievements (and a real completion percent) are ready as soon as it shows up
+        ensureAchievementsCached(game.gameId)
+    }
+
+    // fetches a game's achievements if they have never been fetched before, so the library grid's
+    // completion pill has a real total to divide by instead of sitting at 0%. Fetching also
+    // updates the cached game's total achievement count as a side effect (see GameRepository)
+    private fun ensureAchievementsCached(gameId: Int) {
+        viewModelScope.launch {
+            try {
+                gameRepository.getAchievements(gameId)
+                val refreshed = gameRepository.getGame(gameId) ?: return@launch
+                _uiState.update { state ->
+                    state.copy(
+                        libraryGames = state.libraryGames.map { libraryGame ->
+                            if (libraryGame.game.gameId == gameId) libraryGame.copy(game = refreshed) else libraryGame
+                        },
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Caching achievements for game $gameId failed", e)
+            }
+        }
     }
 
     // keeps the count and the owned games in step with the library, whichever screen changes it
@@ -149,6 +174,10 @@ class GameViewModel(
                 gameRepository.getGame(entry.gameId)?.let { game -> LibraryGame(entry, game) }
             }
             _uiState.update { it.copy(libraryGames = games) }
+
+            // games added before achievement totals were tracked, or whose first fetch never
+            // finished, catch up here rather than sitting at 0% forever
+            games.filter { it.game.totalAchievements == null }.forEach { ensureAchievementsCached(it.game.gameId) }
         }
     }
 

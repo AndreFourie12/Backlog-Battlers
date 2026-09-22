@@ -64,17 +64,21 @@ class SteamClientTest {
     }
 
     @Test
-    fun `display names read names and descriptions, and a missing description stays null`() = runBlocking {
+    fun `display names read names, descriptions and icons, and a missing description stays null`() = runBlocking {
         val seen = mutableListOf<HttpRequestData>()
         val body = """{"game":{"gameName":"Hades","availableGameStats":{"achievements":[
-            {"name":"AchA","defaultvalue":0,"displayName":"Tartarus Cleared","hidden":0,"description":"Clear Tartarus"},
+            {"name":"AchA","defaultvalue":0,"displayName":"Tartarus Cleared","hidden":0,"description":"Clear Tartarus",
+             "icon":"https://cdn.steam/AchA.jpg","icongray":"https://cdn.steam/AchA_gray.jpg"},
             {"name":"AchB","defaultvalue":0,"displayName":"Secret One","hidden":1}]}}}"""
         val steam = steamWith(apiKey = "test-key", seen = seen) { HttpStatusCode.OK to body }
 
         val names = steam.displayNames(1145360)!!
 
-        assertEquals(SteamAchievementInfo("Tartarus Cleared", "Clear Tartarus"), names["AchA"])
-        assertEquals(SteamAchievementInfo("Secret One", null), names["AchB"])
+        assertEquals(
+            SteamAchievementInfo("Tartarus Cleared", "Clear Tartarus", "https://cdn.steam/AchA.jpg", "https://cdn.steam/AchA_gray.jpg"),
+            names["AchA"],
+        )
+        assertEquals(SteamAchievementInfo("Secret One", null, null, null), names["AchB"])
         assertEquals("test-key", seen.single().url.parameters["key"])
         assertEquals("1145360", seen.single().url.parameters["appid"])
     }

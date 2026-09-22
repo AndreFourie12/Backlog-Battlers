@@ -201,6 +201,20 @@ class SearchViewModelTest {
     }
 
     @Test
+    fun `adding a game from search also caches its achievement total`() = runTest {
+        val hollow = game(1, "Hollow Knight")
+        games.cachedGames = mapOf(1 to hollow)
+        games.achievementsByGame = mapOf(1 to listOf(achievement("a"), achievement("b")))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.addToLibrary(hollow)
+        advanceUntilIdle()
+
+        assertEquals(2, games.cachedGames.getValue(1).totalAchievements)
+    }
+
+    @Test
     fun `a dropped connection shows the retry state, and retrying asks again`() = runTest {
         games.failing = true
         val viewModel = viewModel()
