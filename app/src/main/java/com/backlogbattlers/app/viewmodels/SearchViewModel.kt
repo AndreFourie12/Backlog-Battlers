@@ -7,6 +7,7 @@ import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
+import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.domain.model.BrowseCategory
 import com.backlogbattlers.app.domain.model.Game
 import com.backlogbattlers.app.domain.model.LibraryStatus
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -66,6 +68,8 @@ data class SearchUiState(
     val filters: SearchFilters = SearchFilters(),
     val ownedGameIds: Set<Int> = emptySet(),
     val browsedCategory: BrowseCategory? = null,
+    // the default platform from Settings, so results are labelled the way they would be filed
+    val preferredPlatform: Platform = Platform.PC,
 ) {
 
     val visibleResults: List<Game>
@@ -95,6 +99,7 @@ class SearchViewModel(
     private val gameRepository: GameRepository = ServiceLocator.gameRepository,
     private val libraryRepository: LibraryRepository = ServiceLocator.libraryRepository,
     private val searchHistoryRepository: SearchHistoryRepository = ServiceLocator.searchHistoryRepository,
+    private val settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -110,6 +115,7 @@ class SearchViewModel(
     init {
         observeRecentSearches()
         observeLibrary()
+        observePreferredPlatform()
         loadTrending()
     }
 
@@ -280,7 +286,19 @@ class SearchViewModel(
         }
     }
 
-    private fun platformOf(game: Game): Platform = primaryPlatform(game.platforms) ?: Platform.OTHER
+    private fun observePreferredPlatform() {
+        viewModelScope.launch {
+            settingsRepository.observeSettings().collect { settings ->
+                _uiState.update { it.copy(preferredPlatform = settings.defaultPlatform) }
+            }
+        }
+    }
+
+    // read fresh at the moment of adding, so the game is filed under the platform chosen in Settings
+    private suspend fun platformOf(game: Game): Platform {
+        val preferred = settingsRepository.observeSettings().first().defaultPlatform
+        return primaryPlatform(game.platforms, preferred) ?: Platform.OTHER
+    }
 
     private companion object {
         const val TAG = "SearchViewModel"

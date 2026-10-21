@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.repository.DeleteAccountResult
 import com.backlogbattlers.app.domain.model.HomeBackdrop
+import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.User
 import com.backlogbattlers.app.domain.model.UserSettings
@@ -48,6 +49,12 @@ class SettingsViewModel : ViewModel() {
     // stores the artwork shown behind the home screen header
     fun setHomeBackdrop(backdrop: HomeBackdrop) {
         viewModelScope.launch { settingsRepository.setHomeBackdrop(backdrop) }
+    }
+
+    //------------------------------
+    // stores the platform games are filed under when they are on it
+    fun setDefaultPlatform(platform: Platform) {
+        viewModelScope.launch { settingsRepository.setDefaultPlatform(platform) }
     }
 
     //------------------------------

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.LibraryRepository
+import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.domain.model.Achievement
 import com.backlogbattlers.app.domain.model.Game
 import com.backlogbattlers.app.domain.model.LibraryStatus
@@ -37,7 +38,14 @@ data class GameDetailUiState(
     // the network, so the header can show while this is still true
     val achievementsLoading: Boolean = true,
     val achievementsFailed: Boolean = false,
+    // the default platform from Settings, and the platform the game is filed under once it is in the library
+    val preferredPlatform: Platform = Platform.PC,
+    val libraryPlatform: Platform? = null,
 ) {
+    // what the header shows: where the game is filed if it is in the library, otherwise where it would be
+    val platform: Platform?
+        get() = libraryPlatform ?: game?.let { primaryPlatform(it.platforms, preferredPlatform) }
+
     val unlockedCount: Int get() = achievements.count { it.unlocked }
     val totalCount: Int get() = achievements.size
     val earnedPoints: Int get() = achievements.filter { it.unlocked }.sumOf { it.points }
@@ -54,6 +62,7 @@ data class GameDetailUiState(
 class GameDetailViewModel(
     private val gameRepository: GameRepository = ServiceLocator.gameRepository,
     private val libraryRepository: LibraryRepository = ServiceLocator.libraryRepository,
+    private val settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameDetailUiState())
@@ -64,11 +73,19 @@ class GameDetailViewModel(
     private var libraryEntryId: String? = null
     private var observeJob: Job? = null
 
+    init {
+        viewModelScope.launch {
+            settingsRepository.observeSettings().collect { settings ->
+                _uiState.update { it.copy(preferredPlatform = settings.defaultPlatform) }
+            }
+        }
+    }
+
     fun load(gameId: Int) {
         if (loadedGameId == gameId) return
         loadedGameId = gameId
         libraryEntryId = null
-        _uiState.value = GameDetailUiState()
+        _uiState.value = GameDetailUiState(preferredPlatform = _uiState.value.preferredPlatform)
 
         viewModelScope.launch {
             // the cache lookup is local, so the header can show right away, ahead of the achievements
@@ -112,9 +129,11 @@ class GameDetailViewModel(
             // elsewhere) updates points and completion live
             libraryRepository.observeByGameId(gameId).collect { entry ->
                 libraryEntryId = entry?.libraryEntryId
+                val filedUnder = entry?.platform
                 val unlockedIds = entry?.unlockedAchievementIds.orEmpty().toSet()
                 _uiState.update {
                     it.copy(
+                        libraryPlatform = filedUnder,
                         achievements = achievements.map { a ->
                             AchievementUiItem(a, unlocked = a.achievementId in unlockedIds)
                         }.sortedByDescending { item -> item.achievement.rarityPercent ?: 0.0 },
@@ -136,7 +155,8 @@ class GameDetailViewModel(
         viewModelScope.launch {
             try {
                 val entryId = libraryEntryId ?: run {
-                    val platform = _uiState.value.game?.let { primaryPlatform(it.platforms) } ?: Platform.OTHER
+                    val preferred = settingsRepository.observeSettings().first().defaultPlatform
+                    val platform = _uiState.value.game?.let { primaryPlatform(it.platforms, preferred) } ?: Platform.OTHER
                     libraryRepository.addToLibrary(gameId, platform, LibraryStatus.BACKLOG)
                     libraryRepository.observeByGameId(gameId).first()?.libraryEntryId
                 } ?: return@launch
