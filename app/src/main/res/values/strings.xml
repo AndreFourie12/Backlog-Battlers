@@ -173,6 +173,12 @@
     <string name="settings_connected_accounts_pending">Coming soon</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_appearance">Appearance</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_dialog_title">Choose your language</string>
+    <!-- each language is named in itself, so people can find theirs whatever the app is showing -->
+    <string name="language_english" translatable="false">English</string>
+    <string name="language_afrikaans" translatable="false">Afrikaans</string>
+    <string name="language_zulu" translatable="false">isiZulu</string>
     <string name="settings_default_platform">Default Platform</string>
     <string name="settings_default_platform_dialog_title">Where do you mostly play?</string>
     <string name="settings_default_platform_saved">New games will be added as %1$s when they\'re available there</string>

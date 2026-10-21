@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.repository.DeleteAccountResult
+import com.backlogbattlers.app.domain.model.AppLanguage
 import com.backlogbattlers.app.domain.model.HomeBackdrop
 import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.ThemeMode
@@ -49,6 +50,13 @@ class SettingsViewModel : ViewModel() {
     // stores the artwork shown behind the home screen header
     fun setHomeBackdrop(backdrop: HomeBackdrop) {
         viewModelScope.launch { settingsRepository.setHomeBackdrop(backdrop) }
+    }
+
+    //------------------------------
+    // stores the language choice. like the theme, the caller applies it, which recreates the
+    // activity, so the write runs on the application scope where the recreation can't cut it short
+    fun setLanguage(language: AppLanguage) {
+        ServiceLocator.applicationScope.launch { settingsRepository.setLanguage(language) }
     }
 
     //------------------------------

@@ -84,6 +84,18 @@
             android:paddingBottom="4dp">
 
             <include
+                android:id="@+id/rowLanguage"
+                layout="@layout/item_settings_row"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/settings_row_height" />
+
+            <include
+                android:id="@+id/dividerPreferencesLanguage"
+                layout="@layout/partial_settings_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp" />
+
+            <include
                 android:id="@+id/rowNotifications"
                 layout="@layout/item_settings_row"
                 android:layout_width="match_parent"

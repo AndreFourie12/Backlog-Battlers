@@ -55,5 +55,5 @@
         app:layout_constraintEnd_toEndOf="@id/img_game_art"
         app:layout_constraintStart_toStartOf="@id/img_game_art"
         app:layout_constraintTop_toBottomOf="@id/tv_game_completion"
-        tools:text="PC · Action RPG" />
+        tools:text="Steam · Action RPG" />
 </androidx.constraintlayout.widget.ConstraintLayout>

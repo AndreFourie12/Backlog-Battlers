@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -15,11 +16,14 @@ import androidx.navigation.fragment.findNavController
 import com.backlogbattlers.app.BuildConfig
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.data.repository.DeleteAccountResult
+import com.backlogbattlers.app.domain.model.AppLanguage
 import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.UserSettings
 import com.backlogbattlers.app.util.bindSettingsHeader
+import com.backlogbattlers.app.util.applyLanguage
 import com.backlogbattlers.app.util.bindSettingsRow
+import com.backlogbattlers.app.util.currentLanguage
 import com.backlogbattlers.app.util.platformLabel
 import com.backlogbattlers.app.viewmodels.SettingsViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -106,6 +110,17 @@ class SettingsFragment : Fragment() {
 
         // these two rows carry the current value on the right, so they are
         // rebound whenever the stored settings change
+        // the language is read from the app's locale rather than the stored settings, so the row
+        // is right even after it was changed from the phone's own settings (android 13+)
+        val language = currentLanguage()
+        view.findViewById<View>(R.id.rowLanguage).bindSettingsRow(
+            icon = R.drawable.ic_translate,
+            title = R.string.settings_language,
+            value = getString(languageName(language)),
+        ) {
+            pickLanguage(language)
+        }
+
         val notificationsRow = view.findViewById<View>(R.id.rowNotifications)
         val appearanceRow = view.findViewById<View>(R.id.rowAppearance)
         val platformRow = view.findViewById<View>(R.id.rowDefaultPlatform)
@@ -113,6 +128,9 @@ class SettingsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.settings.collect { settings ->
+                    // keeps the stored choice in step with a change made from the phone's settings
+                    if (settings.language != language) viewModel.setLanguage(language)
+
                     notificationsRow.bindSettingsRow(
                         icon = R.drawable.ic_bell,
                         title = R.string.settings_notifications,
@@ -165,6 +183,32 @@ class SettingsFragment : Fragment() {
             0 -> getString(R.string.settings_notifications_all_off)
             else -> getString(R.string.settings_notifications_some_on, on, switches.size)
         }
+    }
+
+    //------------------------------
+    // switching language recreates the activity, which redraws every screen in the new language
+    private fun pickLanguage(current: AppLanguage) {
+        val choices = AppLanguage.entries
+        val names = choices.map { getString(languageName(it)) }.toTypedArray()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.settings_language_dialog_title)
+            .setSingleChoiceItems(names, choices.indexOf(current)) { dialog, which ->
+                dialog.dismiss()
+                val chosen = choices[which]
+                if (chosen != current) {
+                    viewModel.setLanguage(chosen)
+                    applyLanguage(chosen)
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    @StringRes
+    private fun languageName(language: AppLanguage): Int = when (language) {
+        AppLanguage.ENGLISH -> R.string.language_english
+        AppLanguage.AFRIKAANS -> R.string.language_afrikaans
+        AppLanguage.ZULU -> R.string.language_zulu
     }
 
     //------------------------------

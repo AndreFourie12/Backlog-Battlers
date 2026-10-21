@@ -9,7 +9,8 @@ import com.backlogbattlers.app.domain.model.Platform
 
 
 fun platformLabel(platform: String): String = when (platform.uppercase()) {
-    "PC" -> "PC"
+    // PC games are labelled by the store most PC players use
+    "PC" -> "Steam"
     "PLAYSTATION" -> "PlayStation"
     "XBOX" -> "Xbox"
     "SWITCH" -> "Switch"

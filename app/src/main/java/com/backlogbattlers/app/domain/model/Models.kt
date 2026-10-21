@@ -93,10 +93,20 @@ enum class CompletionType {
 }
 
 // enum representing supported application languages
-enum class AppLanguage {
-    ENGLISH,
-    NODECIDEDYET,
-    AFRIKAANS,
+enum class AppLanguage(val tag: String) {
+    ENGLISH("en"),
+    AFRIKAANS("af"),
+    ZULU("zu"),
+    ;
+
+    companion object {
+        // the language for a locale tag such as "af" or "af-ZA". anything the app has no
+        // translation for shows the English text, so it counts as English
+        fun fromTag(tag: String?): AppLanguage {
+            val language = tag?.substringBefore('-')?.lowercase()
+            return entries.firstOrNull { it.tag == language } ?: ENGLISH
+        }
+    }
 }
 
 // enum representing the appearance the user picked in settings

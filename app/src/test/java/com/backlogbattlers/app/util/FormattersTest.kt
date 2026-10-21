@@ -47,13 +47,13 @@ class FormattersTest {
 
     @Test
     fun `a game reads as its main platform and first genre`() {
-        assertEquals("PC · Adventure", gameSubtitle(listOf("OTHER", "PLAYSTATION", "PC"), listOf("Adventure", "Indie")))
+        assertEquals("Steam · Adventure", gameSubtitle(listOf("OTHER", "PLAYSTATION", "PC"), listOf("Adventure", "Indie")))
         assertEquals("PlayStation · Strategy", gameSubtitle(listOf("XBOX", "PLAYSTATION"), listOf("Strategy")))
     }
 
     @Test
     fun `a game with only a platform, or only a genre, reads as just that`() {
-        assertEquals("PC", gameSubtitle(listOf("PC"), emptyList()))
+        assertEquals("Steam", gameSubtitle(listOf("PC"), emptyList()))
         assertEquals("Adventure", gameSubtitle(emptyList(), listOf("Adventure")))
         assertEquals("", gameSubtitle(emptyList(), emptyList()))
     }
@@ -69,7 +69,7 @@ class FormattersTest {
     @Test
     fun `the library caption reads platform, status, and hours to beat when the game has one`() {
         assertEquals(
-            "PC · Not started · 25h to beat",
+            "Steam · Not started · 25h to beat",
             libraryStatusCaption(Platform.PC, LibraryStatus.BACKLOG, avgCompletionHours = 24.6f),
         )
         assertEquals(

@@ -47,7 +47,7 @@
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
-            tools:text="PC · Adventure" />
+            tools:text="Steam · Adventure" />
     </LinearLayout>
 
     <TextView
