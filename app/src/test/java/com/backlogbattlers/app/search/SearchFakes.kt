@@ -190,4 +190,9 @@ class FakeSettingsRepository : SettingsRepository {
     override suspend fun setRankChangeNotificationsEnabled(enabled: Boolean) { settings.update { it.copy(rankChangeNotificationsEnabled = enabled) } }
     override suspend fun setSeasonResetNotificationsEnabled(enabled: Boolean) { settings.update { it.copy(seasonResetNotificationsEnabled = enabled) } }
     override suspend fun setFriendActivityNotificationsEnabled(enabled: Boolean) { settings.update { it.copy(friendActivityNotificationsEnabled = enabled) } }
+
+    var syncPending = false
+    override suspend fun replaceSyncedSettings(settings: UserSettings) { this.settings.value = settings.copy(biometricLoginEnabled = this.settings.value.biometricLoginEnabled) }
+    override suspend fun isSyncPending(): Boolean = syncPending
+    override suspend fun setSyncPending(pending: Boolean) { syncPending = pending }
 }

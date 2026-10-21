@@ -43,48 +43,59 @@ class SettingsViewModel : ViewModel() {
     // which recreates the activity, so this write runs on the application
     // scope rather than one that the recreation could cut short
     fun setThemeMode(mode: ThemeMode) {
-        ServiceLocator.applicationScope.launch { settingsRepository.setThemeMode(mode) }
+        saveAndSync { settingsRepository.setThemeMode(mode) }
     }
 
     //------------------------------
     // stores the artwork shown behind the home screen header
     fun setHomeBackdrop(backdrop: HomeBackdrop) {
-        viewModelScope.launch { settingsRepository.setHomeBackdrop(backdrop) }
+        saveAndSync { settingsRepository.setHomeBackdrop(backdrop) }
     }
 
     //------------------------------
     // stores the language choice. like the theme, the caller applies it, which recreates the
     // activity, so the write runs on the application scope where the recreation can't cut it short
     fun setLanguage(language: AppLanguage) {
-        ServiceLocator.applicationScope.launch { settingsRepository.setLanguage(language) }
+        saveAndSync { settingsRepository.setLanguage(language) }
     }
 
     //------------------------------
     // stores the platform games are filed under when they are on it
     fun setDefaultPlatform(platform: Platform) {
-        viewModelScope.launch { settingsRepository.setDefaultPlatform(platform) }
+        saveAndSync { settingsRepository.setDefaultPlatform(platform) }
     }
 
     //------------------------------
     // notification preferences
     fun setAchievementNotifications(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setAchievementNotificationsEnabled(enabled) }
+        saveAndSync { settingsRepository.setAchievementNotificationsEnabled(enabled) }
     }
 
     fun setRankChangeNotifications(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setRankChangeNotificationsEnabled(enabled) }
+        saveAndSync { settingsRepository.setRankChangeNotificationsEnabled(enabled) }
     }
 
     fun setSeasonResetNotifications(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setSeasonResetNotificationsEnabled(enabled) }
+        saveAndSync { settingsRepository.setSeasonResetNotificationsEnabled(enabled) }
     }
 
     fun setFriendActivityNotifications(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setFriendActivityNotificationsEnabled(enabled) }
+        saveAndSync { settingsRepository.setFriendActivityNotificationsEnabled(enabled) }
     }
 
     //------------------------------
-    // biometric unlock preference
+    // saves a change on this phone, then uploads the settings so they follow the user to another
+    // phone (see SettingsSync). on the application scope, so leaving the screen, or the activity
+    // being recreated for a new theme or language, can't cut the write or the upload short
+    private fun saveAndSync(write: suspend () -> Unit) {
+        ServiceLocator.applicationScope.launch {
+            write()
+            ServiceLocator.settingsSync.push()
+        }
+    }
+
+    //------------------------------
+    // biometric unlock preference, kept on this phone only: it depends on this phone's sensor
     fun setBiometricLogin(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.setBiometricLoginEnabled(enabled) }
     }
@@ -101,16 +112,19 @@ class SettingsViewModel : ViewModel() {
                 ServiceLocator.libraryRepository.clear()
                 ServiceLocator.searchHistoryRepository.clear()
                 settingsRepository.setBiometricLoginEnabled(false)
+                settingsRepository.setSyncPending(false)
             }
             withContext(Dispatchers.Main) { onDone(result) }
         }
     }
 
     //------------------------------
-    // signs the user out and clears tokens
+    // signs the user out and clears tokens. a settings change that never got uploaded belongs to
+    // this account, so it is dropped rather than sent to whoever signs in next
     fun logOut(onDone: () -> Unit) {
         viewModelScope.launch {
             authRepository.signOut()
+            settingsRepository.setSyncPending(false)
             onDone()
         }
     }

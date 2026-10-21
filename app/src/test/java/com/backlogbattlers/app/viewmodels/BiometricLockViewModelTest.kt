@@ -96,6 +96,7 @@ class BiometricLockViewModelTest {
             signOutCalled = true
         }
         override suspend fun deleteAccount(): DeleteAccountResult = DeleteAccountResult.FAILED
+        override suspend fun freshAccessToken(): String? = null
     }
 
     // fake SettingsRepository for testing
@@ -112,6 +113,9 @@ class BiometricLockViewModelTest {
         override suspend fun setRankChangeNotificationsEnabled(enabled: Boolean) {}
         override suspend fun setSeasonResetNotificationsEnabled(enabled: Boolean) {}
         override suspend fun setFriendActivityNotificationsEnabled(enabled: Boolean) {}
+        override suspend fun replaceSyncedSettings(settings: UserSettings) {}
+        override suspend fun isSyncPending(): Boolean = false
+        override suspend fun setSyncPending(pending: Boolean) {}
         override suspend fun setBiometricLoginEnabled(enabled: Boolean) {
             lastBiometricLoginEnabled = enabled
         }

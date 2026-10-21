@@ -57,6 +57,9 @@ class LoginViewModel(
             when (val result = authRepository.signInWithGoogle(activity)) {
                 is AuthResult.Success -> {
                     _uiState.value = LoginUiState.Success(result.user)
+                    // brings down the settings saved to this account, e.g. from another phone.
+                    // runs past this screen, which closes as the user is taken home
+                    ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
                 }
                 is AuthResult.Failure -> {
                     Log.e("LoginViewModel", "Sign-In failure: ${result.message}")
