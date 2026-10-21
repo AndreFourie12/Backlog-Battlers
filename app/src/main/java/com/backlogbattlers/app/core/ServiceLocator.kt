@@ -8,6 +8,7 @@ import com.backlogbattlers.app.data.remote.AuthApi
 import com.backlogbattlers.app.data.remote.FriendsApi
 import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.remote.LeaderboardApi
+import com.backlogbattlers.app.data.remote.SettingsApi
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthRepositoryImpl
 import com.backlogbattlers.app.data.repository.FriendsRepository
@@ -22,8 +23,12 @@ import com.backlogbattlers.app.data.repository.SearchHistoryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.data.repository.SettingsRepositoryImpl
+import com.backlogbattlers.app.data.repository.SettingsSync
 import com.backlogbattlers.app.util.AndroidBiometricAvailabilityChecker
 import com.backlogbattlers.app.util.BiometricAvailabilityChecker
+import com.backlogbattlers.app.util.applyLanguage
+import com.backlogbattlers.app.util.applyThemeMode
+import com.backlogbattlers.app.util.currentLanguage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -32,6 +37,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 // dependency locator holding application singletons for database, network, and repository instances
@@ -116,6 +122,26 @@ object ServiceLocator {
     val settingsRepository: SettingsRepository by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing settingsRepository")
         SettingsRepositoryImpl(context)
+    }
+
+    val settingsApi: SettingsApi by lazy {
+        SettingsApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
+    }
+
+    val settingsSync: SettingsSync by lazy {
+        SettingsSync(
+            settingsRepository = settingsRepository,
+            settingsApi = settingsApi,
+            accessToken = { authRepository.freshAccessToken() },
+            // the theme and the language are applied to the whole app, which recreates the
+            // activity on screen; everything else is read from the settings as screens open
+            applyToApp = { before, after ->
+                withContext(Dispatchers.Main) {
+                    if (after.themeMode != before.themeMode) applyThemeMode(after.themeMode)
+                    if (after.language != currentLanguage()) applyLanguage(after.language)
+                }
+            },
+        )
     }
 
     val biometricAvailabilityChecker: BiometricAvailabilityChecker by lazy {
