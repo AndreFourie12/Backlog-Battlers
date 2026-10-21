@@ -30,6 +30,7 @@ import com.backlogbattlers.app.adapters.SearchResultAdapter
 import com.backlogbattlers.app.domain.model.LibraryGame
 import com.backlogbattlers.app.domain.model.LibrarySort
 import com.backlogbattlers.app.domain.model.LibraryStatus
+import com.backlogbattlers.app.util.primaryPlatform
 import com.backlogbattlers.app.util.addGridSpacing
 import com.backlogbattlers.app.util.inflateChild
 import com.backlogbattlers.app.util.librarySortLabel
@@ -235,7 +236,7 @@ class GamesFragment : Fragment() {
         popularProgress.setVisible(state.popular is GameListState.Loading)
         popularError.setVisible(state.popular is GameListState.Error)
         popularList.setVisible(games.isNotEmpty())
-        popularAdapter.submitList(games.map { SearchResult(it, it.gameId in state.ownedGameIds) })
+        popularAdapter.submitList(games.map { SearchResult(it, it.gameId in state.ownedGameIds, primaryPlatform(it.platforms, state.preferredPlatform)) })
     }
 
     private fun renderLibraryFilters(state: GamesUiState) {

@@ -7,6 +7,7 @@ import com.backlogbattlers.api.db.DatabaseFactory
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.igdbHttpClient
+import com.backlogbattlers.api.routes.accountRoutes
 import com.backlogbattlers.api.routes.achievementRoutes
 import com.backlogbattlers.api.routes.authRoutes
 import com.backlogbattlers.api.routes.friendRoutes
@@ -15,6 +16,7 @@ import com.backlogbattlers.api.routes.completionRoutes
 import com.backlogbattlers.api.routes.healthRoutes
 import com.backlogbattlers.api.routes.leaderboardRoutes
 import com.backlogbattlers.api.routes.libraryRoutes
+import com.backlogbattlers.api.routes.settingsRoutes
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -58,6 +60,8 @@ fun Application.module() {
         friendRoutes(currentUser = bearerCurrentUser(jwtService))
         completionRoutes(currentUser = bearerCurrentUser(jwtService))
         leaderboardRoutes(currentUser = bearerCurrentUser(jwtService))
+        accountRoutes(currentUser = bearerCurrentUser(jwtService))
+        settingsRoutes(currentUser = bearerCurrentUser(jwtService))
     }
 }
 //------------------------------EOF------------------------------\\

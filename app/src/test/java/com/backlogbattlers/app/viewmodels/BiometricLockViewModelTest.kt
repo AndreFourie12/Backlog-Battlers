@@ -2,10 +2,12 @@ package com.backlogbattlers.app.viewmodels
 
 import android.app.Activity
 import com.backlogbattlers.app.data.repository.AuthRepository
+import com.backlogbattlers.app.data.repository.DeleteAccountResult
 import com.backlogbattlers.app.data.repository.AuthResult
 import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.domain.model.AppLanguage
 import com.backlogbattlers.app.domain.model.HomeBackdrop
+import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.User
 import com.backlogbattlers.app.domain.model.UserSettings
@@ -93,6 +95,8 @@ class BiometricLockViewModelTest {
         override suspend fun signOut() {
             signOutCalled = true
         }
+        override suspend fun deleteAccount(): DeleteAccountResult = DeleteAccountResult.FAILED
+        override suspend fun freshAccessToken(): String? = null
     }
 
     // fake SettingsRepository for testing
@@ -104,10 +108,14 @@ class BiometricLockViewModelTest {
         override suspend fun setLanguage(language: AppLanguage) {}
         override suspend fun setThemeMode(mode: ThemeMode) {}
         override suspend fun setHomeBackdrop(backdrop: HomeBackdrop) {}
+        override suspend fun setDefaultPlatform(platform: Platform) {}
         override suspend fun setAchievementNotificationsEnabled(enabled: Boolean) {}
         override suspend fun setRankChangeNotificationsEnabled(enabled: Boolean) {}
         override suspend fun setSeasonResetNotificationsEnabled(enabled: Boolean) {}
         override suspend fun setFriendActivityNotificationsEnabled(enabled: Boolean) {}
+        override suspend fun replaceSyncedSettings(settings: UserSettings) {}
+        override suspend fun isSyncPending(): Boolean = false
+        override suspend fun setSyncPending(pending: Boolean) {}
         override suspend fun setBiometricLoginEnabled(enabled: Boolean) {
             lastBiometricLoginEnabled = enabled
         }

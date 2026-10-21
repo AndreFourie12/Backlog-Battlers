@@ -9,12 +9,12 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.domain.model.Game
+import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.util.formatHours
 import com.backlogbattlers.app.util.formatPoints
 import com.backlogbattlers.app.util.inflateChild
 import com.backlogbattlers.app.util.loadArtwork
 import com.backlogbattlers.app.util.platformLabel
-import com.backlogbattlers.app.util.primaryPlatform
 import com.backlogbattlers.app.util.setVisible
 import com.backlogbattlers.app.viewmodels.GameDetailUiState
 
@@ -75,7 +75,7 @@ class GameDetailHeaderAdapter(
         fun bind(state: GameDetailUiState, isFavourite: Boolean) {
             val context = itemView.context
 
-            renderGame(state.game)
+            renderGame(state.game, state.platform)
 
             completionPercent.text = context.getString(R.string.detail_completion_value, state.completionPercent)
             completionBar.progress = state.completionPercent
@@ -96,13 +96,12 @@ class GameDetailHeaderAdapter(
             favouriteButton.imageTintList = ContextCompat.getColorStateList(context, color)
         }
 
-        private fun renderGame(game: Game?) {
+        private fun renderGame(game: Game?, platform: Platform?) {
             game ?: return
             backdrop.loadArtwork(game.artworkUrl ?: game.coverImageUrl)
             cover.loadArtwork(game.coverImageUrl ?: game.artworkUrl)
             title.text = game.title
 
-            val platform = primaryPlatform(game.platforms)
             platformChip.text = platform?.let { platformLabel(it.name) }
             platformChip.setVisible(platform != null)
 

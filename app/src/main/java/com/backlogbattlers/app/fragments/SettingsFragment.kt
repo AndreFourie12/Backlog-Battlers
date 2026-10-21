@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -14,10 +15,16 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.backlogbattlers.app.BuildConfig
 import com.backlogbattlers.app.R
+import com.backlogbattlers.app.data.repository.DeleteAccountResult
+import com.backlogbattlers.app.domain.model.AppLanguage
+import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.UserSettings
 import com.backlogbattlers.app.util.bindSettingsHeader
+import com.backlogbattlers.app.util.applyLanguage
 import com.backlogbattlers.app.util.bindSettingsRow
+import com.backlogbattlers.app.util.currentLanguage
+import com.backlogbattlers.app.util.platformLabel
 import com.backlogbattlers.app.viewmodels.SettingsViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -99,15 +106,31 @@ class SettingsFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.btnLogOut).setOnClickListener { confirmLogOut() }
+        view.findViewById<View>(R.id.btnDeleteAccount).setOnClickListener { confirmDeleteAccount() }
 
         // these two rows carry the current value on the right, so they are
         // rebound whenever the stored settings change
+        // the language is read from the app's locale rather than the stored settings, so the row
+        // is right even after it was changed from the phone's own settings (android 13+)
+        val language = currentLanguage()
+        view.findViewById<View>(R.id.rowLanguage).bindSettingsRow(
+            icon = R.drawable.ic_translate,
+            title = R.string.settings_language,
+            value = getString(languageName(language)),
+        ) {
+            pickLanguage(language)
+        }
+
         val notificationsRow = view.findViewById<View>(R.id.rowNotifications)
         val appearanceRow = view.findViewById<View>(R.id.rowAppearance)
+        val platformRow = view.findViewById<View>(R.id.rowDefaultPlatform)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.settings.collect { settings ->
+                    // keeps the stored choice in step with a change made from the phone's settings
+                    if (settings.language != language) viewModel.setLanguage(language)
+
                     notificationsRow.bindSettingsRow(
                         icon = R.drawable.ic_bell,
                         title = R.string.settings_notifications,
@@ -122,6 +145,14 @@ class SettingsFragment : Fragment() {
                         value = getString(themeLabel(settings.themeMode)),
                     ) {
                         findNavController().navigate(R.id.action_settingsFragment_to_appearanceFragment)
+                    }
+
+                    platformRow.bindSettingsRow(
+                        icon = R.drawable.ic_gamepad,
+                        title = R.string.settings_default_platform,
+                        value = platformLabel(settings.defaultPlatform.name),
+                    ) {
+                        pickDefaultPlatform(settings.defaultPlatform)
                     }
                 }
             }
@@ -155,6 +186,55 @@ class SettingsFragment : Fragment() {
     }
 
     //------------------------------
+    // switching language recreates the activity, which redraws every screen in the new language
+    private fun pickLanguage(current: AppLanguage) {
+        val choices = AppLanguage.entries
+        val names = choices.map { getString(languageName(it)) }.toTypedArray()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.settings_language_dialog_title)
+            .setSingleChoiceItems(names, choices.indexOf(current)) { dialog, which ->
+                dialog.dismiss()
+                val chosen = choices[which]
+                if (chosen != current) {
+                    viewModel.setLanguage(chosen)
+                    applyLanguage(chosen)
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    @StringRes
+    private fun languageName(language: AppLanguage): Int = when (language) {
+        AppLanguage.ENGLISH -> R.string.language_english
+        AppLanguage.AFRIKAANS -> R.string.language_afrikaans
+        AppLanguage.ZULU -> R.string.language_zulu
+    }
+
+    //------------------------------
+    // the platforms a user can pick as their default. "Other" is left out: it is what a game falls
+    // back to when it lists nothing recognisable, not somewhere people play
+    private val platformChoices = listOf(Platform.PC, Platform.PLAYSTATION, Platform.XBOX, Platform.SWITCH)
+
+    private fun pickDefaultPlatform(current: Platform) {
+        val labels = platformChoices.map { platformLabel(it.name) }.toTypedArray()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.settings_default_platform_dialog_title)
+            .setSingleChoiceItems(labels, platformChoices.indexOf(current)) { dialog, which ->
+                val chosen = platformChoices[which]
+                viewModel.setDefaultPlatform(chosen)
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.settings_default_platform_saved, labels[which]),
+                    Toast.LENGTH_SHORT,
+                ).show()
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    //------------------------------
     // signing out drops the session, so it asks first
     private fun confirmLogOut() {
         MaterialAlertDialogBuilder(requireContext())
@@ -169,6 +249,53 @@ class SettingsFragment : Fragment() {
                 }
             }
             .show()
+    }
+
+    //------------------------------
+    // deleting the account can't be undone, so it asks first, then shows the
+    // button as busy until the backend has answered
+    private fun confirmDeleteAccount() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.delete_account_confirm_title)
+            .setMessage(R.string.delete_account_confirm_body)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.delete_account_confirm_action) { _, _ -> deleteAccount() }
+            .show()
+    }
+
+    private fun deleteAccount() {
+        val button = view?.findViewById<View>(R.id.btnDeleteAccount) ?: return
+        val label = button.findViewById<TextView>(R.id.tvDeleteAccount)
+        button.isEnabled = false
+        label.setText(R.string.delete_account_in_progress)
+
+        viewModel.deleteAccount { result ->
+            if (!isAdded || view == null) return@deleteAccount
+
+            when (result) {
+                DeleteAccountResult.DELETED -> {
+                    Toast.makeText(requireContext(), R.string.delete_account_done, Toast.LENGTH_LONG).show()
+                    findNavController().navigate(R.id.action_settingsFragment_to_loginFragment)
+                }
+                // the session is dead, so there is nothing to delete with: sign in again first
+                DeleteAccountResult.SIGN_IN_AGAIN -> {
+                    Toast.makeText(requireContext(), R.string.delete_account_sign_in_again, Toast.LENGTH_LONG).show()
+                    viewModel.logOut {
+                        if (isAdded) findNavController().navigate(R.id.action_settingsFragment_to_loginFragment)
+                    }
+                }
+                DeleteAccountResult.NO_CONNECTION, DeleteAccountResult.FAILED -> {
+                    val message = if (result == DeleteAccountResult.NO_CONNECTION) {
+                        R.string.delete_account_no_connection
+                    } else {
+                        R.string.delete_account_failed
+                    }
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                    button.isEnabled = true
+                    label.setText(R.string.delete_account)
+                }
+            }
+        }
     }
 }
 //------------------------------EOF------------------------------\\

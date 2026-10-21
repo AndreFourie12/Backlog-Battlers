@@ -189,6 +189,27 @@ object Friendships : Table("friendships")
     }
 }
 
+// usersettings table: the app's preferences, saved here so they follow the user to another phone.
+// one row per user, written in full by PUT /users/me/settings; no row until the app first saves.
+// a table of its own rather than columns on Users, because SchemaUtils.create adds missing tables
+// to a live database but never adds columns to an existing one
+object UserSettings : Table("user_settings")
+{
+    val userId = reference("user_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    // a locale tag the app is translated into: en, af or zu
+    val language = varchar("language", 8)
+    val themeMode = varchar("theme_mode", 16)
+    val homeBackdrop = varchar("home_backdrop", 16)
+    val defaultPlatform = enumerationByName<Platform>("default_platform", 20)
+    val achievementNotifications = bool("achievement_notifications")
+    val rankChangeNotifications = bool("rank_change_notifications")
+    val seasonResetNotifications = bool("season_reset_notifications")
+    val friendActivityNotifications = bool("friend_activity_notifications")
+    val updatedAt = timestamp("updated_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(userId)
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -200,5 +221,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     Friendships,
     CompletionRecords,
     MonthlyLeaderboardEntries,
+    UserSettings,
 )
 //------------------------------EOF------------------------------\\

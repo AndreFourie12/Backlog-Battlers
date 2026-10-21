@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- logo shown by the system splash screen. the splash crops its icon to the middle third
+     (a 192dp circle of 288dp), so the logo sits on a white disc that fills that circle -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <inset android:inset="15%">
+            <shape android:shape="oval">
+                <solid android:color="@color/brand_icon_background" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:drawable="@drawable/img_logo_launcher"
+            android:inset="19%" />
+    </item>
+</layer-list>

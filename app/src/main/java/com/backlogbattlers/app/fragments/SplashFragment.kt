@@ -10,11 +10,12 @@ import androidx.navigation.fragment.findNavController
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.util.shouldRequireBiometricUnlock
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-// splash screen fragment displaying app branding and routing user to login
+// first destination on launch. it has nothing to show of its own: the system splash
+// (installSplashScreen in MainActivity) stays on screen until this has routed the user
+// to login, the fingerprint lock or home
 class SplashFragment : Fragment() {
 
     //------------------------------
@@ -33,7 +34,6 @@ class SplashFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(1200L)
             val currentUser = ServiceLocator.authRepository.getCurrentUser()
 
             // this if statement only looks at biometric state once a session already exist
@@ -45,6 +45,11 @@ class SplashFragment : Fragment() {
                 if (shouldRequireBiometricUnlock(settings.biometricLoginEnabled, availability)) {
                     findNavController().navigate(R.id.action_splashFragment_to_biometricLockFragment)
                 } else {
+                    // uploads a settings change that didn't make it last time, or else picks up
+                    // changes made on another phone. in the background: launch never waits on the
+                    // network. behind the fingerprint gate this waits for the unlock instead, so a
+                    // pulled theme or language can't recreate the screen under the prompt
+                    ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
                     findNavController().navigate(R.id.action_splashFragment_to_homeFragment)
                 }
             } else {

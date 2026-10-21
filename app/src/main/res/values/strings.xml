@@ -173,6 +173,15 @@
     <string name="settings_connected_accounts_pending">Coming soon</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_appearance">Appearance</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_dialog_title">Choose your language</string>
+    <!-- each language is named in itself, so people can find theirs whatever the app is showing -->
+    <string name="language_english" translatable="false">English</string>
+    <string name="language_afrikaans" translatable="false">Afrikaans</string>
+    <string name="language_zulu" translatable="false">isiZulu</string>
+    <string name="settings_default_platform">Default Platform</string>
+    <string name="settings_default_platform_dialog_title">Where do you mostly play?</string>
+    <string name="settings_default_platform_saved">New games will be added as %1$s when they\'re available there</string>
     <string name="settings_privacy">Privacy &amp; Data</string>
     <string name="settings_help">Help &amp; Support</string>
     <string name="settings_about">About</string>
@@ -185,6 +194,15 @@
     <string name="log_out_confirm_title">Log out?</string>
     <string name="log_out_confirm_body">You will need to sign in with Google again to get back to your backlog.</string>
     <string name="log_out_confirm_action">Log Out</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_account_in_progress">Deleting your account…</string>
+    <string name="delete_account_confirm_title">Delete your account?</string>
+    <string name="delete_account_confirm_body">This permanently deletes your profile, game library, points and friends from Backlog Battlers. It can\'t be undone.</string>
+    <string name="delete_account_confirm_action">Delete</string>
+    <string name="delete_account_done">Your account has been deleted</string>
+    <string name="delete_account_sign_in_again">Your session has expired. Sign in again, then delete your account.</string>
+    <string name="delete_account_no_connection">Couldn\'t reach Backlog Battlers. Check your connection and try again.</string>
+    <string name="delete_account_failed">Something went wrong deleting your account. Please try again.</string>
     <string name="cancel">Cancel</string>
 
 

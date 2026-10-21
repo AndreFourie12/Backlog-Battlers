@@ -3,16 +3,22 @@ package com.backlogbattlers.app.search
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
+import com.backlogbattlers.app.data.repository.SettingsRepository
+import com.backlogbattlers.app.domain.model.AppLanguage
 import com.backlogbattlers.app.domain.model.Achievement
 import com.backlogbattlers.app.domain.model.CompletionType
 import com.backlogbattlers.app.domain.model.Game
+import com.backlogbattlers.app.domain.model.HomeBackdrop
 import com.backlogbattlers.app.domain.model.LibraryEntry
 import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.Recommendation
+import com.backlogbattlers.app.domain.model.ThemeMode
+import com.backlogbattlers.app.domain.model.UserSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import java.io.IOException
 import java.util.UUID
 
@@ -144,6 +150,10 @@ class FakeLibraryRepository : LibraryRepository {
     override suspend fun remove(libraryEntryId: String) {
         entries.value = entries.value.filterNot { it.libraryEntryId == libraryEntryId }
     }
+
+    override suspend fun clear() {
+        entries.value = emptyList()
+    }
 }
 
 class FakeSearchHistoryRepository : SearchHistoryRepository {
@@ -159,4 +169,30 @@ class FakeSearchHistoryRepository : SearchHistoryRepository {
     override suspend fun removeSearch(query: String) {
         searches.value = searches.value.filterNot { it.equals(query, ignoreCase = true) }
     }
+
+    override suspend fun clear() {
+        searches.value = emptyList()
+    }
+}
+
+class FakeSettingsRepository : SettingsRepository {
+
+    val settings = MutableStateFlow(UserSettings())
+
+    override fun observeSettings(): Flow<UserSettings> = settings
+    override fun getSettingsBlocking(): UserSettings = settings.value
+    override suspend fun setLanguage(language: AppLanguage) { settings.update { it.copy(language = language) } }
+    override suspend fun setThemeMode(mode: ThemeMode) { settings.update { it.copy(themeMode = mode) } }
+    override suspend fun setHomeBackdrop(backdrop: HomeBackdrop) { settings.update { it.copy(homeBackdrop = backdrop) } }
+    override suspend fun setDefaultPlatform(platform: Platform) { settings.update { it.copy(defaultPlatform = platform) } }
+    override suspend fun setBiometricLoginEnabled(enabled: Boolean) { settings.update { it.copy(biometricLoginEnabled = enabled) } }
+    override suspend fun setAchievementNotificationsEnabled(enabled: Boolean) { settings.update { it.copy(achievementNotificationsEnabled = enabled) } }
+    override suspend fun setRankChangeNotificationsEnabled(enabled: Boolean) { settings.update { it.copy(rankChangeNotificationsEnabled = enabled) } }
+    override suspend fun setSeasonResetNotificationsEnabled(enabled: Boolean) { settings.update { it.copy(seasonResetNotificationsEnabled = enabled) } }
+    override suspend fun setFriendActivityNotificationsEnabled(enabled: Boolean) { settings.update { it.copy(friendActivityNotificationsEnabled = enabled) } }
+
+    var syncPending = false
+    override suspend fun replaceSyncedSettings(settings: UserSettings) { this.settings.value = settings.copy(biometricLoginEnabled = this.settings.value.biometricLoginEnabled) }
+    override suspend fun isSyncPending(): Boolean = syncPending
+    override suspend fun setSyncPending(pending: Boolean) { syncPending = pending }
 }

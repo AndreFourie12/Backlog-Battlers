@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.LibraryRepository
+import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.domain.model.Game
 import com.backlogbattlers.app.domain.model.LibraryEntry
 import com.backlogbattlers.app.domain.model.LibraryGame
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -37,6 +39,8 @@ data class GamesUiState(
     // null means the "All" chip: every status is shown
     val statusFilter: LibraryStatus? = null,
     val librarySort: LibrarySort = LibrarySort.RECENTLY_ADDED,
+    // the default platform from Settings, so the popular list labels games the way they would be filed
+    val preferredPlatform: Platform = Platform.PC,
 ) {
 
     val visibleLibraryGames: List<LibraryGame>
@@ -58,6 +62,7 @@ data class GamesUiState(
 class GameViewModel(
     private val gameRepository: GameRepository = ServiceLocator.gameRepository,
     private val libraryRepository: LibraryRepository = ServiceLocator.libraryRepository,
+    private val settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GamesUiState())
@@ -72,6 +77,7 @@ class GameViewModel(
 
     init {
         observeLibrary()
+        observePreferredPlatform()
         loadPopular()
     }
 
@@ -113,7 +119,7 @@ class GameViewModel(
             try {
                 libraryRepository.addToLibrary(
                     gameId = game.gameId,
-                    platform = primaryPlatform(game.platforms) ?: Platform.OTHER,
+                    platform = primaryPlatform(game.platforms, preferredPlatform()) ?: Platform.OTHER,
                     status = LibraryStatus.BACKLOG,
                 )
                 _addedGames.tryEmit(game.title)
@@ -151,6 +157,18 @@ class GameViewModel(
     }
 
     // keeps the count and the owned games in step with the library, whichever screen changes it
+    private fun observePreferredPlatform() {
+        viewModelScope.launch {
+            settingsRepository.observeSettings().collect { settings ->
+                _uiState.update { it.copy(preferredPlatform = settings.defaultPlatform) }
+            }
+        }
+    }
+
+    // read fresh at the moment of adding, rather than from the ui state, so a game added the instant
+    // the screen opens is still filed under the platform chosen in Settings
+    private suspend fun preferredPlatform(): Platform = settingsRepository.observeSettings().first().defaultPlatform
+
     private fun observeLibrary() {
         viewModelScope.launch {
             libraryRepository.observeLibrary().collect { entries ->

@@ -28,14 +28,32 @@ class FormattersTest {
     }
 
     @Test
+    fun `the default platform from Settings wins whenever the game is on it`() {
+        assertEquals(Platform.PLAYSTATION, primaryPlatform(listOf("OTHER", "PLAYSTATION", "PC"), preferred = Platform.PLAYSTATION))
+        assertEquals(Platform.SWITCH, primaryPlatform(listOf("switch", "PC"), preferred = Platform.SWITCH))
+    }
+
+    @Test
+    fun `a game not on the default platform falls back to its main one`() {
+        assertEquals(Platform.PC, primaryPlatform(listOf("XBOX", "PC"), preferred = Platform.SWITCH))
+        assertNull(primaryPlatform(emptyList(), preferred = Platform.XBOX))
+    }
+
+    @Test
+    fun `the label under a game follows the default platform too`() {
+        assertEquals("Xbox · Shooter", gameSubtitle(listOf("PC", "XBOX"), listOf("Shooter"), preferred = Platform.XBOX))
+        assertEquals("Switch · Platformer", gameSubtitle(Platform.SWITCH, listOf("Platformer")))
+    }
+
+    @Test
     fun `a game reads as its main platform and first genre`() {
-        assertEquals("PC · Adventure", gameSubtitle(listOf("OTHER", "PLAYSTATION", "PC"), listOf("Adventure", "Indie")))
+        assertEquals("Steam · Adventure", gameSubtitle(listOf("OTHER", "PLAYSTATION", "PC"), listOf("Adventure", "Indie")))
         assertEquals("PlayStation · Strategy", gameSubtitle(listOf("XBOX", "PLAYSTATION"), listOf("Strategy")))
     }
 
     @Test
     fun `a game with only a platform, or only a genre, reads as just that`() {
-        assertEquals("PC", gameSubtitle(listOf("PC"), emptyList()))
+        assertEquals("Steam", gameSubtitle(listOf("PC"), emptyList()))
         assertEquals("Adventure", gameSubtitle(emptyList(), listOf("Adventure")))
         assertEquals("", gameSubtitle(emptyList(), emptyList()))
     }
@@ -51,7 +69,7 @@ class FormattersTest {
     @Test
     fun `the library caption reads platform, status, and hours to beat when the game has one`() {
         assertEquals(
-            "PC · Not started · 25h to beat",
+            "Steam · Not started · 25h to beat",
             libraryStatusCaption(Platform.PC, LibraryStatus.BACKLOG, avgCompletionHours = 24.6f),
         )
         assertEquals(

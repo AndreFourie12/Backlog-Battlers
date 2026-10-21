@@ -20,6 +20,9 @@ interface SearchHistoryRepository {
     suspend fun recordSearch(query: String)
 
     suspend fun removeSearch(query: String)
+
+    // forgets every recent search, when the account is deleted
+    suspend fun clear()
 }
 
 class SearchHistoryRepositoryImpl(
@@ -54,6 +57,10 @@ class SearchHistoryRepositoryImpl(
                 .filterNot { it.equals(query.trim(), ignoreCase = true) }
             prefs[Keys.RECENT_SEARCHES] = remaining.joinToString(SEPARATOR)
         }
+    }
+
+    override suspend fun clear() {
+        context.searchHistoryStore.edit { prefs -> prefs.remove(Keys.RECENT_SEARCHES) }
     }
 
     private fun String?.toQueryList(): List<String> {

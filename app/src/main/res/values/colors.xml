@@ -48,4 +48,13 @@
     <color name="google_ripple">#1F1F1F1F</color>
 
     <color name="surface_tile">#FFE8EDF5</color>
+
+    <!-- the completion pill on library cover art. it sits on artwork, not the
+         page, so it looks the same in both themes and has no night twin -->
+    <color name="scrim_slate">#FF3D4450</color>
+
+    <!-- launcher icon and splash. brand colours that stay the
+         same in both themes, so they have no night twin either -->
+    <color name="brand_icon_background">#FFFFFFFF</color>
+    <color name="brand_splash_background">#FF10141C</color>
 </resources>

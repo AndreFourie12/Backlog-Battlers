@@ -116,6 +116,55 @@ Notes:
 
 WHich matches the app's `Game` model, except `cachedAt`, which the app sets itself when it caches a game.
 
+### `DELETE /users/me`
+
+Permanently deletes the signed-in user's account. Needs `Authorization: Bearer <access token>`.
+
+Everything the account owns goes with it: library entries and their unlocked achievements, completion records, monthly points, friend requests (sent and received) and friendships. Other users are not affected, apart from losing the friendship. The access token stops working straight away.
+
+| Status | Meaning |
+|---|---|
+| 204 | Deleted. No body. |
+| 401 | `{"error":"Sign in to manage your account"}` (missing, invalid or expired token) |
+| 404 | `{"error":"Account was not found"}` (already deleted) |
+
+### `GET /users/me/settings` and `PUT /users/me/settings`
+
+The app's preferences, saved to the account so they follow the user to another phone. Both need `Authorization: Bearer <access token>`. The fingerprint lock is not included: it belongs to one phone's sensor.
+
+`PUT` replaces every setting at once, and the newest save wins. Both routes answer with the stored settings:
+
+```json
+{
+  "language": "af",
+  "themeMode": "LIGHT",
+  "homeBackdrop": "COAST",
+  "defaultPlatform": "PLAYSTATION",
+  "achievementNotifications": true,
+  "rankChangeNotifications": false,
+  "seasonResetNotifications": true,
+  "friendActivityNotifications": false,
+  "updatedAt": 1761030000000
+}
+```
+
+| Field | Allowed values |
+|---|---|
+| `language` | `en`, `af`, `zu` |
+| `themeMode` | `DARK`, `LIGHT` |
+| `homeBackdrop` | `HILLS`, `MOUNTAIN`, `MEADOW`, `FOREST`, `COAST` |
+| `defaultPlatform` | `PC`, `PLAYSTATION`, `XBOX`, `SWITCH` |
+| `updatedAt` | Epoch milliseconds, set by the server. Ignored in a `PUT`. |
+
+| Status | Meaning |
+|---|---|
+| 200 | The stored settings |
+| 400 | A value the app doesn't offer, e.g. `{"error":"language must be one of en, af, zu"}` |
+| 401 | `{"error":"Sign in to use your settings"}` |
+| 404 | `GET` only: `{"error":"No settings have been saved yet"}`. The app then uploads its own. |
+
+How the app uses them: every change in Settings is uploaded straight away. If the upload fails (for example offline), the change is kept and uploaded the next time the app opens. Otherwise, opening the app or signing in downloads the account's settings, so a change made on another phone shows up.
+
 ## Planned endpoints
 
 Routes follow the Part 1 design document, the below routes are yet to be built:

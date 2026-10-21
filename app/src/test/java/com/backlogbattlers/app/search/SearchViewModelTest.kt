@@ -2,11 +2,13 @@ package com.backlogbattlers.app.search
 
 import com.backlogbattlers.app.domain.model.BrowseCategory
 import com.backlogbattlers.app.domain.model.SearchSort
+import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.viewmodels.GameListState
 import com.backlogbattlers.app.viewmodels.SearchMode
 import com.backlogbattlers.app.viewmodels.SearchViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -40,7 +42,9 @@ class SearchViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = SearchViewModel(games, library, history)
+    private val settings = FakeSettingsRepository()
+
+    private fun viewModel() = SearchViewModel(games, library, history, settings)
 
     @Test
     fun `an empty box rests on the shortcuts`() = runTest {
@@ -198,6 +202,21 @@ class SearchViewModelTest {
         viewModel.addToLibrary(hollow)
         advanceUntilIdle()
         assertEquals(setOf(1), viewModel.uiState.value.ownedGameIds)
+    }
+
+    @Test
+    fun `adding a game from search files it under the default platform from Settings`() = runTest {
+        settings.setDefaultPlatform(Platform.XBOX)
+        val hollow = game(1, "Hollow Knight", platforms = listOf("PC", "XBOX", "SWITCH"))
+        games.searchResults = listOf(hollow)
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.addToLibrary(hollow)
+        advanceUntilIdle()
+
+        assertEquals(Platform.XBOX, library.observeLibrary().first().single().platform)
+        assertEquals(Platform.XBOX, viewModel.uiState.value.preferredPlatform)
     }
 
     @Test

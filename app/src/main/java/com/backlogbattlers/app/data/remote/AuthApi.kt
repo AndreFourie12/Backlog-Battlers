@@ -4,9 +4,13 @@ import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
+import io.ktor.client.request.delete
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
@@ -88,4 +92,25 @@ class AuthApi(
         }
         return response.body()
     }
+
+    //------------------------------
+    // DELETEs the signed-in user's account on the backend, along with everything it owns.
+    // a 404 counts as done (the account is already gone); a 401 means the session is no longer valid
+    suspend fun deleteAccount(accessToken: String) {
+        val response = httpClient.delete("$baseUrl/users/me") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
+        }
+        when {
+            response.status.isSuccess() || response.status == HttpStatusCode.NotFound -> Unit
+            response.status == HttpStatusCode.Unauthorized -> throw SessionExpiredException()
+            else -> {
+                val errorText = runCatching { response.body<String>() }.getOrDefault("HTTP ${response.status.value}")
+                Log.e("AuthApi", "Delete account request failed [${response.status.value}]: $errorText")
+                throw IllegalStateException("Server returned HTTP ${response.status.value}: $errorText")
+            }
+        }
+    }
 }
+
+/** Thrown when the backend no longer accepts the stored session, so the user has to sign in again. */
+class SessionExpiredException : Exception("The session has expired")

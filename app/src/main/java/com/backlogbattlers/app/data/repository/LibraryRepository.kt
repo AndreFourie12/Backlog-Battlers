@@ -37,6 +37,9 @@ interface LibraryRepository {
 
     // removes a library entry by id
     suspend fun remove(libraryEntryId: String)
+
+    // removes every library entry on this device, when the account is deleted
+    suspend fun clear()
 }
 
 
@@ -150,6 +153,12 @@ class LibraryRepositoryImpl(
     override suspend fun remove(libraryEntryId: String) {
         val existing = dao.getById(libraryEntryId) ?: return
         dao.delete(existing)
+    }
+
+    //------------------------------
+    // removes every library entry by delegating to LibraryEntryDao
+    override suspend fun clear() {
+        dao.clear()
     }
 
     //------------------------------
