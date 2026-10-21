@@ -15,10 +15,12 @@ import androidx.navigation.fragment.findNavController
 import com.backlogbattlers.app.BuildConfig
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.data.repository.DeleteAccountResult
+import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.UserSettings
 import com.backlogbattlers.app.util.bindSettingsHeader
 import com.backlogbattlers.app.util.bindSettingsRow
+import com.backlogbattlers.app.util.platformLabel
 import com.backlogbattlers.app.viewmodels.SettingsViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -106,6 +108,7 @@ class SettingsFragment : Fragment() {
         // rebound whenever the stored settings change
         val notificationsRow = view.findViewById<View>(R.id.rowNotifications)
         val appearanceRow = view.findViewById<View>(R.id.rowAppearance)
+        val platformRow = view.findViewById<View>(R.id.rowDefaultPlatform)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -124,6 +127,14 @@ class SettingsFragment : Fragment() {
                         value = getString(themeLabel(settings.themeMode)),
                     ) {
                         findNavController().navigate(R.id.action_settingsFragment_to_appearanceFragment)
+                    }
+
+                    platformRow.bindSettingsRow(
+                        icon = R.drawable.ic_gamepad,
+                        title = R.string.settings_default_platform,
+                        value = platformLabel(settings.defaultPlatform.name),
+                    ) {
+                        pickDefaultPlatform(settings.defaultPlatform)
                     }
                 }
             }
@@ -154,6 +165,29 @@ class SettingsFragment : Fragment() {
             0 -> getString(R.string.settings_notifications_all_off)
             else -> getString(R.string.settings_notifications_some_on, on, switches.size)
         }
+    }
+
+    //------------------------------
+    // the platforms a user can pick as their default. "Other" is left out: it is what a game falls
+    // back to when it lists nothing recognisable, not somewhere people play
+    private val platformChoices = listOf(Platform.PC, Platform.PLAYSTATION, Platform.XBOX, Platform.SWITCH)
+
+    private fun pickDefaultPlatform(current: Platform) {
+        val labels = platformChoices.map { platformLabel(it.name) }.toTypedArray()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.settings_default_platform_dialog_title)
+            .setSingleChoiceItems(labels, platformChoices.indexOf(current)) { dialog, which ->
+                val chosen = platformChoices[which]
+                viewModel.setDefaultPlatform(chosen)
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.settings_default_platform_saved, labels[which]),
+                    Toast.LENGTH_SHORT,
+                ).show()
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     //------------------------------

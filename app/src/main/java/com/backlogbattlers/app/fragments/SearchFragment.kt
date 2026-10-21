@@ -30,6 +30,7 @@ import com.backlogbattlers.app.adapters.SearchResult
 import com.backlogbattlers.app.adapters.SearchResultAdapter
 import com.backlogbattlers.app.domain.model.BrowseCategory
 import com.backlogbattlers.app.domain.model.SearchSort
+import com.backlogbattlers.app.util.primaryPlatform
 import com.backlogbattlers.app.util.browseCategoryLabel
 import com.backlogbattlers.app.util.inflateChild
 import com.backlogbattlers.app.util.platformLabel
@@ -252,7 +253,7 @@ class SearchFragment : Fragment() {
 
         val games = (state.suggestions as? GameListState.Loaded)?.games.orEmpty()
         list.setVisible(games.isNotEmpty())
-        suggestionAdapter.submitList(games.map { SearchResult(it, it.gameId in state.ownedGameIds) })
+        suggestionAdapter.submitList(games.map { SearchResult(it, it.gameId in state.ownedGameIds, primaryPlatform(it.platforms, state.preferredPlatform)) })
 
         message.setVisible(state.suggestions is GameListState.Error)
         message.setText(R.string.search_error)
@@ -275,7 +276,7 @@ class SearchFragment : Fragment() {
 
         val visible = state.visibleResults
         list.setVisible(visible.isNotEmpty())
-        resultAdapter.submitList(visible.map { SearchResult(it, it.gameId in state.ownedGameIds) })
+        resultAdapter.submitList(visible.map { SearchResult(it, it.gameId in state.ownedGameIds, primaryPlatform(it.platforms, state.preferredPlatform)) })
 
         count.text = resources.getQuantityString(R.plurals.search_result_count, visible.size, visible.size)
 

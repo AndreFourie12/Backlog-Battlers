@@ -16,19 +16,22 @@ fun platformLabel(platform: String): String = when (platform.uppercase()) {
     else -> "Other"
 }
 
-// the API lists a game's platforms in no set order, so the one a game is shown and filed under is picked
-// by rank instead, following the order of Platform: PC first, then the consoles, "other" last.
+// the platform a game is shown and filed under: the user's default platform (Settings) when the
+// game is on it. Otherwise, as the API lists a game's platforms in no set order, it is picked by
+// rank, following the order of Platform: PC first, then the consoles, "other" last.
 // Null when the game lists none
-fun primaryPlatform(platforms: List<String>): Platform? {
-    return platforms
-        .map { name -> runCatching { Platform.valueOf(name.uppercase()) }.getOrDefault(Platform.OTHER) }
-        .minOrNull()
+fun primaryPlatform(platforms: List<String>, preferred: Platform? = null): Platform? {
+    val listed = platforms.map { name -> runCatching { Platform.valueOf(name.uppercase()) }.getOrDefault(Platform.OTHER) }
+    return preferred?.takeIf { it in listed } ?: listed.minOrNull()
 }
 
-fun gameSubtitle(platforms: List<String>, genres: List<String>): String {
-    val platform = primaryPlatform(platforms)?.let { platformLabel(it.name) }
+fun gameSubtitle(platforms: List<String>, genres: List<String>, preferred: Platform? = null): String =
+    gameSubtitle(primaryPlatform(platforms, preferred), genres)
+
+// for a game whose platform is already settled, e.g. a library entry's
+fun gameSubtitle(platform: Platform?, genres: List<String>): String {
     val genre = genres.firstOrNull()
-    return listOfNotNull(platform, genre).joinToString(" · ")
+    return listOfNotNull(platform?.let { platformLabel(it.name) }, genre).joinToString(" · ")
 }
 
 // how a library entry's status reads inline, e.g. under a game's progress bar

@@ -173,6 +173,9 @@
     <string name="settings_connected_accounts_pending">Coming soon</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_appearance">Appearance</string>
+    <string name="settings_default_platform">Default Platform</string>
+    <string name="settings_default_platform_dialog_title">Where do you mostly play?</string>
+    <string name="settings_default_platform_saved">New games will be added as %1$s when they\'re available there</string>
     <string name="settings_privacy">Privacy &amp; Data</string>
     <string name="settings_help">Help &amp; Support</string>
     <string name="settings_about">About</string>
