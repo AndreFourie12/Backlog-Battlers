@@ -7,7 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthResult
+import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.domain.model.User
+import com.backlogbattlers.app.util.BiometricAvailabilityChecker
+import com.backlogbattlers.app.util.shouldOfferBiometricUnlock
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +33,8 @@ sealed class LoginUiState {
 // viewmodel managing google sso state and repository interactions
 class LoginViewModel(
     private val authRepository: AuthRepository = ServiceLocator.authRepository,
+    private val settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
+    private val biometricChecker: BiometricAvailabilityChecker = ServiceLocator.biometricAvailabilityChecker,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
@@ -67,5 +73,23 @@ class LoginViewModel(
                 }
             }
         }
+    }
+
+    //------------------------------
+    // whether to ask "unlock with your fingerprint next time?" before going home: once per phone,
+    // only when it isn't on yet and the phone has a fingerprint, face or screen lock to use
+    suspend fun shouldAskAboutBiometricUnlock(): Boolean {
+        return shouldOfferBiometricUnlock(
+            biometricEnabled = settingsRepository.observeSettings().first().biometricLoginEnabled,
+            alreadyOffered = settingsRepository.hasOfferedBiometricUnlock(),
+            availability = biometricChecker.check(),
+        )
+    }
+
+    //------------------------------
+    // stores the answer (DataStore, this phone only) so the question is never asked again here
+    suspend fun answerBiometricOffer(accepted: Boolean) {
+        if (accepted) settingsRepository.setBiometricLoginEnabled(true)
+        settingsRepository.setBiometricUnlockOffered()
     }
 }

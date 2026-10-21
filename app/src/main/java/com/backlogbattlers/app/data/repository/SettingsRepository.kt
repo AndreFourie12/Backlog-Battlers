@@ -65,6 +65,13 @@ interface SettingsRepository {
 
     // marks or clears a change still waiting to be uploaded
     suspend fun setSyncPending(pending: Boolean)
+
+    // whether this phone has already asked "unlock with your fingerprint?" after a sign-in.
+    // kept on the phone only, like the fingerprint lock itself, so it is asked once per phone
+    suspend fun hasOfferedBiometricUnlock(): Boolean
+
+    // remembers that the question was asked, whatever the answer
+    suspend fun setBiometricUnlockOffered()
 }
 
 //------------------------------
@@ -84,6 +91,7 @@ class SettingsRepositoryImpl(
         val NOTIF_SEASON_RESET = booleanPreferencesKey("notif_season_reset")
         val NOTIF_FRIEND_ACTIVITY = booleanPreferencesKey("notif_friend_activity")
         val SYNC_PENDING = booleanPreferencesKey("settings_sync_pending")
+        val BIOMETRIC_OFFERED = booleanPreferencesKey("biometric_unlock_offered")
     }
 
     //------------------------------
@@ -222,5 +230,13 @@ class SettingsRepositoryImpl(
 
     override suspend fun setSyncPending(pending: Boolean) {
         context.dataStore.edit { prefs -> prefs[Keys.SYNC_PENDING] = pending }
+    }
+
+    override suspend fun hasOfferedBiometricUnlock(): Boolean {
+        return context.dataStore.data.first()[Keys.BIOMETRIC_OFFERED] ?: false
+    }
+
+    override suspend fun setBiometricUnlockOffered() {
+        context.dataStore.edit { prefs -> prefs[Keys.BIOMETRIC_OFFERED] = true }
     }
 }

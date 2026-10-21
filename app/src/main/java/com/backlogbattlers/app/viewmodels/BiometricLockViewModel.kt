@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.SettingsRepository
+import com.backlogbattlers.app.util.BiometricLockReason
+import com.backlogbattlers.app.util.lockReasonFor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +24,10 @@ sealed class BiometricLockUiState {
     // biometric check succeeded
     data object Success : BiometricLockUiState()
 
-    // scan failed or cancelled user was signed out
+    // the prompt closed without unlocking: the screen offers to try again or sign in again
+    data class Locked(val reason: BiometricLockReason) : BiometricLockUiState()
+
+    // the user chose to sign in again instead, and was signed out
     data object SignedOut : BiometricLockUiState()
 }
 
@@ -42,17 +47,25 @@ class BiometricLockViewModel(
     }
 
     //------------------------------
-    // the scan matched the caller can now navigate to home
+    // the scan (or the phone's PIN) matched, the caller can now navigate to home
     fun onAuthenticationSucceeded() {
         _uiState.value = BiometricLockUiState.Success
     }
 
     //------------------------------
-    // the scan was cancelled or failed terminally sign the session out entirely and turn the biometric setting off
-    fun onAuthenticationTerminated() {
+    // the prompt closed without unlocking, from the user cancelling or from an error. nothing is
+    // signed out: the screen stays locked and offers to try again or to sign in again
+    fun onAuthenticationError(errorCode: Int) {
+        _uiState.value = BiometricLockUiState.Locked(lockReasonFor(errorCode))
+    }
+
+    //------------------------------
+    // the user would rather sign in with Google than unlock: the session ends here. fingerprint
+    // unlock stays on, so after signing in it guards the next launch as before
+    fun onSignInAgain() {
         viewModelScope.launch {
             authRepository.signOut()
-            settingsRepository.setBiometricLoginEnabled(false)
+            settingsRepository.setSyncPending(false)
             _uiState.value = BiometricLockUiState.SignedOut
         }
     }

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -12,6 +13,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.backlogbattlers.app.R
+import com.backlogbattlers.app.core.ServiceLocator
+import com.backlogbattlers.app.util.BiometricAvailability
 import com.backlogbattlers.app.util.bindSettingsHeader
 import com.backlogbattlers.app.util.bindSettingsToggle
 import com.backlogbattlers.app.util.setSettingsToggleChecked
@@ -53,8 +56,17 @@ class PrivacyDataFragment : Fragment() {
             title = R.string.privacy_biometric,
             body = R.string.privacy_biometric_body,
             checked = viewModel.settings.value.biometricLoginEnabled,
-            onCheckedChange = viewModel::setBiometricLogin,
-        )
+        ) { enabled ->
+            // turning it on only works on a phone that can unlock with something. otherwise it
+            // says why and stays off, rather than being a switch that quietly does nothing
+            val availability = ServiceLocator.biometricAvailabilityChecker.check()
+            if (enabled && availability != BiometricAvailability.Available) {
+                biometric.setSettingsToggleChecked(false)
+                Toast.makeText(requireContext(), unavailableMessage(availability), Toast.LENGTH_LONG).show()
+            } else {
+                viewModel.setBiometricLogin(enabled)
+            }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -63,6 +75,13 @@ class PrivacyDataFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun unavailableMessage(availability: BiometricAvailability): Int = when (availability) {
+        BiometricAvailability.NoHardware -> R.string.biometric_unavailable_no_hardware
+        BiometricAvailability.NotEnrolled -> R.string.biometric_unavailable_not_enrolled
+        BiometricAvailability.Unavailable,
+        BiometricAvailability.Available -> R.string.biometric_unavailable_other
     }
 }
 //------------------------------EOF------------------------------\\
