@@ -28,6 +28,24 @@ class FormattersTest {
     }
 
     @Test
+    fun `the default platform from Settings wins whenever the game is on it`() {
+        assertEquals(Platform.PLAYSTATION, primaryPlatform(listOf("OTHER", "PLAYSTATION", "PC"), preferred = Platform.PLAYSTATION))
+        assertEquals(Platform.SWITCH, primaryPlatform(listOf("switch", "PC"), preferred = Platform.SWITCH))
+    }
+
+    @Test
+    fun `a game not on the default platform falls back to its main one`() {
+        assertEquals(Platform.PC, primaryPlatform(listOf("XBOX", "PC"), preferred = Platform.SWITCH))
+        assertNull(primaryPlatform(emptyList(), preferred = Platform.XBOX))
+    }
+
+    @Test
+    fun `the label under a game follows the default platform too`() {
+        assertEquals("Xbox · Shooter", gameSubtitle(listOf("PC", "XBOX"), listOf("Shooter"), preferred = Platform.XBOX))
+        assertEquals("Switch · Platformer", gameSubtitle(Platform.SWITCH, listOf("Platformer")))
+    }
+
+    @Test
     fun `a game reads as its main platform and first genre`() {
         assertEquals("PC · Adventure", gameSubtitle(listOf("OTHER", "PLAYSTATION", "PC"), listOf("Adventure", "Indie")))
         assertEquals("PlayStation · Strategy", gameSubtitle(listOf("XBOX", "PLAYSTATION"), listOf("Strategy")))

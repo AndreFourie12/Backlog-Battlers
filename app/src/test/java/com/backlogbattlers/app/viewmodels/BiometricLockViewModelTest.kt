@@ -7,6 +7,7 @@ import com.backlogbattlers.app.data.repository.AuthResult
 import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.domain.model.AppLanguage
 import com.backlogbattlers.app.domain.model.HomeBackdrop
+import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.User
 import com.backlogbattlers.app.domain.model.UserSettings
@@ -106,6 +107,7 @@ class BiometricLockViewModelTest {
         override suspend fun setLanguage(language: AppLanguage) {}
         override suspend fun setThemeMode(mode: ThemeMode) {}
         override suspend fun setHomeBackdrop(backdrop: HomeBackdrop) {}
+        override suspend fun setDefaultPlatform(platform: Platform) {}
         override suspend fun setAchievementNotificationsEnabled(enabled: Boolean) {}
         override suspend fun setRankChangeNotificationsEnabled(enabled: Boolean) {}
         override suspend fun setSeasonResetNotificationsEnabled(enabled: Boolean) {}

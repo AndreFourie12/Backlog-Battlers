@@ -7,6 +7,7 @@ import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.search.FakeGameRepository
 import com.backlogbattlers.app.search.FakeLibraryRepository
+import com.backlogbattlers.app.search.FakeSettingsRepository
 import com.backlogbattlers.app.search.achievement
 import com.backlogbattlers.app.search.game
 import com.backlogbattlers.app.viewmodels.GameListState
@@ -61,7 +62,10 @@ class GameViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = GameViewModel(games, library)
+    // a new instance per test, as JUnit makes a fresh test object for each
+    private val settings = FakeSettingsRepository()
+
+    private fun viewModel() = GameViewModel(games, library, settings)
 
     @Test
     fun `an empty library counts no games and offers the popular ones`() = runTest {
@@ -115,6 +119,34 @@ class GameViewModelTest {
 
     @Test
     fun `a game is filed under its main platform, not the first one the API lists`() = runTest {
+        val sekiro = game(1, "Sekiro", platforms = listOf("OTHER", "PLAYSTATION", "PC", "XBOX"))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.addToLibrary(sekiro)
+        advanceUntilIdle()
+
+        assertEquals(Platform.PC, library.observeLibrary().first().single().platform)
+    }
+
+    @Test
+    fun `a game on the default platform from Settings is filed under it`() = runTest {
+        settings.setDefaultPlatform(Platform.PLAYSTATION)
+        val sekiro = game(1, "Sekiro", platforms = listOf("OTHER", "PLAYSTATION", "PC", "XBOX"))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.addToLibrary(sekiro)
+        advanceUntilIdle()
+
+        assertEquals(Platform.PLAYSTATION, library.observeLibrary().first().single().platform)
+        // and the popular list labels games the same way
+        assertEquals(Platform.PLAYSTATION, viewModel.uiState.value.preferredPlatform)
+    }
+
+    @Test
+    fun `a game that is not on the default platform keeps its main one`() = runTest {
+        settings.setDefaultPlatform(Platform.SWITCH)
         val sekiro = game(1, "Sekiro", platforms = listOf("OTHER", "PLAYSTATION", "PC", "XBOX"))
         val viewModel = viewModel()
         advanceUntilIdle()

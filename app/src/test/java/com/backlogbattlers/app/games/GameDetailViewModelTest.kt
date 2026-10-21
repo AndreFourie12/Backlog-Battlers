@@ -1,8 +1,10 @@
 package com.backlogbattlers.app.games
 
+import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.search.FakeGameRepository
 import com.backlogbattlers.app.search.FakeLibraryRepository
+import com.backlogbattlers.app.search.FakeSettingsRepository
 import com.backlogbattlers.app.search.achievement
 import com.backlogbattlers.app.search.game
 import com.backlogbattlers.app.viewmodels.GameDetailViewModel
@@ -40,7 +42,9 @@ class GameDetailViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = GameDetailViewModel(games, library)
+    private val settings = FakeSettingsRepository()
+
+    private fun viewModel() = GameDetailViewModel(games, library, settings)
 
     @Test
     fun `a freshly loaded game starts fully locked`() = runTest {
@@ -113,6 +117,24 @@ class GameDetailViewModelTest {
         // tracking an achievement implies tracking the game, on the platform it is filed under
         assertEquals(1, library.observeLibrary().first().size)
         assertEquals(Platform.PLAYSTATION, library.observeLibrary().first().single().platform)
+    }
+
+    @Test
+    fun `the header shows the default platform until the game is filed, then where it was filed`() = runTest {
+        games.cachedGames = mapOf(1 to game(1, "Hades", platforms = listOf("PC", "SWITCH")))
+        games.achievementsByGame = mapOf(1 to listOf(achievement("a")))
+        settings.setDefaultPlatform(Platform.SWITCH)
+        val viewModel = viewModel()
+        viewModel.load(1)
+        advanceUntilIdle()
+
+        assertEquals(Platform.SWITCH, viewModel.uiState.value.platform)
+
+        // already in the library under PC, e.g. added before the default was changed
+        library.addToLibrary(gameId = 1, platform = Platform.PC, status = LibraryStatus.BACKLOG)
+        advanceUntilIdle()
+
+        assertEquals(Platform.PC, viewModel.uiState.value.platform)
     }
 
     @Test
