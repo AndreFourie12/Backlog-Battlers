@@ -2,6 +2,7 @@ package com.backlogbattlers.app.viewmodels
 
 import android.app.Activity
 import com.backlogbattlers.app.data.repository.AuthRepository
+import com.backlogbattlers.app.data.repository.DeleteAccountResult
 import com.backlogbattlers.app.data.repository.AuthResult
 import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.domain.model.AppLanguage
@@ -93,6 +94,7 @@ class BiometricLockViewModelTest {
         override suspend fun signOut() {
             signOutCalled = true
         }
+        override suspend fun deleteAccount(): DeleteAccountResult = DeleteAccountResult.FAILED
     }
 
     // fake SettingsRepository for testing

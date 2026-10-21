@@ -144,6 +144,10 @@ class FakeLibraryRepository : LibraryRepository {
     override suspend fun remove(libraryEntryId: String) {
         entries.value = entries.value.filterNot { it.libraryEntryId == libraryEntryId }
     }
+
+    override suspend fun clear() {
+        entries.value = emptyList()
+    }
 }
 
 class FakeSearchHistoryRepository : SearchHistoryRepository {
@@ -158,5 +162,9 @@ class FakeSearchHistoryRepository : SearchHistoryRepository {
 
     override suspend fun removeSearch(query: String) {
         searches.value = searches.value.filterNot { it.equals(query, ignoreCase = true) }
+    }
+
+    override suspend fun clear() {
+        searches.value = emptyList()
     }
 }

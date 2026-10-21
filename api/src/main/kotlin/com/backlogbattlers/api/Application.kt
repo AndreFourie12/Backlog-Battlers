@@ -7,6 +7,7 @@ import com.backlogbattlers.api.db.DatabaseFactory
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.igdbHttpClient
+import com.backlogbattlers.api.routes.accountRoutes
 import com.backlogbattlers.api.routes.achievementRoutes
 import com.backlogbattlers.api.routes.authRoutes
 import com.backlogbattlers.api.routes.friendRoutes
@@ -58,6 +59,7 @@ fun Application.module() {
         friendRoutes(currentUser = bearerCurrentUser(jwtService))
         completionRoutes(currentUser = bearerCurrentUser(jwtService))
         leaderboardRoutes(currentUser = bearerCurrentUser(jwtService))
+        accountRoutes(currentUser = bearerCurrentUser(jwtService))
     }
 }
 //------------------------------EOF------------------------------\\

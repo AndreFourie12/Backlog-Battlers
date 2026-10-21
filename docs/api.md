@@ -116,6 +116,18 @@ Notes:
 
 WHich matches the app's `Game` model, except `cachedAt`, which the app sets itself when it caches a game.
 
+### `DELETE /users/me`
+
+Permanently deletes the signed-in user's account. Needs `Authorization: Bearer <access token>`.
+
+Everything the account owns goes with it: library entries and their unlocked achievements, completion records, monthly points, friend requests (sent and received) and friendships. Other users are not affected, apart from losing the friendship. The access token stops working straight away.
+
+| Status | Meaning |
+|---|---|
+| 204 | Deleted. No body. |
+| 401 | `{"error":"Sign in to manage your account"}` (missing, invalid or expired token) |
+| 404 | `{"error":"Account was not found"}` (already deleted) |
+
 ## Planned endpoints
 
 Routes follow the Part 1 design document, the below routes are yet to be built:

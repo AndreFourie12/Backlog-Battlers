@@ -14,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.backlogbattlers.app.BuildConfig
 import com.backlogbattlers.app.R
+import com.backlogbattlers.app.data.repository.DeleteAccountResult
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.UserSettings
 import com.backlogbattlers.app.util.bindSettingsHeader
@@ -99,6 +100,7 @@ class SettingsFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.btnLogOut).setOnClickListener { confirmLogOut() }
+        view.findViewById<View>(R.id.btnDeleteAccount).setOnClickListener { confirmDeleteAccount() }
 
         // these two rows carry the current value on the right, so they are
         // rebound whenever the stored settings change
@@ -169,6 +171,53 @@ class SettingsFragment : Fragment() {
                 }
             }
             .show()
+    }
+
+    //------------------------------
+    // deleting the account can't be undone, so it asks first, then shows the
+    // button as busy until the backend has answered
+    private fun confirmDeleteAccount() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.delete_account_confirm_title)
+            .setMessage(R.string.delete_account_confirm_body)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.delete_account_confirm_action) { _, _ -> deleteAccount() }
+            .show()
+    }
+
+    private fun deleteAccount() {
+        val button = view?.findViewById<View>(R.id.btnDeleteAccount) ?: return
+        val label = button.findViewById<TextView>(R.id.tvDeleteAccount)
+        button.isEnabled = false
+        label.setText(R.string.delete_account_in_progress)
+
+        viewModel.deleteAccount { result ->
+            if (!isAdded || view == null) return@deleteAccount
+
+            when (result) {
+                DeleteAccountResult.DELETED -> {
+                    Toast.makeText(requireContext(), R.string.delete_account_done, Toast.LENGTH_LONG).show()
+                    findNavController().navigate(R.id.action_settingsFragment_to_loginFragment)
+                }
+                // the session is dead, so there is nothing to delete with: sign in again first
+                DeleteAccountResult.SIGN_IN_AGAIN -> {
+                    Toast.makeText(requireContext(), R.string.delete_account_sign_in_again, Toast.LENGTH_LONG).show()
+                    viewModel.logOut {
+                        if (isAdded) findNavController().navigate(R.id.action_settingsFragment_to_loginFragment)
+                    }
+                }
+                DeleteAccountResult.NO_CONNECTION, DeleteAccountResult.FAILED -> {
+                    val message = if (result == DeleteAccountResult.NO_CONNECTION) {
+                        R.string.delete_account_no_connection
+                    } else {
+                        R.string.delete_account_failed
+                    }
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                    button.isEnabled = true
+                    label.setText(R.string.delete_account)
+                }
+            }
+        }
     }
 }
 //------------------------------EOF------------------------------\\

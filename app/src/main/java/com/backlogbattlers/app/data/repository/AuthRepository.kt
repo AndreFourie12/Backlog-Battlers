@@ -11,6 +11,7 @@ import com.backlogbattlers.app.data.local.TokenStorage
 import com.backlogbattlers.app.data.local.dao.UserDao
 import com.backlogbattlers.app.data.local.entity.UserEntity
 import com.backlogbattlers.app.data.remote.AuthApi
+import com.backlogbattlers.app.data.remote.SessionExpiredException
 import com.backlogbattlers.app.domain.model.User
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
+import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -51,6 +53,24 @@ interface AuthRepository {
 
     // signs out current user
     suspend fun signOut()
+
+    // permanently deletes the signed-in user's account on the backend, then signs out locally
+    suspend fun deleteAccount(): DeleteAccountResult
+}
+
+//------------------------------
+// how a delete account attempt ended. the screen turns each into its own message
+enum class DeleteAccountResult {
+    DELETED,
+
+    // there was no session left to delete with (or it could not be renewed): sign in again first
+    SIGN_IN_AGAIN,
+
+    // the backend could not be reached
+    NO_CONNECTION,
+
+    // the backend refused for some other reason
+    FAILED,
 }
 
 // AuthRepository implementation using CredentialManager, AuthApi, TokenStorage, and Room UserDao's
@@ -171,6 +191,50 @@ class AuthRepositoryImpl(
         // ignore on sign out
         } catch (_: Exception) {
         }
+    }
+
+    //------------------------------
+    // deletes the account on the backend with a fresh access token, then clears the local session
+    // exactly like signing out. a 401 from the backend means the session was already dead
+    override suspend fun deleteAccount(): DeleteAccountResult {
+        return try {
+            val accessToken = freshAccessToken() ?: return DeleteAccountResult.SIGN_IN_AGAIN
+            authApi.deleteAccount(accessToken)
+            signOut()
+            DeleteAccountResult.DELETED
+        } catch (_: SessionExpiredException) {
+            DeleteAccountResult.SIGN_IN_AGAIN
+        } catch (e: IOException) {
+            Log.e("AuthRepository", "Delete account could not reach the backend: ${e.message}", e)
+            DeleteAccountResult.NO_CONNECTION
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Delete account failed: ${e.message}", e)
+            DeleteAccountResult.FAILED
+        }
+    }
+
+    //------------------------------
+    // the stored access token, renewed with the refresh token first if it has expired.
+    // null when there is no session, or the backend will no longer renew it. a network
+    // failure while renewing is thrown, so it is reported as a connection problem
+    private suspend fun freshAccessToken(): String? {
+        val accessToken = tokenStorage.getAccessToken() ?: return null
+        if (!tokenStorage.isAccessTokenExpired()) return accessToken
+
+        val refreshToken = tokenStorage.getRefreshToken() ?: return null
+        val renewed = try {
+            authApi.refresh(refreshToken)
+        } catch (e: IOException) {
+            throw e
+        } catch (_: Exception) {
+            return null
+        }
+        tokenStorage.saveTokens(
+            accessToken = renewed.accessToken,
+            refreshToken = refreshToken,
+            expiresInSeconds = renewed.expiresIn,
+        )
+        return renewed.accessToken
     }
 
     //------------------------------

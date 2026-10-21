@@ -185,6 +185,15 @@
     <string name="log_out_confirm_title">Log out?</string>
     <string name="log_out_confirm_body">You will need to sign in with Google again to get back to your backlog.</string>
     <string name="log_out_confirm_action">Log Out</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_account_in_progress">Deleting your account…</string>
+    <string name="delete_account_confirm_title">Delete your account?</string>
+    <string name="delete_account_confirm_body">This permanently deletes your profile, game library, points and friends from Backlog Battlers. It can\'t be undone.</string>
+    <string name="delete_account_confirm_action">Delete</string>
+    <string name="delete_account_done">Your account has been deleted</string>
+    <string name="delete_account_sign_in_again">Your session has expired. Sign in again, then delete your account.</string>
+    <string name="delete_account_no_connection">Couldn\'t reach Backlog Battlers. Check your connection and try again.</string>
+    <string name="delete_account_failed">Something went wrong deleting your account. Please try again.</string>
     <string name="cancel">Cancel</string>
 
 

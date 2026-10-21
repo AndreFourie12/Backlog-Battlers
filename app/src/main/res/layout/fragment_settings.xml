@@ -190,5 +190,43 @@
                 android:text="@string/log_out"
                 android:textColor="@color/destructive" />
         </LinearLayout>
+
+        <!-- DELETE ACCOUNT -->
+        <LinearLayout
+            android:id="@+id/btnDeleteAccount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:background="@drawable/bg_card_destructive"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:minHeight="@dimen/settings_row_height"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/card_padding"
+            android:paddingTop="13dp"
+            android:paddingEnd="@dimen/card_padding"
+            android:paddingBottom="13dp">
+
+            <ImageView
+                android:layout_width="@dimen/settings_row_icon"
+                android:layout_height="@dimen/settings_row_icon"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_trash"
+                app:tint="@color/destructive" />
+
+            <TextView
+                android:id="@+id/tvDeleteAccount"
+                style="@style/Text.Body"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:includeFontPadding="false"
+                android:text="@string/delete_account"
+                android:textColor="@color/destructive" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

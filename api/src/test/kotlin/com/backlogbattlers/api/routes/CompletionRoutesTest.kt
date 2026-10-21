@@ -11,6 +11,7 @@ import com.backlogbattlers.api.db.Platform
 import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.db.Users
 import com.backlogbattlers.api.scoring.CompleteResponseDto
+import com.backlogbattlers.api.scoring.currentMonthPeriod
 import com.backlogbattlers.api.scoring.monthlyPointsFor
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
@@ -47,7 +48,7 @@ class CompletionRoutesTest {
 
     private val db = DatabaseFactory.init(jdbcUrl = null, memoryName = "completion-routes-${Uuid.random()}")
     private var caller: Uuid? = null
-    private val month = "2026-09" // routes use the real current month; seeded data here is timeless
+    private val month = currentMonthPeriod() // the routes award points to the real current month
 
     private fun ApplicationTestBuilder.installApi() {
         application {

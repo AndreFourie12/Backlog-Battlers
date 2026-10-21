@@ -3,6 +3,7 @@ package com.backlogbattlers.app.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
+import com.backlogbattlers.app.data.repository.DeleteAccountResult
 import com.backlogbattlers.app.domain.model.HomeBackdrop
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.User
@@ -10,7 +11,9 @@ import com.backlogbattlers.app.domain.model.UserSettings
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // shared by settings and every screen under it, so a change made on one screen
 // is already on the others when they open
@@ -69,6 +72,23 @@ class SettingsViewModel : ViewModel() {
     // biometric unlock preference
     fun setBiometricLogin(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.setBiometricLoginEnabled(enabled) }
+    }
+
+    //------------------------------
+    // deletes the account on the backend. once it is gone, everything it left on this device
+    // goes too (library, recent searches, the fingerprint lock) so the next person to sign in
+    // starts clean. runs on the application scope so leaving the screen mid-request can't
+    // leave the account deleted on the backend but still on the device
+    fun deleteAccount(onDone: (DeleteAccountResult) -> Unit) {
+        ServiceLocator.applicationScope.launch {
+            val result = authRepository.deleteAccount()
+            if (result == DeleteAccountResult.DELETED) {
+                ServiceLocator.libraryRepository.clear()
+                ServiceLocator.searchHistoryRepository.clear()
+                settingsRepository.setBiometricLoginEnabled(false)
+            }
+            withContext(Dispatchers.Main) { onDone(result) }
+        }
     }
 
     //------------------------------

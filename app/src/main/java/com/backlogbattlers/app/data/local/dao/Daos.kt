@@ -86,5 +86,9 @@ interface LibraryEntryDao {
     // deletes library entry
     @Delete
     suspend fun delete(entry: LibraryEntryEntity)
+
+    // deletes every library entry, when the account they belong to is deleted
+    @Query("DELETE FROM library_entries")
+    suspend fun clear()
 }
 //------------------------------EOF------------------------------\\
