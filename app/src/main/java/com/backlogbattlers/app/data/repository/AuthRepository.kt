@@ -54,6 +54,10 @@ interface AuthRepository {
     // signs out current user
     suspend fun signOut()
 
+    // the access token for an authenticated request, renewed first if it has expired. null when
+    // nobody is signed in or the session can no longer be renewed; a network failure is thrown
+    suspend fun freshAccessToken(): String?
+
     // permanently deletes the signed-in user's account on the backend, then signs out locally
     suspend fun deleteAccount(): DeleteAccountResult
 }
@@ -217,7 +221,7 @@ class AuthRepositoryImpl(
     // the stored access token, renewed with the refresh token first if it has expired.
     // null when there is no session, or the backend will no longer renew it. a network
     // failure while renewing is thrown, so it is reported as a connection problem
-    private suspend fun freshAccessToken(): String? {
+    override suspend fun freshAccessToken(): String? {
         val accessToken = tokenStorage.getAccessToken() ?: return null
         if (!tokenStorage.isAccessTokenExpired()) return accessToken
 

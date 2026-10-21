@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.backlogbattlers.app.R
+import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.viewmodels.BiometricLockUiState
 import com.backlogbattlers.app.viewmodels.BiometricLockViewModel
 import kotlinx.coroutines.launch
@@ -45,6 +46,8 @@ class BiometricLockFragment : Fragment() {
 
                     when (state) {
                         is BiometricLockUiState.Success -> {
+                            // the settings sync SplashFragment holds back until the user is in
+                            ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
                             findNavController().navigate(R.id.action_biometricLockFragment_to_homeFragment)
                         }
                         is BiometricLockUiState.SignedOut -> {

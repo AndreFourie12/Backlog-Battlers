@@ -55,6 +55,16 @@ interface SettingsRepository {
 
     // updates the friend activity notification preference
     suspend fun setFriendActivityNotificationsEnabled(enabled: Boolean)
+
+    // replaces everything that is saved to the account with [settings] in one write, after
+    // pulling them from the API. the fingerprint lock is left alone, it belongs to this phone
+    suspend fun replaceSyncedSettings(settings: UserSettings)
+
+    // whether a change made here still has to be uploaded, e.g. because it was made offline
+    suspend fun isSyncPending(): Boolean
+
+    // marks or clears a change still waiting to be uploaded
+    suspend fun setSyncPending(pending: Boolean)
 }
 
 //------------------------------
@@ -73,6 +83,7 @@ class SettingsRepositoryImpl(
         val NOTIF_RANK_CHANGE = booleanPreferencesKey("notif_rank_change")
         val NOTIF_SEASON_RESET = booleanPreferencesKey("notif_season_reset")
         val NOTIF_FRIEND_ACTIVITY = booleanPreferencesKey("notif_friend_activity")
+        val SYNC_PENDING = booleanPreferencesKey("settings_sync_pending")
     }
 
     //------------------------------
@@ -188,5 +199,28 @@ class SettingsRepositoryImpl(
         context.dataStore.edit { prefs ->
             prefs[Keys.NOTIF_FRIEND_ACTIVITY] = enabled
         }
+    }
+
+    //------------------------------
+    // writes every synced setting in a single DataStore edit, so the screens see one change
+    override suspend fun replaceSyncedSettings(settings: UserSettings) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.LANGUAGE] = settings.language.name
+            prefs[Keys.THEME_MODE] = settings.themeMode.name
+            prefs[Keys.HOME_BACKDROP] = settings.homeBackdrop.name
+            prefs[Keys.DEFAULT_PLATFORM] = settings.defaultPlatform.name
+            prefs[Keys.NOTIF_ACHIEVEMENT] = settings.achievementNotificationsEnabled
+            prefs[Keys.NOTIF_RANK_CHANGE] = settings.rankChangeNotificationsEnabled
+            prefs[Keys.NOTIF_SEASON_RESET] = settings.seasonResetNotificationsEnabled
+            prefs[Keys.NOTIF_FRIEND_ACTIVITY] = settings.friendActivityNotificationsEnabled
+        }
+    }
+
+    override suspend fun isSyncPending(): Boolean {
+        return context.dataStore.data.first()[Keys.SYNC_PENDING] ?: false
+    }
+
+    override suspend fun setSyncPending(pending: Boolean) {
+        context.dataStore.edit { prefs -> prefs[Keys.SYNC_PENDING] = pending }
     }
 }
