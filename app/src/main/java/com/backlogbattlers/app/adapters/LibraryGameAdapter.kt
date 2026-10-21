@@ -55,7 +55,8 @@ class LibraryGameAdapter(
             art.loadArtwork(game.coverImageUrl ?: game.artworkUrl)
             val percent = completionPercent(libraryGame.entry.unlockedAchievementIds.size, game.totalAchievements)
             completion.text = completion.context.getString(R.string.library_completion_percent, percent)
-            subtitle.text = gameSubtitle(game.platforms, game.genres)
+            // a library game is labelled with the platform it was filed under
+            subtitle.text = gameSubtitle(libraryGame.entry.platform, game.genres)
 
             itemView.setOnClickListener { onClick(libraryGame) }
         }

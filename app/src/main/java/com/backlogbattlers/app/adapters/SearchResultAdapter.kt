@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.backlogbattlers.app.domain.model.Game
+import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.util.gameSubtitle
 import com.backlogbattlers.app.util.inflateChild
@@ -18,6 +19,8 @@ import com.backlogbattlers.app.util.setVisible
 data class SearchResult(
     val game: Game,
     val owned: Boolean,
+    // the platform the row is labelled with, see primaryPlatform
+    val platform: Platform?,
 )
 
 class SearchResultAdapter(
@@ -56,7 +59,7 @@ class SearchResultAdapter(
             art.loadArtwork(game.artworkUrl ?: game.coverImageUrl)
             title.text = game.title
 
-            val line = gameSubtitle(game.platforms, game.genres)
+            val line = gameSubtitle(result.platform, game.genres)
             subtitle.text = line
             subtitle.setVisible(line.isNotEmpty())
 

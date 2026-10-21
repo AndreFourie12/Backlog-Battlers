@@ -143,6 +143,8 @@ data class UserSettings(
     val language: AppLanguage = AppLanguage.ENGLISH,
     val themeMode: ThemeMode = ThemeMode.DARK,
     val homeBackdrop: HomeBackdrop = HomeBackdrop.HILLS,
+    // the platform the user mostly plays on. games that are on it get filed and labelled under it
+    val defaultPlatform: Platform = Platform.PC,
     val biometricLoginEnabled: Boolean = false,
     val achievementNotificationsEnabled: Boolean = true,
     val rankChangeNotificationsEnabled: Boolean = true,

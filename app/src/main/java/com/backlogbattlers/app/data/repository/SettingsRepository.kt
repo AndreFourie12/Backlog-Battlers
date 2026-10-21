@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.backlogbattlers.app.domain.model.AppLanguage
 import com.backlogbattlers.app.domain.model.HomeBackdrop
+import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.UserSettings
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +38,9 @@ interface SettingsRepository {
     // updates the artwork shown behind the home screen header
     suspend fun setHomeBackdrop(backdrop: HomeBackdrop)
 
+    // updates the platform games are filed under when they are on it
+    suspend fun setDefaultPlatform(platform: Platform)
+
     // updates the biometric login preference
     suspend fun setBiometricLoginEnabled(enabled: Boolean)
 
@@ -63,6 +67,7 @@ class SettingsRepositoryImpl(
         val LANGUAGE = stringPreferencesKey("language")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val HOME_BACKDROP = stringPreferencesKey("home_backdrop")
+        val DEFAULT_PLATFORM = stringPreferencesKey("default_platform")
         val BIOMETRIC_LOGIN_ENABLED = booleanPreferencesKey("biometric_login_enabled")
         val NOTIF_ACHIEVEMENT = booleanPreferencesKey("notif_achievement")
         val NOTIF_RANK_CHANGE = booleanPreferencesKey("notif_rank_change")
@@ -87,10 +92,15 @@ class SettingsRepositoryImpl(
                 runCatching { HomeBackdrop.valueOf(it) }.getOrNull()
             } ?: HomeBackdrop.HILLS
 
+            val defaultPlatform = prefs[Keys.DEFAULT_PLATFORM]?.let {
+                runCatching { Platform.valueOf(it) }.getOrNull()
+            } ?: Platform.PC
+
             UserSettings(
                 language = language,
                 themeMode = themeMode,
                 homeBackdrop = homeBackdrop,
+                defaultPlatform = defaultPlatform,
                 biometricLoginEnabled = prefs[Keys.BIOMETRIC_LOGIN_ENABLED] ?: false,
                 achievementNotificationsEnabled = prefs[Keys.NOTIF_ACHIEVEMENT] ?: true,
                 rankChangeNotificationsEnabled = prefs[Keys.NOTIF_RANK_CHANGE] ?: true,
@@ -129,6 +139,14 @@ class SettingsRepositoryImpl(
     override suspend fun setHomeBackdrop(backdrop: HomeBackdrop) {
         context.dataStore.edit { prefs ->
             prefs[Keys.HOME_BACKDROP] = backdrop.name
+        }
+    }
+
+    //------------------------------
+    // saves the default Platform preference to DataStore
+    override suspend fun setDefaultPlatform(platform: Platform) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.DEFAULT_PLATFORM] = platform.name
         }
     }
 
