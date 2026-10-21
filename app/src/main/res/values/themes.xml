@@ -28,6 +28,15 @@
 
     <style name="Theme.PROG7314_POE_Backlog_Battler" parent="Base.Theme.PROG7314_POE_Backlog_Battler" />
 
+    <!-- the launch splash (core-splashscreen). the system draws it before the app's own
+         light/dark choice is known, so it uses the dark page colour the app ships with
+         rather than following the phone's theme -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/brand_splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.PROG7314_POE_Backlog_Battler</item>
+    </style>
+
     <!-- confirmation dialogs (sign out, clear cached data) in app colours -->
     <style name="ThemeOverlay.App.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="colorSurface">@color/surface</item>

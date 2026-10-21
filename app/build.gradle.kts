@@ -89,6 +89,7 @@ dependencies {
     // achievements-loading row and its achievement list into a single RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 
     implementation("androidx.credentials:credentials:1.3.0")

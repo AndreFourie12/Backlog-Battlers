@@ -24,7 +24,7 @@
 
     <!-- straddles the art's bottom edge on purpose: a top AND a bottom constraint to that same
          edge centers the pill on it, half over the art and half over the page below.
-         Hardcoded to 50% for now: nothing tracks a game's real completion yet -->
+         LibraryGameAdapter fills in the share of the game's achievements unlocked -->
     <TextView
         android:id="@+id/tv_game_completion"
         style="@style/Text.CardBadge"

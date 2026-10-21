@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
@@ -17,6 +18,8 @@ class MainActivity : AppCompatActivity() {
     private var contentDrawsBehindStatusBar = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // has to run before super.onCreate so the launch theme hands over to the app theme
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -31,6 +34,11 @@ class MainActivity : AppCompatActivity() {
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
+        // the logo stays up while SplashFragment works out whether to go to login,
+        // the fingerprint lock or home, so the user never sees an empty screen in between
+        splashScreen.setKeepOnScreenCondition {
+            navController.currentDestination?.id == R.id.splashFragment
+        }
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         val navDivider = findViewById<View>(R.id.navDivider)
 
