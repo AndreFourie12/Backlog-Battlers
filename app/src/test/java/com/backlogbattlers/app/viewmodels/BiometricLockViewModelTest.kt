@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.viewmodels
 
 import android.app.Activity
+import androidx.biometric.BiometricPrompt
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.DeleteAccountResult
@@ -12,6 +13,7 @@ import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.domain.model.ThemeMode
 import com.backlogbattlers.app.domain.model.User
 import com.backlogbattlers.app.domain.model.UserSettings
+import com.backlogbattlers.app.util.BiometricLockReason
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -21,6 +23,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -72,16 +76,43 @@ class BiometricLockViewModelTest {
 
     @Test
     //------------------------------
-    // verifies onAuthenticationTerminated signs out disables biometric and sets state to SignedOut
-    fun `onAuthenticationTerminated signs out disables biometric and sets state to SignedOut`() = runTest {
+    // verifies cancelling the prompt keeps the session and offers to try again or sign in again
+    fun `cancelling the prompt keeps the user signed in and locked`() = runTest {
+        val fakeAuth = FakeAuthRepository()
+        val viewModel = BiometricLockViewModel(fakeAuth, FakeSettingsRepository())
+
+        viewModel.onAuthenticationError(BiometricPrompt.ERROR_USER_CANCELED)
+
+        assertFalse(fakeAuth.signOutCalled)
+        assertEquals(BiometricLockUiState.Locked(BiometricLockReason.CANCELLED), viewModel.uiState.value)
+    }
+
+    @Test
+    //------------------------------
+    // verifies too many failed scans explains the lockout instead of signing out
+    fun `too many failed scans locks the screen with the lockout reason`() = runTest {
+        val fakeAuth = FakeAuthRepository()
+        val viewModel = BiometricLockViewModel(fakeAuth, FakeSettingsRepository())
+
+        viewModel.onAuthenticationError(BiometricPrompt.ERROR_LOCKOUT)
+
+        assertFalse(fakeAuth.signOutCalled)
+        assertEquals(BiometricLockUiState.Locked(BiometricLockReason.LOCKED_OUT), viewModel.uiState.value)
+    }
+
+    @Test
+    //------------------------------
+    // verifies choosing sign in again ends the session but leaves fingerprint unlock on
+    fun `signing in again signs out and keeps fingerprint unlock on`() = runTest {
         val fakeAuth = FakeAuthRepository()
         val fakeSettings = FakeSettingsRepository()
         val viewModel = BiometricLockViewModel(fakeAuth, fakeSettings)
+        viewModel.onAuthenticationError(BiometricPrompt.ERROR_USER_CANCELED)
 
-        viewModel.onAuthenticationTerminated()
+        viewModel.onSignInAgain()
 
         assertTrue(fakeAuth.signOutCalled)
-        assertEquals(false, fakeSettings.lastBiometricLoginEnabled)
+        assertNull(fakeSettings.lastBiometricLoginEnabled)
         assertEquals(BiometricLockUiState.SignedOut, viewModel.uiState.value)
     }
 
@@ -117,6 +148,8 @@ class BiometricLockViewModelTest {
         override suspend fun replaceSyncedSettings(settings: UserSettings) {}
         override suspend fun isSyncPending(): Boolean = false
         override suspend fun setSyncPending(pending: Boolean) {}
+        override suspend fun hasOfferedBiometricUnlock(): Boolean = false
+        override suspend fun setBiometricUnlockOffered() {}
         override suspend fun setBiometricLoginEnabled(enabled: Boolean) {
             lastBiometricLoginEnabled = enabled
         }

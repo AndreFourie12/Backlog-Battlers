@@ -34,4 +34,27 @@
         android:gravity="center"
         android:text="@string/biometric_lock_body" />
 
+    <!-- shown once the prompt has closed without unlocking -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBiometricRetry"
+        style="@style/Widget.App.AccentButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/cta_height"
+        android:layout_marginTop="32dp"
+        android:text="@string/biometric_lock_retry"
+        android:visibility="gone"
+        app:icon="@null"
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBiometricSignInAgain"
+        style="@style/Widget.App.QuietButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:minHeight="48dp"
+        android:text="@string/biometric_lock_sign_in_again"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
 </LinearLayout>

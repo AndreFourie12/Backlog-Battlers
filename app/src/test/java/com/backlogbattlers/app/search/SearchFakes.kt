@@ -195,4 +195,7 @@ class FakeSettingsRepository : SettingsRepository {
     override suspend fun replaceSyncedSettings(settings: UserSettings) { this.settings.value = settings.copy(biometricLoginEnabled = this.settings.value.biometricLoginEnabled) }
     override suspend fun isSyncPending(): Boolean = syncPending
     override suspend fun setSyncPending(pending: Boolean) { syncPending = pending }
+    var biometricOffered = false
+    override suspend fun hasOfferedBiometricUnlock(): Boolean = biometricOffered
+    override suspend fun setBiometricUnlockOffered() { biometricOffered = true }
 }

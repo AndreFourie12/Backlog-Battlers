@@ -4,8 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.biometric.BiometricManager
+import android.widget.TextView
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -16,11 +15,16 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.core.ServiceLocator
+import com.backlogbattlers.app.util.BiometricLockReason
+import com.backlogbattlers.app.util.UNLOCK_AUTHENTICATORS
+import com.backlogbattlers.app.util.setVisible
 import com.backlogbattlers.app.viewmodels.BiometricLockUiState
 import com.backlogbattlers.app.viewmodels.BiometricLockViewModel
 import kotlinx.coroutines.launch
 
 // fingerprint lock screen shown after a cold launch when biometric login is on.
+// the prompt accepts a fingerprint or face, or the phone's PIN, pattern or password. if it is
+// closed without unlocking, the screen stays locked and offers to try again or sign in again
 class BiometricLockFragment : Fragment() {
 
     private val viewModel: BiometricLockViewModel by viewModels()
@@ -40,9 +44,20 @@ class BiometricLockFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val body = view.findViewById<TextView>(R.id.tvBiometricLockBody)
+        val retry = view.findViewById<View>(R.id.btnBiometricRetry)
+        val signInAgain = view.findViewById<View>(R.id.btnBiometricSignInAgain)
+        retry.setOnClickListener { showBiometricPrompt() }
+        signInAgain.setOnClickListener { viewModel.onSignInAgain() }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
+                    val locked = state as? BiometricLockUiState.Locked
+                    // retrying only makes sense while the sensor or screen lock is still there
+                    retry.setVisible(locked != null && locked.reason != BiometricLockReason.UNAVAILABLE)
+                    signInAgain.setVisible(locked != null)
+                    body.setText(if (locked != null) lockMessage(locked.reason) else R.string.biometric_lock_body)
 
                     when (state) {
                         is BiometricLockUiState.Success -> {
@@ -51,20 +66,29 @@ class BiometricLockFragment : Fragment() {
                             findNavController().navigate(R.id.action_biometricLockFragment_to_homeFragment)
                         }
                         is BiometricLockUiState.SignedOut -> {
-                            Toast.makeText(requireContext(), R.string.biometric_signed_out_message, Toast.LENGTH_LONG).show()
                             findNavController().navigate(R.id.action_biometricLockFragment_to_loginFragment)
                         }
-                        BiometricLockUiState.Idle, BiometricLockUiState.Authenticating -> Unit
+                        BiometricLockUiState.Idle,
+                        BiometricLockUiState.Authenticating,
+                        is BiometricLockUiState.Locked -> Unit
                     }
                 }
             }
         }
 
-        showBiometricPrompt()
+        // a recreated screen (e.g. after rotating) that was already showing its buttons waits for a tap
+        if (viewModel.uiState.value !is BiometricLockUiState.Locked) showBiometricPrompt()
+    }
+
+    private fun lockMessage(reason: BiometricLockReason): Int = when (reason) {
+        BiometricLockReason.CANCELLED -> R.string.biometric_lock_cancelled
+        BiometricLockReason.LOCKED_OUT -> R.string.biometric_lock_locked_out
+        BiometricLockReason.UNAVAILABLE -> R.string.biometric_lock_unavailable
     }
 
     //------------------------------
-    // builds and immediately shows the system fingerprint popup
+    // builds and immediately shows the system unlock popup. with the screen lock allowed as a
+    // fallback, the system adds its own "Use PIN" option, so the prompt has no cancel button of ours
     private fun showBiometricPrompt() {
         viewModel.onAuthenticationStarted()
 
@@ -75,7 +99,7 @@ class BiometricLockFragment : Fragment() {
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                viewModel.onAuthenticationTerminated()
+                viewModel.onAuthenticationError(errorCode)
             }
         }
 
@@ -83,11 +107,10 @@ class BiometricLockFragment : Fragment() {
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(getString(R.string.biometric_prompt_title))
             .setSubtitle(getString(R.string.biometric_prompt_subtitle))
-            .setNegativeButtonText(getString(R.string.biometric_prompt_negative_button))
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+            .setAllowedAuthenticators(UNLOCK_AUTHENTICATORS)
             .build()
 
         prompt.authenticate(promptInfo)
     }
 }
-//------------------------------EOF------------------------------\\
+//------------------------------EOF------------------------------\
