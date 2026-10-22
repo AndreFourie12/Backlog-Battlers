@@ -90,7 +90,7 @@ class GameDetailHeaderAdapter(
                 state.unlockedCount.toString(),
                 state.totalCount.toString(),
             )
-            statCompletionTime.text = formatHours(state.game?.avgCompletionHours)
+            statCompletionTime.text = context.formatHours(state.game?.avgCompletionHours)
 
             val color = if (isFavourite) R.color.destructive else R.color.white
             favouriteButton.imageTintList = ContextCompat.getColorStateList(context, color)
@@ -102,7 +102,7 @@ class GameDetailHeaderAdapter(
             cover.loadArtwork(game.coverImageUrl ?: game.artworkUrl)
             title.text = game.title
 
-            platformChip.text = platform?.let { platformLabel(it.name) }
+            platformChip.text = platform?.let { itemView.context.platformLabel(it.name) }
             platformChip.setVisible(platform != null)
 
             val genre = game.genres.firstOrNull()

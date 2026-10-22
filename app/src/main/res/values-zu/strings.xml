@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    isiZulu. Every translatable string in values/strings.xml has a twin here; the ones marked
+    translatable="false" there (brand names, number formats) are left out on purpose.
+    Machine-assisted translation: have an isiZulu speaker read it over before the final video.
+-->
+<resources>
+    <!-- bottom navigation -->
+    <string name="nav_home">Ikhaya</string>
+    <string name="nav_games">Imidlalo</string>
+    <string name="nav_activity">Okwenzekayo</string>
+    <string name="nav_friends">Abangane</string>
+    <string name="nav_profile">Iphrofayela</string>
+
+    <!-- screen titles -->
+    <string name="title_games">Imidlalo</string>
+    <string name="title_friends">Abangane</string>
+    <string name="title_activity">Okwenzekayo</string>
+    <string name="title_leaderboard">Ibhodi labaphambili</string>
+    <string name="standings_empty_body">Akekho osethole amaphuzu kule nyanga. Qeda umdlalo ukuze ube ngowokuqala.</string>
+    <string name="title_settings">Izilungiselelo</string>
+
+    <!-- shared copy -->
+    <string name="search_your_library">Sesha emtapweni wakho</string>
+    <string name="search_for_a_game">Sesha umdlalo</string>
+    <string name="add_game">+ Engeza umdlalo</string>
+    <string name="view_all">Buka konke</string>
+    <string name="show_less">Bonisa okuncane</string>
+    <string name="view_full">Buka konke</string>
+    <string name="view_leaderboard">Buka ibhodi labaphambili</string>
+    <string name="invite_friends">Mema abangane</string>
+    <string name="accept">Yamukela</string>
+    <string name="owned">Okwakho</string>
+    <string name="add">Engeza</string>
+    <string name="completion">Ukuqedwa</string>
+    <string name="achievements">Izimpumelelo</string>
+    <string name="points">Amaphuzu</string>
+    <string name="playtime">Isikhathi sokudlala</string>
+    <string name="avg_completion_time">Isikhathi esijwayelekile sokuqeda</string>
+    <string name="locked">Ivaliwe</string>
+    <string name="unlocked">Ivuliwe</string>
+    <string name="achievements_error">Akukwazekanga ukulayisha izimpumelelo manje.</string>
+    <string name="badges">Amabheji</string>
+    <string name="showcase_title">Izimpumelelo ezivela kancane</string>
+    <string name="recent_activity">Okwenzeke muva nje</string>
+    <string name="achievement_progress">Inqubekela phambili yezimpumelelo</string>
+    <string name="your_position">Indawo yakho</string>
+    <string name="vs_last_month">uma kuqhathaniswa nenyanga edlule</string>
+    <string name="no_friends_yet">Awukabi nabangane</string>
+    <string name="no_friends_body">Engeza abangane ukuze uqale umncintiswano wale nyanga</string>
+    <string name="welcome_title">Siyakwamukela ku-Backlog Battlers</string>
+    <string name="welcome_body">Landelela izimpumelelo zakho, uqede imidlalo yakho esalindile, futhi ulwe nabangane ukuze ube phezulu ebhodini labaphambili.</string>
+    <string name="competition_title">Umncintiswano wenyanga</string>
+    <string name="competition_body">Hlula abangane bakho. Qeda imidlalo eminingi. Thola izimpumelelo eziningi.</string>
+    <string name="recommended_for_you">Okunconyelwe wena</string>
+    <string name="great_games_to_start_with">Imidlalo emihle yokuqala ngayo</string>
+    <string name="recommendations_error">Akukwazekanga ukulayisha imidlalo manje.</string>
+    <string name="try_again">Zama futhi</string>
+    <string name="recent">Okwakamuva</string>
+    <string name="trending">Okudumile</string>
+    <string name="browse_by_genre">Phequlula ngohlobo</string>
+    <string name="log_out">Phuma</string>
+    <string name="you_suffix">(Wena)</string>
+    <string name="search_for_quoted">Sesha “%1$s”</string>
+
+    <string name="genre_action">Isenzo</string>
+    <string name="genre_rpg">RPG</string>
+    <string name="genre_puzzle">Izindida</string>
+    <string name="genre_coop">Ukudlala ndawonye</string>
+    <string name="genre_strategy">Isu</string>
+    <string name="filter_platform">Inkundla</string>
+    <string name="filter_genre">Uhlobo</string>
+    <string name="filter_sort">Hlunga</string>
+    <string name="filter_any_platform">Noma iyiphi inkundla</string>
+    <string name="filter_any_genre">Noma iluphi uhlobo</string>
+    <string name="sort_relevance">Okuhambisanayo</string>
+    <string name="sort_name_a_z">Igama A–Z</string>
+    <string name="sort_name_z_a">Igama Z–A</string>
+    <string name="search_no_results">Ayikho imidlalo efana no-“%1$s”</string>
+    <string name="search_no_results_filtered">Ayikho imiphumela esele ngalezi zihlungi</string>
+    <string name="search_no_results_filtered_body">Khulisa inkundla noma uhlobo ukuze ubone okuningi.</string>
+    <string name="search_no_results_body">Hlola ukupela, noma uzame isihloko esifushane.</string>
+    <string name="search_error">Akukwazekanga ukufinyelela kuhlu lwemidlalo.</string>
+    <string name="try_again_body">Hlola uxhumano lwakho bese uzama futhi.</string>
+    <string name="added_to_library">U-%1$s wengeziwe ohlwini lwakho</string>
+
+    <!-- games screen -->
+    <string name="search_library">Sesha emtapweni wakho</string>
+    <string name="library_empty_title">Umtapo wakho awunalutho</string>
+    <string name="library_empty_body">Engeza imidlalo onayo noma ofuna ukuyidlala. Ngayinye ilandelela izimpumelelo zayo futhi ikhombisa ukuthi mangaki amaphuzu osengawathola.</string>
+    <string name="add_first_game">Engeza umdlalo wakho wokuqala</string>
+    <string name="popular_to_start_with">Okudumile ongaqala ngakho</string>
+
+    <!-- games screen, the library list once it has games in it -->
+    <string name="library_filter_all">Konke</string>
+    <string name="library_filter_in_progress">Kuyaqhubeka</string>
+    <string name="library_filter_completed">Kuqediwe</string>
+    <string name="library_filter_not_started">Akukaqalwa</string>
+    <string name="sort_recently_added">Okwengezwe muva nje</string>
+    <string name="library_no_matches">Ayikho imidlalo efana no-“%1$s”</string>
+    <string name="library_completion_percent">%1$d%% kuqediwe</string>
+    <string name="library_no_results">Ayikho imidlalo emtapweni wakho efana nalesi sihlungi</string>
+
+    <!-- content descriptions -->
+    <string name="cd_back">Emuva</string>
+    <string name="cd_search">Sesha</string>
+    <string name="cd_notifications">Izaziso</string>
+    <string name="cd_settings">Izilungiselelo</string>
+    <string name="cd_appearance">Ukubukeka</string>
+    <string name="cd_add_friend">Engeza umngane</string>
+    <string name="cd_favourite">Engeza kokuthandayo</string>
+    <string name="cd_sort">Hlunga umtapo</string>
+    <string name="cd_clear">Sula usesho</string>
+    <string name="cd_add_to_library">Engeza emtapweni</string>
+    <string name="cd_remove">Susa</string>
+    <string name="cd_app_logo">Uphawu lwe-Backlog Battlers</string>
+    <string name="cd_game_art">Isithombe somdlalo</string>
+    <string name="cd_reject_request">Yenqaba isicelo sobungane</string>
+
+    <!-- friends feature -->
+    <string name="tab_all_friends">Bonke abangane</string>
+    <string name="tab_following">Obalandelayo</string>
+    <string name="tab_requests">Izicelo</string>
+    <string name="reject">Yenqaba</string>
+    <string name="pending">Kulindile</string>
+    <string name="already_friends">Abangane</string>
+    <string name="search_friends_hint">Sesha abangane</string>
+    <string name="find_friends_title">Thola abangane</string>
+    <string name="search_for_friends_hint">Sesha ngegama</string>
+    <string name="no_search_results_title">Ayikho imiphumela</string>
+    <string name="no_search_results_body">Zama elinye igama</string>
+    <string name="search_friends_prompt_title">Thola abangane ngegama</string>
+    <string name="search_friends_prompt_body">Thepha usesho noma ucindezele u-enter uma usulungile</string>
+    <string name="following_empty_title">Ukulandela akukatholakali okwamanje</string>
+    <string name="following_empty_body">Buya uzobheka uma sekwakhiwe</string>
+    <string name="no_friends_title_empty">Nguwe wedwa okwamanje</string>
+    <string name="no_friends_body_empty">Wonke umuntu ohlwini lwakho lwabangane ulandelaniswa ngamaphuzu atholwe kule nyanga, futhi ibhodi labaphambili liqala kabusha mhla zi-1.</string>
+    <string name="share_invite_link">Yabelana ngesixhumanisi sesimemo</string>
+    <string name="find_by_username">Thola ngegama lomsebenzisi</string>
+    <string name="invite_share_text">Ngengeze ku-Backlog Battlers! Ngisesha ngegama lami uma usungenile.</string>
+
+    <!-- sign in screen -->
+    <string name="login_tagline">Landelela imidlalo yakho, uthole amaphuzu ngempumelelo ngayinye, futhi uncintisane nabangane njalo ngenyanga.</string>
+    <string name="login_continue_with_google">Qhubeka nge-Google</string>
+    <string name="login_signing_in">Iyangena</string>
+    <string name="login_account_hint">Umusha lapha? Lokhu kudala i-akhawunti yakho. Usuvele udlala? Kukungenisa futhi.</string>
+    <string name="login_terms_notice">Ngokuqhubeka uyavumelana neMigomo kanye neNqubomgomo Yobumfihlo.</string>
+    <string name="login_terms_link">Imigomo</string>
+    <string name="login_privacy_link">Inqubomgomo Yobumfihlo</string>
+
+    <string name="cd_home_backdrop">Amagquma ngaphansi kwesibhakabhaka esikhanyayo</string>
+
+    <!-- settings, section headers -->
+    <string name="settings_section_account">I-AKHAWUNTI</string>
+    <string name="settings_section_preferences">OKUTHANDAYO</string>
+    <string name="settings_section_support">USIZO</string>
+
+    <!-- settings, rows -->
+    <string name="settings_edit_profile">Hlela iphrofayela</string>
+    <string name="settings_connected_accounts">Ama-akhawunti axhunyiwe</string>
+    <string name="settings_connected_accounts_pending">Kuyeza maduze</string>
+    <string name="settings_notifications">Izaziso</string>
+    <string name="settings_appearance">Ukubukeka</string>
+    <string name="settings_language">Ulimi</string>
+    <string name="settings_language_dialog_title">Khetha ulimi lwakho</string>
+    <string name="settings_default_platform">Inkundla oyisebenzisa kakhulu</string>
+    <string name="settings_default_platform_dialog_title">Udlala kakhulu kuphi?</string>
+    <string name="settings_default_platform_saved">Imidlalo emisha izongezwa njengo-%1$s uma itholakala lapho</string>
+    <string name="settings_privacy">Ubumfihlo nedatha</string>
+    <string name="settings_help">Usizo nokwesekwa</string>
+    <string name="settings_about">Mayelana</string>
+    <string name="settings_notifications_all_on">Konke kuvuliwe</string>
+    <string name="settings_notifications_all_off">Konke kuvaliwe</string>
+    <string name="settings_notifications_some_on">%1$d kwangu-%2$d kuvuliwe</string>
+
+    <!-- settings, log out -->
+    <string name="log_out_confirm_title">Uyaphuma?</string>
+    <string name="log_out_confirm_body">Kuzodingeka ungene futhi nge-Google ukuze ubuyele ohlwini lwakho.</string>
+    <string name="log_out_confirm_action">Phuma</string>
+    <string name="delete_account">Susa i-akhawunti</string>
+    <string name="delete_account_in_progress">Isusa i-akhawunti yakho…</string>
+    <string name="delete_account_confirm_title">Susa i-akhawunti yakho?</string>
+    <string name="delete_account_confirm_body">Lokhu kususa unomphela iphrofayela yakho, umtapo wemidlalo, amaphuzu nabangane ku-Backlog Battlers. Akukwazi ukuhlehliswa.</string>
+    <string name="delete_account_confirm_action">Susa</string>
+    <string name="delete_account_done">I-akhawunti yakho isusiwe</string>
+    <string name="delete_account_sign_in_again">Iseshini yakho iphelelwe yisikhathi. Ngena futhi, bese usula i-akhawunti yakho.</string>
+    <string name="delete_account_no_connection">Akukwazekanga ukufinyelela ku-Backlog Battlers. Hlola uxhumano lwakho bese uzama futhi.</string>
+    <string name="delete_account_failed">Kukhona okungahambanga kahle ekususeni i-akhawunti yakho. Sicela uzame futhi.</string>
+    <string name="cancel">Khansela</string>
+
+    <!-- edit profile -->
+    <string name="title_edit_profile">Hlela iphrofayela</string>
+    <string name="edit_profile_display_name">Igama elibonakalayo</string>
+    <string name="edit_profile_display_name_hint">Indlela abangane abakubona ngayo</string>
+    <string name="edit_profile_email">I-imeyili</string>
+    <string name="edit_profile_email_locked">I-imeyili yakho ivela ku-akhawunti ye-Google ongene ngayo.</string>
+    <string name="edit_profile_avatar_note">Isithombe sakho sivela ku-akhawunti yakho ye-Google.</string>
+    <string name="edit_profile_save">Londoloza izinguquko</string>
+    <string name="edit_profile_saved">Iphrofayela ibuyekeziwe</string>
+    <string name="edit_profile_name_empty">Faka igama elibonakalayo</string>
+    <string name="edit_profile_name_too_long">Amagama abonakalayo anezinhlamvu ezingu-24 noma ngaphansi</string>
+    <string name="edit_profile_signed_out">Ngena ukuze uhlele iphrofayela yakho</string>
+    <string name="cd_avatar">Isithombe sephrofayela</string>
+
+    <!-- notification settings -->
+    <string name="title_notifications">Izaziso</string>
+    <string name="notifications_intro">Khetha ukuthi i-Backlog Battlers ikutshele ngani.</string>
+    <string name="notifications_section_progress">INQUBEKELA PHAMBILI YAKHO</string>
+    <string name="notifications_section_competition">UMNCINTISWANO</string>
+    <string name="notif_achievements">Izimpumelelo</string>
+    <string name="notif_achievements_body">Uma uvula impumelelo emdlalweni owulandelelayo</string>
+    <string name="notif_rank">Izinguquko zezinga</string>
+    <string name="notif_rank_body">Uma unyuka noma wehla ebhodini labaphambili lenyanga</string>
+    <string name="notif_season">Ukuqala kabusha kwesizini</string>
+    <string name="notif_season_body">Uma kuqala inyanga entsha futhi amaphuzu eqala kabusha</string>
+    <string name="notif_friends">Okwenziwa abangane</string>
+    <string name="notif_friends_body">Uma umngane eqeda umdlalo noma ekudlula</string>
+
+    <!-- appearance -->
+    <string name="title_appearance">Ukubukeka</string>
+    <string name="appearance_section_theme">ITHIMU</string>
+    <string name="appearance_section_backdrop">ISITHOMBE SANGEMUVA SEKHAYA</string>
+    <string name="appearance_theme_dark">Okumnyama</string>
+    <string name="appearance_theme_dark_body">Okujwayelekile. Kuphumuza amehlo ebusuku.</string>
+    <string name="appearance_theme_light">Okukhanyayo</string>
+    <string name="appearance_theme_light_body">Kukhanya kakhudlwana, kungcono emini.</string>
+    <string name="appearance_backdrop_body">Isithombe esingemuva kwesihloko esikrinini sakho sasekhaya.</string>
+    <string name="backdrop_hills">Amagquma</string>
+    <string name="backdrop_mountain">Isigodi sezintaba</string>
+    <string name="backdrop_meadow">Idlelo lasehlobo</string>
+    <string name="backdrop_forest">Ihlathi likaphayini</string>
+    <string name="backdrop_coast">Ugu lwamatshe</string>
+    <string name="cd_backdrop_preview">Ukubuka kuqala isithombe sangemuva</string>
+    <string name="cd_selected">Kukhethiwe</string>
+
+    <!-- privacy and data -->
+    <string name="title_privacy">Ubumfihlo nedatha</string>
+    <string name="privacy_section_security">UKUPHEPHA</string>
+    <string name="privacy_section_data">IDATHA YAKHO</string>
+    <string name="privacy_biometric">Ukungena nge-biometric</string>
+    <string name="privacy_biometric_body">Sebenzisa isigxivizo somunwe noma ubuso ukuvula uhlelo</string>
+    <string name="privacy_what_we_store">Esikugcinayo</string>
+    <string name="privacy_what_we_store_body">Igama lakho elibonakalayo, i-imeyili nesithombe kuvela ku-akhawunti ye-Google ongena ngayo. Umtapo wakho, isikhathi sokudlala nenqubekela phambili yezimpumelelo kugcinwa kule divayisi futhi kuvumelaniswa ne-akhawunti yakho ukuze indawo yakho ebhodini labaphambili ihlale inembile.</string>
+    <string name="privacy_policy">Inqubomgomo yobumfihlo</string>
+    <string name="privacy_terms">Imigomo yokusebenzisa</string>
+    <string name="biometric_lock_title">Kudingeka isigxivizo somunwe</string>
+    <string name="biometric_lock_body">Qinisekisa ukuthi nguwe ukuze uvule i-Backlog Battlers</string>
+    <string name="biometric_prompt_title">Vula i-Backlog Battlers</string>
+    <string name="biometric_prompt_subtitle">Skena isigxivizo somunwe wakho ukuze uqhubeke</string>
+    <string name="biometric_prompt_negative_button">Khansela</string>
+    <string name="biometric_signed_out_message">Ukuhlolwa kwesigxivizo somunwe kukhanseliwe. Sicela ungene futhi.</string>
+    <string name="cd_fingerprint_icon">Isithonjana sesigxivizo somunwe</string>
+
+    <!-- help and support -->
+    <string name="title_help">Usizo nokwesekwa</string>
+    <string name="help_section_faq">IMIBUZO EJWAYELEKILE</string>
+    <string name="help_faq_points_q">Amaphuzu abalwa kanjani?</string>
+    <string name="help_faq_points_a">Impumelelo ngayinye oyivulayo inamaphuzu ngokuya ngokuthi ivela kancane kangakanani emphakathini. Izimpumelelo ezivela kancane zinamaphuzu amaningi, ngakho ukuqeda umdlalo onzima kungcono kunokuphinda-phinda olula.</string>
+    <string name="help_faq_season_q">Isizini iqala kabusha nini?</string>
+    <string name="help_faq_season_a">Amaphuzu ebhodi labaphambili aqala kabusha ngosuku lokuqala lwenyanga ngayinye. Umtapo wakho, isikhathi sokudlala nezimpumelelo ezivuliwe kuyagcinwa; ukulandelana kwenyanga kuphela okuqala kabusha.</string>
+    <string name="help_faq_platform_q">Kungani isikhathi sami sokudlala singekho?</string>
+    <string name="help_faq_platform_a">Isikhathi sokudlala silethwa uma uxhuma i-akhawunti yemidlalo. Ukuxhuma ama-akhawunti kusakhiwa, ngakho okwamanje ungafaka amahora ngokwakho esikrinini semininingwane yomdlalo.</string>
+    <string name="help_faq_friends_q">Ngingabengeza kanjani abangane?</string>
+    <string name="help_faq_friends_a">Vula ithebhu yaBangane bese usesha igama elibonakalayo, noma uthumele isimemo. Uma sebamukele, nobabili nivela ebhodini labaphambili lenyanga lomunye nomunye.</string>
+
+    <!-- about -->
+    <string name="title_about">Mayelana</string>
+    <string name="about_tagline">Qeda imidlalo yakho esalindile. Hlula abangane bakho.</string>
+    <string name="about_section_app">UHLELO</string>
+    <string name="about_section_legal">EZOMTHETHO</string>
+    <string name="about_version">Inguqulo</string>
+    <string name="about_build">Ukwakhiwa</string>
+    <string name="about_build_debug">Ukulungisa amaphutha</string>
+    <string name="about_build_release">Ukukhishwa</string>
+    <string name="about_blurb">I-Backlog Battlers ilandelela imidlalo onayo, ibala amaphuzu ezimpumelelo ozivulayo, futhi ikubeka ebhodini labaphambili lenyanga ubhekene nabangane bakho. Yakhiwe njengephrojekthi yephothifoliyo ye-PROG7314.</string>
+    <string name="about_open_source">Amalayisensi omthombo ovulekile</string>
+    <string name="about_terms_body">I-Backlog Battlers iyiphrojekthi yephothifoliyo yomfundi, inikezwa njengoba injalo futhi ngaphandle kwesiqinisekiso. Yisebenzise ukulandelela imidlalo yakho. Ungazami ukwenza mbumbulu izimpumelelo noma izindawo ebhodini labaphambili, futhi ungasebenzisi uhlelo ukuhlukumeza abanye abadlali. Ama-akhawunti enza noma yikuphi kwalokhu angasuswa. Ngoba lena inguqulo yomsebenzi wesifundo, izici zingashintsha noma zinyamalale phakathi kwezinguqulo, futhi asiqinisekisi ukuthi idatha izosinda uma ufaka kabusha uhlelo.</string>
+    <string name="about_privacy_body">Ukungena nge-Google kunika uhlelo igama lakho elibonakalayo, ikheli le-imeyili nesithombe sephrofayela. Lokho, kanye nomtapo wakho, isikhathi sokudlala, izimpumelelo namaphuzu enyanga, kugcinwa kule divayisi nakuseva yephrojekthi ukuze indawo yakho ebhodini labaphambili inembe.\n\nIdatha yakho ayikaze ithengiswe noma yabelwe abakhangisi. Abangane bangabona igama lakho elibonakalayo, isithombe, amaphuzu nokwenzeke muva nje. Akekho ongabona ikheli lakho le-imeyili.\n\nUkuphuma kusula iseshini yakho kanye nekhophi yephrofayela yakho kule divayisi.</string>
+    <string name="about_licences_body">Lolu hlelo lwakhiwe phezu komsebenzi womthombo ovulekile okhishwe ngaphansi kwe-Apache License 2.0:\n\n• AndroidX ne-Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines ne-kotlinx.serialization\n• Ktor Client\n\nImibhalo egcwele yamalayisensi iyatholakala endaweni yokugcina yephrojekthi ngayinye.</string>
+
+    <!-- activity feed -->
+    <string name="activity_no_standings_title">Akukabi khona ukulandelana</string>
+    <string name="activity_no_standings_body">Engeza umngane, bese nobabili nilandelaniswa ngamaphuzu atholwe kule nyanga.</string>
+    <string name="view_standings">Buka ukulandelana</string>
+    <string name="activity_today">Namuhla</string>
+    <string name="activity_event_joined">Ujoyine i-<b>Backlog Battlers</b></string>
+    <string name="activity_just_now">Manje nje</string>
+    <string name="activity_feed_hint" formatted="false">Izimpumelelo ezivuliwe, ukuqeda okungu-100% nezinguquko zezinga zakho nezabangane bakho kuzovela lapha, kuhlelwe ngosuku.</string>
+
+    <!-- profile -->
+    <string name="profile_level">Izinga 1</string>
+    <string name="profile_xp_progress">0 / 500 XP · vula impumelelo ukuze uqale</string>
+    <string name="badges_earned_count">0 kwangu-4 atholiwe</string>
+    <string name="badge_completionist">Oqeda konke</string>
+    <string name="badge_achievement_hunter">Umzingeli wezimpumelelo</string>
+    <string name="badge_monthly_competitor">Umncintisani wenyanga</string>
+    <string name="badge_early_bird">Ovuka ekuseni</string>
+    <string name="showcase_body">Bonisa izimpumelelo zakho ezivela kancane, imidlalo oyiqedile, kanye nesilinganiso sokuqeda</string>
+    <string name="recent_activity_empty">Imidlalo oyidlalayo izovela lapha</string>
+    <string name="add_a_game">Engeza umdlalo →</string>
+
+    <plurals name="search_result_count">
+        <item quantity="one">Umphumela ongu-%1$d</item>
+        <item quantity="other">Imiphumela engu-%1$d</item>
+    </plurals>
+
+    <plurals name="library_game_count">
+        <item quantity="one">Umdlalo ongu-%1$d emtapweni wakho</item>
+        <item quantity="other">Imidlalo engu-%1$d emtapweni wakho</item>
+    </plurals>
+
+    <!-- platforms (brand names stay as they are) -->
+    <string name="platform_steam">Steam</string>
+    <string name="platform_playstation">PlayStation</string>
+    <string name="platform_xbox">Xbox</string>
+    <string name="platform_switch">Switch</string>
+    <string name="platform_other">Okunye</string>
+
+    <!-- "amahora" (hours) -->
+    <string name="hours_short">Amahora angu-%1$d</string>
+    <string name="points_short">Amaphuzu angu-%1$s</string>
+
+    <!-- friends and leaderboard -->
+    <string name="friend_online">Uku-inthanethi</string>
+    <string name="friend_offline">Akekho ku-inthanethi</string>
+    <string name="friends_error_load">Akukwazekanga ukulayisha abangane bakho. Hlola uxhumano lwakho bese uzama futhi.</string>
+    <string name="friends_error_search">Akukwazekanga ukusesha abadlali. Hlola uxhumano lwakho bese uzama futhi.</string>
+    <string name="friends_error_send">Akukwazekanga ukuthumela isicelo sobungane. Sicela uzame futhi.</string>
+    <string name="friends_error_accept">Akukwazekanga ukwamukela isicelo sobungane. Sicela uzame futhi.</string>
+    <string name="friends_error_reject">Akukwazekanga ukwenqaba isicelo sobungane. Sicela uzame futhi.</string>
+    <string name="standings_error_load">Akukwazekanga ukulayisha ibhodi labaphambili. Hlola uxhumano lwakho bese uzama futhi.</string>
+
+    <!-- signing in -->
+    <string name="sign_in_cancelled">Ukungena kukhanseliwe</string>
+    <string name="sign_in_no_account">Ayitholakalanga i-akhawunti ye-Google kule foni. Yengeze kuzilungiselelo zefoni yakho bese uzama futhi.</string>
+    <string name="sign_in_no_connection">Akukwazekanga ukufinyelela ku-Backlog Battlers. Hlola uxhumano lwakho bese uzama futhi.</string>
+    <string name="sign_in_failed">Ukungena akusebenzanga. Sicela uzame futhi.</string>
+</resources>

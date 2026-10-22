@@ -2,6 +2,7 @@ package com.backlogbattlers.app.ui.login
 
 import android.app.Activity
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
@@ -22,8 +23,8 @@ sealed class LoginUiState {
     // success state containing authenticated User
     data class Success(val user: User) : LoginUiState()
 
-    // error state containing error message
-    data class Error(val message: String) : LoginUiState()
+    // error state, with a message from strings.xml to show
+    data class Error(@StringRes val messageRes: Int) : LoginUiState()
 }
 
 // viewmodel managing google sso state and repository interactions
@@ -62,8 +63,8 @@ class LoginViewModel(
                     ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
                 }
                 is AuthResult.Failure -> {
-                    Log.e("LoginViewModel", "Sign-In failure: ${result.message}")
-                    _uiState.value = LoginUiState.Error(result.message)
+                    Log.e("LoginViewModel", "Sign-In failure, showing message ${result.messageRes}")
+                    _uiState.value = LoginUiState.Error(result.messageRes)
                 }
             }
         }

@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Backlog Battlers</string>
-    <string name="wordmark">BACKLOG BATTLERS</string>
+    <string name="app_name" translatable="false">Backlog Battlers</string>
+    <string name="wordmark" translatable="false">BACKLOG BATTLERS</string>
 
 
 
@@ -41,11 +41,11 @@
     <string name="playtime">Playtime</string>
     <string name="avg_completion_time">Avg Completion Time</string>
     <!-- the big number on a detail stat tile: earned points, or achievements unlocked, out of the total -->
-    <string name="detail_stat_ratio">%1$s / %2$s</string>
-    <string name="detail_completion_value">%1$d%%</string>
+    <string name="detail_stat_ratio" translatable="false">%1$s / %2$s</string>
+    <string name="detail_completion_value" translatable="false">%1$d%%</string>
     <string name="locked">Locked</string>
     <string name="unlocked">Unlocked</string>
-    <string name="rarity_unknown">—</string>
+    <string name="rarity_unknown" translatable="false">—</string>
     <string name="achievements_error">Couldn\'t load achievements right now.</string>
     <string name="badges">Badges</string>
     <string name="showcase_title">Rarest Achievement Showcase</string>
@@ -185,7 +185,7 @@
     <string name="settings_privacy">Privacy &amp; Data</string>
     <string name="settings_help">Help &amp; Support</string>
     <string name="settings_about">About</string>
-    <string name="settings_version_value">v%1$s</string>
+    <string name="settings_version_value" translatable="false">v%1$s</string>
     <string name="settings_notifications_all_on">All on</string>
     <string name="settings_notifications_all_off">All off</string>
     <string name="settings_notifications_some_on">%1$d of %2$d on</string>
@@ -303,7 +303,7 @@
     <string name="about_build_release">Release</string>
     <string name="about_blurb">Backlog Battlers tracks the games you own, scores the achievements you unlock, and puts you on a monthly leaderboard against your friends. Built as a PROG7314 portfolio project.</string>
     <string name="about_open_source">Open source licences</string>
-    <string name="about_copyright">© 2026 Backlog Battlers</string>
+    <string name="about_copyright" translatable="false">© 2026 Backlog Battlers</string>
     <string name="about_terms_body">Backlog Battlers is a student portfolio project, provided as is and without warranty. Use it to track your own games. Do not attempt to falsify achievements or leaderboard standings, and do not use the app to harass other players. Accounts that do either may be removed. Because this is a coursework build, features can change or disappear between versions and data is not guaranteed to survive a reinstall.</string>
     <string name="about_privacy_body">Signing in with Google gives the app your display name, email address and profile picture. That, along with your library, playtime, achievements and monthly points, is stored on this device and on the project backend so your leaderboard position is accurate.\n\nYour data is never sold or shared with advertisers. Friends can see your display name, picture, points and recent activity. Nobody can see your email address.\n\nSigning out clears your session and your local copy of your profile from this device.</string>
     <string name="about_licences_body">This app is built on open source work released under the Apache License 2.0:\n\n• AndroidX and Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines and kotlinx.serialization\n• Ktor Client\n\nFull licence texts are available from each project\'s repository.</string>
@@ -316,10 +316,10 @@
     <string name="activity_event_joined">You joined <b>Backlog Battlers</b></string>
     <string name="activity_just_now">Just now</string>
     <string name="activity_feed_hint" formatted="false">Achievement unlocks, 100% completions and rank changes from you and your friends will show up here, grouped by day.</string>
-    <string name="profile_avatar_initial">A</string>
+    <string name="profile_avatar_initial" translatable="false">A</string>
 
     <!-- profile -->
-    <string name="profile_display_name">Alex</string>
+    <string name="profile_display_name" translatable="false">Alex</string>
     <string name="profile_level">Level 1</string>
     <string name="profile_xp_progress">0 / 500 XP · unlock an achievement to start</string>
     <string name="badges_earned_count">0 of 4 earned</string>
@@ -340,4 +340,36 @@
         <item quantity="one">%1$d game in your library</item>
         <item quantity="other">%1$d games in your library</item>
     </plurals>
+
+    <!-- platforms. PC games are shown under the store most PC players use; the console names are
+         brands, but each language may still write them its own way -->
+    <string name="platform_steam">Steam</string>
+    <string name="platform_playstation">PlayStation</string>
+    <string name="platform_xbox">Xbox</string>
+    <string name="platform_switch">Switch</string>
+    <string name="platform_other">Other</string>
+
+    <!-- a whole number of hours, e.g. a game's average time to beat -->
+    <string name="hours_short">%1$dh</string>
+    <string name="hours_unknown" translatable="false">—</string>
+
+    <!-- points, already formatted with thousands separators -->
+    <string name="points_short">%1$s pts</string>
+
+    <!-- friends and leaderboard -->
+    <string name="friend_online">Online</string>
+    <string name="friend_offline">Offline</string>
+    <string name="friend_achievement_count" translatable="false">🏆 %1$d</string>
+    <string name="friends_error_load">Couldn\'t load your friends. Check your connection and try again.</string>
+    <string name="friends_error_search">Couldn\'t search for players. Check your connection and try again.</string>
+    <string name="friends_error_send">Couldn\'t send the friend request. Please try again.</string>
+    <string name="friends_error_accept">Couldn\'t accept the friend request. Please try again.</string>
+    <string name="friends_error_reject">Couldn\'t decline the friend request. Please try again.</string>
+    <string name="standings_error_load">Couldn\'t load the leaderboard. Check your connection and try again.</string>
+
+    <!-- signing in -->
+    <string name="sign_in_cancelled">Sign-in was cancelled</string>
+    <string name="sign_in_no_account">No Google account was found on this phone. Add one in your phone\'s settings and try again.</string>
+    <string name="sign_in_no_connection">Couldn\'t reach Backlog Battlers. Check your connection and try again.</string>
+    <string name="sign_in_failed">Sign-in didn\'t work. Please try again.</string>
 </resources>

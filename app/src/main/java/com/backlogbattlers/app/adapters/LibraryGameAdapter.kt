@@ -11,6 +11,7 @@ import com.backlogbattlers.app.R
 import com.backlogbattlers.app.domain.model.LibraryGame
 import com.backlogbattlers.app.util.completionPercent
 import com.backlogbattlers.app.util.gameSubtitle
+import com.backlogbattlers.app.util.platformLabel
 import com.backlogbattlers.app.util.inflateChild
 import com.backlogbattlers.app.util.loadArtwork
 
@@ -56,7 +57,7 @@ class LibraryGameAdapter(
             val percent = completionPercent(libraryGame.entry.unlockedAchievementIds.size, game.totalAchievements)
             completion.text = completion.context.getString(R.string.library_completion_percent, percent)
             // a library game is labelled with the platform it was filed under
-            subtitle.text = gameSubtitle(libraryGame.entry.platform, game.genres)
+            subtitle.text = gameSubtitle(itemView.context.platformLabel(libraryGame.entry.platform.name), game.genres)
 
             itemView.setOnClickListener { onClick(libraryGame) }
         }

@@ -308,7 +308,7 @@ class SearchFragment : Fragment() {
     private fun renderFilterChips(state: SearchUiState) {
         bindFilterChip(
             kind = FilterChip.PLATFORM,
-            label = state.filters.platform?.let { platformLabel(it) } ?: getString(R.string.filter_platform),
+            label = state.filters.platform?.let { requireContext().platformLabel(it) } ?: getString(R.string.filter_platform),
             active = state.filters.platform != null,
         )
         bindFilterChip(
@@ -350,7 +350,7 @@ class SearchFragment : Fragment() {
                     true
                 }
                 state.platformOptions.forEach { platform ->
-                    menu.menu.add(platformLabel(platform)).setOnMenuItemClickListener {
+                    menu.menu.add(requireContext().platformLabel(platform)).setOnMenuItemClickListener {
                         viewModel.setPlatformFilter(platform)
                         true
                     }

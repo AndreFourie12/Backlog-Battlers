@@ -1,5 +1,7 @@
 package com.backlogbattlers.app.viewmodels
 
+import androidx.annotation.StringRes
+import com.backlogbattlers.app.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
@@ -25,7 +27,8 @@ data class FriendsUiState(
     val selfUserId: String? = null,
     val searchQuery: String = "",
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    // a message from strings.xml for the screen to show once, never the raw exception text
+    @StringRes val errorMessage: Int? = null,
     val hasNoFriends: Boolean = false,
 )
 
@@ -70,7 +73,7 @@ class FriendsViewModel(
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: "could not load friends") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = R.string.friends_error_load) }
             }
         }
     }
@@ -95,7 +98,7 @@ class FriendsViewModel(
                 friendsRepository.acceptRequest(requestId)
                 refresh()
             } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message ?: "could not accept request") }
+                _uiState.update { it.copy(errorMessage = R.string.friends_error_accept) }
             }
         }
     }
@@ -108,7 +111,7 @@ class FriendsViewModel(
                 friendsRepository.rejectRequest(requestId)
                 refresh()
             } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message ?: "could not reject request") }
+                _uiState.update { it.copy(errorMessage = R.string.friends_error_reject) }
             }
         }
     }

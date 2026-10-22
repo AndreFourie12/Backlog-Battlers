@@ -88,7 +88,7 @@ class LeaderboardAdapter(
         holder.tvOnlineStatus.setVisible(false)
         holder.tvAchievementCount.setVisible(false)
 
-        holder.tvPoints.text = "${formatPoints(entry.monthlyPoints)} pts"
+        holder.tvPoints.text = holder.itemView.context.getString(R.string.points_short, formatPoints(entry.monthlyPoints))
     }
 }
 //------------------------------EOF------------------------------\\

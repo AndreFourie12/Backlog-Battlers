@@ -1,5 +1,7 @@
 package com.backlogbattlers.app.viewmodels
 
+import androidx.annotation.StringRes
+import com.backlogbattlers.app.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
@@ -16,7 +18,8 @@ data class StandingsUiState(
     val entries: List<LeaderboardEntry> = emptyList(),
     val selfUserId: String? = null,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    // a message from strings.xml for the screen to show once, never the raw exception text
+    @StringRes val errorMessage: Int? = null,
 ) {
     val isEmpty: Boolean get() = !isLoading && errorMessage == null && entries.isEmpty()
 }
@@ -52,7 +55,7 @@ class StandingsViewModel(
                     it.copy(isLoading = false, entries = entries, selfUserId = board.me?.userId)
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: "could not load the leaderboard") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = R.string.standings_error_load) }
             }
         }
     }

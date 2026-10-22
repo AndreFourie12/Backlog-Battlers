@@ -150,7 +150,7 @@ class SettingsFragment : Fragment() {
                     platformRow.bindSettingsRow(
                         icon = R.drawable.ic_gamepad,
                         title = R.string.settings_default_platform,
-                        value = platformLabel(settings.defaultPlatform.name),
+                        value = requireContext().platformLabel(settings.defaultPlatform.name),
                     ) {
                         pickDefaultPlatform(settings.defaultPlatform)
                     }
@@ -217,7 +217,7 @@ class SettingsFragment : Fragment() {
     private val platformChoices = listOf(Platform.PC, Platform.PLAYSTATION, Platform.XBOX, Platform.SWITCH)
 
     private fun pickDefaultPlatform(current: Platform) {
-        val labels = platformChoices.map { platformLabel(it.name) }.toTypedArray()
+        val labels = platformChoices.map { requireContext().platformLabel(it.name) }.toTypedArray()
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.settings_default_platform_dialog_title)
             .setSingleChoiceItems(labels, platformChoices.indexOf(current)) { dialog, which ->

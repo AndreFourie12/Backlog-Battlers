@@ -1,5 +1,7 @@
 package com.backlogbattlers.app.viewmodels
 
+import androidx.annotation.StringRes
+import com.backlogbattlers.app.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
@@ -16,7 +18,8 @@ data class FindFriendsUiState(
     val query: String = "",
     val results: List<FriendSearchResult> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    // a message from strings.xml for the screen to show once, never the raw exception text
+    @StringRes val errorMessage: Int? = null,
     val sentRequestUserIds: Set<String> = emptySet(),
     val hasSearched: Boolean = false,
 )
@@ -48,7 +51,7 @@ class FindFriendsViewModel(
                 val results = friendsRepository.searchUsers(query)
                 _uiState.update { it.copy(isLoading = false, results = results, hasSearched = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: "search failed", hasSearched = true) }
+                _uiState.update { it.copy(isLoading = false, errorMessage = R.string.friends_error_search, hasSearched = true) }
             }
         }
     }
@@ -61,7 +64,7 @@ class FindFriendsViewModel(
                 friendsRepository.sendRequest(targetUserId)
                 _uiState.update { it.copy(sentRequestUserIds = it.sentRequestUserIds + targetUserId) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message ?: "could not send request") }
+                _uiState.update { it.copy(errorMessage = R.string.friends_error_send) }
             }
         }
     }
