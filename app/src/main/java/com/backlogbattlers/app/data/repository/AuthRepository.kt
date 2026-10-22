@@ -3,10 +3,14 @@ package com.backlogbattlers.app.data.repository
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.NoCredentialException
+import com.backlogbattlers.app.R
 import com.backlogbattlers.app.data.local.TokenStorage
 import com.backlogbattlers.app.data.local.dao.UserDao
 import com.backlogbattlers.app.data.local.entity.UserEntity
@@ -18,11 +22,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.SerializationException
 import java.io.IOException
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 
 //------------------------------
 // sealed class representing authentication results statuses
@@ -31,8 +31,8 @@ sealed class AuthResult {
     // authentication success result containing User model
     data class Success(val user: User) : AuthResult()
 
-    // authentication failure result containing error message
-    data class Failure(val message: String) : AuthResult()
+    // authentication failure, with a message from strings.xml to show the user
+    data class Failure(@StringRes val messageRes: Int) : AuthResult()
 }
 
 //------------------------------
@@ -160,16 +160,19 @@ class AuthRepositoryImpl(
                 )
                 AuthResult.Success(domainUser)
             } else {
-                AuthResult.Failure("Unsupported credential type returned: ${credential.type}")
+                Log.e("AuthRepository", "Unsupported credential type returned: ${credential.type}")
+                AuthResult.Failure(R.string.sign_in_failed)
             }
         } catch (e: Exception) {
             Log.e("AuthRepository", "Google Sign-In failed: ${e.message}", e)
-            val userMessage = when {
-                e is ConnectException || e is UnknownHostException || e is SocketTimeoutException -> "Unable to connect to backend server. Please ensure the backend server is running."
-                e is SerializationException -> "Received invalid response from backend server. Please check API_BASE_URL setting."
-                else -> e.message ?: "Google Sign-In failed"
+            // the details stay in the log; the user gets a plain message in their own language
+            val messageRes = when (e) {
+                is GetCredentialCancellationException -> R.string.sign_in_cancelled
+                is NoCredentialException -> R.string.sign_in_no_account
+                is IOException -> R.string.sign_in_no_connection
+                else -> R.string.sign_in_failed
             }
-            AuthResult.Failure(userMessage)
+            AuthResult.Failure(messageRes)
         }
     }
 

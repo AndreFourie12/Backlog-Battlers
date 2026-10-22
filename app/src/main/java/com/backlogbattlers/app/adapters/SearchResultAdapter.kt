@@ -12,6 +12,7 @@ import com.backlogbattlers.app.domain.model.Game
 import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.util.gameSubtitle
+import com.backlogbattlers.app.util.platformLabel
 import com.backlogbattlers.app.util.inflateChild
 import com.backlogbattlers.app.util.loadArtwork
 import com.backlogbattlers.app.util.setVisible
@@ -59,7 +60,7 @@ class SearchResultAdapter(
             art.loadArtwork(game.artworkUrl ?: game.coverImageUrl)
             title.text = game.title
 
-            val line = gameSubtitle(result.platform, game.genres)
+            val line = gameSubtitle(result.platform?.let { itemView.context.platformLabel(it.name) }, game.genres)
             subtitle.text = line
             subtitle.setVisible(line.isNotEmpty())
 

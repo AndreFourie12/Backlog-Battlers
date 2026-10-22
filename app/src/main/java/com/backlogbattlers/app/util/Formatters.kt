@@ -1,21 +1,27 @@
 package com.backlogbattlers.app.util
 
-import com.backlogbattlers.app.domain.model.LibraryStatus
+import android.content.Context
+import androidx.annotation.StringRes
+import com.backlogbattlers.app.R
 import com.backlogbattlers.app.domain.model.Platform
 
 //------------------------------
-// the display formatting the screens share
+// the display formatting the screens share. anything a person reads comes from strings.xml, so
+// it follows the app's language; the functions here only decide which string, and how to join them
 
 
 
-fun platformLabel(platform: String): String = when (platform.uppercase()) {
-    // PC games are labelled by the store most PC players use
-    "PC" -> "Steam"
-    "PLAYSTATION" -> "PlayStation"
-    "XBOX" -> "Xbox"
-    "SWITCH" -> "Switch"
-    else -> "Other"
+// the name a platform is shown with. PC games are labelled by the store most PC players use
+@StringRes
+fun platformLabelRes(platform: String): Int = when (platform.uppercase()) {
+    "PC" -> R.string.platform_steam
+    "PLAYSTATION" -> R.string.platform_playstation
+    "XBOX" -> R.string.platform_xbox
+    "SWITCH" -> R.string.platform_switch
+    else -> R.string.platform_other
 }
+
+fun Context.platformLabel(platform: String): String = getString(platformLabelRes(platform))
 
 // the platform a game is shown and filed under: the user's default platform (Settings) when the
 // game is on it. Otherwise, as the API lists a game's platforms in no set order, it is picked by
@@ -26,39 +32,23 @@ fun primaryPlatform(platforms: List<String>, preferred: Platform? = null): Platf
     return preferred?.takeIf { it in listed } ?: listed.minOrNull()
 }
 
-fun gameSubtitle(platforms: List<String>, genres: List<String>, preferred: Platform? = null): String =
-    gameSubtitle(primaryPlatform(platforms, preferred), genres)
-
-// for a game whose platform is already settled, e.g. a library entry's
-fun gameSubtitle(platform: Platform?, genres: List<String>): String {
-    val genre = genres.firstOrNull()
-    return listOfNotNull(platform?.let { platformLabel(it.name) }, genre).joinToString(" · ")
+// the line under a game: its platform's name and its first genre, whichever of the two it has.
+// genres come from the IGDB catalogue as they are
+fun gameSubtitle(platformLabel: String?, genres: List<String>): String {
+    return listOfNotNull(platformLabel, genres.firstOrNull()).joinToString(" · ")
 }
 
-// how a library entry's status reads inline, e.g. under a game's progress bar
-fun libraryStatusLabel(status: LibraryStatus): String = when (status) {
-    LibraryStatus.BACKLOG -> "Not started"
-    LibraryStatus.PLAYING -> "In progress"
-    LibraryStatus.COMPLETED -> "Completed"
-    LibraryStatus.ABANDONED -> "Abandoned"
+// a game's average time to beat, rounded to the nearest hour, or null when IGDB has no usable
+// figure for it (so the screen can show a dash rather than "0h")
+fun hoursToBeat(hours: Float?): Int? {
+    if (hours == null || hours <= 0f) return null
+    return kotlin.math.round(hours).toInt()
 }
 
-// the line under a library game's progress bar: its platform, its status, and — once the game has
-// a known average completion time — how long it usually takes to beat. No percentage yet: that
-// needs the app to track time played against time to beat, which is a later piece of this feature
-fun libraryStatusCaption(platform: Platform, status: LibraryStatus, avgCompletionHours: Float?): String {
-    val parts = mutableListOf(platformLabel(platform.name), libraryStatusLabel(status))
-    if (avgCompletionHours != null && avgCompletionHours > 0f) {
-        parts += "${kotlin.math.round(avgCompletionHours).toInt()}h to beat"
-    }
-    return parts.joinToString(" · ")
-}
-
-// a game's average time to beat, for the detail screen's stat tile. Rounded to the nearest hour;
-// a dash when IGDB has no usable figure for it, rather than showing "0h"
-fun formatHours(hours: Float?): String {
-    if (hours == null || hours <= 0f) return "—"
-    return "${kotlin.math.round(hours).toInt()}h"
+// the same, written out for the detail screen's stat tile, e.g. "25h"
+fun Context.formatHours(hours: Float?): String {
+    val whole = hoursToBeat(hours) ?: return getString(R.string.hours_unknown)
+    return getString(R.string.hours_short, whole)
 }
 
 // points are always written with a thousands separator
@@ -80,19 +70,6 @@ fun formatRarity(percent: Double): String {
 //------------------------------
 
 
-// turns a rank into the ordinal the copy reads with
-fun ordinal(rank: Int): String {
-    if (rank <= 0) return "unranked"
-    val suffix = when {
-        rank % 100 in 11..13 -> "th"
-        rank % 10 == 1 -> "st"
-        rank % 10 == 2 -> "nd"
-        rank % 10 == 3 -> "rd"
-        else -> "th"
-    }
-    return "$rank$suffix"
-}
-//------------------------------
 
 
 

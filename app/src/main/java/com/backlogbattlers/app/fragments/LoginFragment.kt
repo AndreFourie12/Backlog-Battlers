@@ -67,7 +67,7 @@ class LoginFragment : Fragment() {
                         is LoginUiState.Error -> {
                             btnSignIn.isEnabled = true
                             progressBar.visibility = View.GONE
-                            Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                            Toast.makeText(requireContext(), state.messageRes, Toast.LENGTH_LONG).show()
                         }
                     }
                 }

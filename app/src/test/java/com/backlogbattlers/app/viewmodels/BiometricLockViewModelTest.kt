@@ -2,6 +2,7 @@ package com.backlogbattlers.app.viewmodels
 
 import android.app.Activity
 import androidx.biometric.BiometricPrompt
+import com.backlogbattlers.app.R
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.DeleteAccountResult
 import com.backlogbattlers.app.data.repository.AuthResult
@@ -121,7 +122,7 @@ class BiometricLockViewModelTest {
 
         override fun observeCurrentUser(): Flow<User?> = flowOf(null)
         override suspend fun getCurrentUser(): User? = null
-        override suspend fun signInWithGoogle(activity: Activity): AuthResult = AuthResult.Failure("not implemented")
+        override suspend fun signInWithGoogle(activity: Activity): AuthResult = AuthResult.Failure(R.string.sign_in_failed)
         override suspend fun updateDisplayName(displayName: String): Boolean = false
         override suspend fun signOut() {
             signOutCalled = true

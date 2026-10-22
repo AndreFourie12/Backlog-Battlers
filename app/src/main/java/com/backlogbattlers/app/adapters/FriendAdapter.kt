@@ -99,15 +99,15 @@ class FriendAdapter(
 
         // this if statement sets online status text and color
         if (friend.isOnline) {
-            holder.tvOnlineStatus.text = "Online"
+            holder.tvOnlineStatus.setText(R.string.friend_online)
             holder.tvOnlineStatus.setTextColor(ContextCompat.getColor(context, R.color.success))
         } else {
-            holder.tvOnlineStatus.text = "Offline"
+            holder.tvOnlineStatus.setText(R.string.friend_offline)
             holder.tvOnlineStatus.setTextColor(ContextCompat.getColor(context, R.color.text_tertiary))
         }
 
-        holder.tvPoints.text = "${formatPoints(friend.monthlyPoints)} pts"
-        holder.tvAchievementCount.text = "🏆 ${friend.achievementCount}"
+        holder.tvPoints.text = context.getString(R.string.points_short, formatPoints(friend.monthlyPoints))
+        holder.tvAchievementCount.text = context.getString(R.string.friend_achievement_count, friend.achievementCount)
     }
 }
 //------------------------------EOF------------------------------\\

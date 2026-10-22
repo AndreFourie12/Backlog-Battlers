@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Afrikaans. Every translatable string in values/strings.xml has a twin here; the ones marked
+    translatable="false" there (brand names, number formats) are left out on purpose.
+    Machine-assisted translation: have an Afrikaans speaker read it over before the final video.
+-->
+<resources>
+    <!-- bottom navigation -->
+    <string name="nav_home">Tuis</string>
+    <string name="nav_games">Speletjies</string>
+    <string name="nav_activity">Aktiwiteit</string>
+    <string name="nav_friends">Vriende</string>
+    <string name="nav_profile">Profiel</string>
+
+    <!-- screen titles -->
+    <string name="title_games">Speletjies</string>
+    <string name="title_friends">Vriende</string>
+    <string name="title_activity">Aktiwiteit</string>
+    <string name="title_leaderboard">Ranglys</string>
+    <string name="standings_empty_body">Niemand het nog hierdie maand punte aangeteken nie. Voltooi \'n speletjie om boaan te kom.</string>
+    <string name="title_settings">Instellings</string>
+
+    <!-- shared copy -->
+    <string name="search_your_library">Soek in jou biblioteek</string>
+    <string name="search_for_a_game">Soek \'n speletjie</string>
+    <string name="add_game">+ Voeg speletjie by</string>
+    <string name="view_all">Sien alles</string>
+    <string name="show_less">Wys minder</string>
+    <string name="view_full">Sien volledig</string>
+    <string name="view_leaderboard">Sien ranglys</string>
+    <string name="invite_friends">Nooi vriende</string>
+    <string name="accept">Aanvaar</string>
+    <string name="owned">In besit</string>
+    <string name="add">Voeg by</string>
+    <string name="completion">Voltooiing</string>
+    <string name="achievements">Prestasies</string>
+    <string name="points">Punte</string>
+    <string name="playtime">Speeltyd</string>
+    <string name="avg_completion_time">Gem. voltooiingstyd</string>
+    <string name="locked">Gesluit</string>
+    <string name="unlocked">Ontsluit</string>
+    <string name="achievements_error">Kon nie nou prestasies laai nie.</string>
+    <string name="badges">Kentekens</string>
+    <string name="showcase_title">Skaarsste prestasies</string>
+    <string name="recent_activity">Onlangse aktiwiteit</string>
+    <string name="achievement_progress">Prestasievordering</string>
+    <string name="your_position">Jou posisie</string>
+    <string name="vs_last_month">teenoor verlede maand</string>
+    <string name="no_friends_yet">Nog geen vriende nie</string>
+    <string name="no_friends_body">Voeg vriende by om hierdie maand se kompetisie te begin</string>
+    <string name="welcome_title">Welkom by Backlog Battlers</string>
+    <string name="welcome_body">Hou jou prestasies dop, werk jou agterstand weg en veg teen vriende vir die top van die ranglys.</string>
+    <string name="competition_title">Maandelikse kompetisie</string>
+    <string name="competition_body">Klop jou vriende. Voltooi meer speletjies. Verdien meer prestasies.</string>
+    <string name="recommended_for_you">Aanbeveel vir jou</string>
+    <string name="great_games_to_start_with">Goeie speletjies om mee te begin</string>
+    <string name="recommendations_error">Kon nie nou speletjies laai nie.</string>
+    <string name="try_again">Probeer weer</string>
+    <string name="recent">Onlangs</string>
+    <string name="trending">Gewild</string>
+    <string name="browse_by_genre">Blaai volgens genre</string>
+    <string name="log_out">Teken uit</string>
+    <string name="you_suffix">(Jy)</string>
+    <string name="search_for_quoted">Soek vir “%1$s”</string>
+
+    <string name="genre_action">Aksie</string>
+    <string name="genre_rpg">RPG</string>
+    <string name="genre_puzzle">Raaisel</string>
+    <string name="genre_coop">Saamspeel</string>
+    <string name="genre_strategy">Strategie</string>
+    <string name="filter_platform">Platform</string>
+    <string name="filter_genre">Genre</string>
+    <string name="filter_sort">Sorteer</string>
+    <string name="filter_any_platform">Enige platform</string>
+    <string name="filter_any_genre">Enige genre</string>
+    <string name="sort_relevance">Relevansie</string>
+    <string name="sort_name_a_z">Naam A–Z</string>
+    <string name="sort_name_z_a">Naam Z–A</string>
+    <string name="search_no_results">Geen speletjies pas by “%1$s” nie</string>
+    <string name="search_no_results_filtered">Geen resultate met hierdie filters nie</string>
+    <string name="search_no_results_filtered_body">Verbreed die platform of genre om meer te sien.</string>
+    <string name="search_no_results_body">Kyk na die spelling, of probeer \'n korter titel.</string>
+    <string name="search_error">Kon nie die speletjiekatalogus bereik nie.</string>
+    <string name="try_again_body">Kyk na jou verbinding en probeer weer.</string>
+    <string name="added_to_library">%1$s is by jou agterstand gevoeg</string>
+
+    <!-- games screen -->
+    <string name="search_library">Soek in jou biblioteek</string>
+    <string name="library_empty_title">Jou biblioteek is leeg</string>
+    <string name="library_empty_body">Voeg speletjies by wat jy besit of wil speel. Elkeen hou sy prestasies dop en wys hoeveel punte jy nog kan verdien.</string>
+    <string name="add_first_game">Voeg jou eerste speletjie by</string>
+    <string name="popular_to_start_with">Gewild om mee te begin</string>
+
+    <!-- games screen, the library list once it has games in it -->
+    <string name="library_filter_all">Alles</string>
+    <string name="library_filter_in_progress">Aan die gang</string>
+    <string name="library_filter_completed">Voltooi</string>
+    <string name="library_filter_not_started">Nie begin nie</string>
+    <string name="sort_recently_added">Onlangs bygevoeg</string>
+    <string name="library_no_matches">Geen speletjies pas by “%1$s” nie</string>
+    <string name="library_completion_percent">%1$d%% voltooi</string>
+    <string name="library_no_results">Geen speletjies in jou biblioteek pas by hierdie filter nie</string>
+
+    <!-- content descriptions -->
+    <string name="cd_back">Terug</string>
+    <string name="cd_search">Soek</string>
+    <string name="cd_notifications">Kennisgewings</string>
+    <string name="cd_settings">Instellings</string>
+    <string name="cd_appearance">Voorkoms</string>
+    <string name="cd_add_friend">Voeg vriend by</string>
+    <string name="cd_favourite">Voeg by gunstelinge</string>
+    <string name="cd_sort">Sorteer biblioteek</string>
+    <string name="cd_clear">Vee soektog uit</string>
+    <string name="cd_add_to_library">Voeg by biblioteek</string>
+    <string name="cd_remove">Verwyder</string>
+    <string name="cd_app_logo">Backlog Battlers-logo</string>
+    <string name="cd_game_art">Speletjiekuns</string>
+    <string name="cd_reject_request">Wys vriendversoek van die hand</string>
+
+    <!-- friends feature -->
+    <string name="tab_all_friends">Alle vriende</string>
+    <string name="tab_following">Volg</string>
+    <string name="tab_requests">Versoeke</string>
+    <string name="reject">Weier</string>
+    <string name="pending">Hangend</string>
+    <string name="already_friends">Vriende</string>
+    <string name="search_friends_hint">Soek vriende</string>
+    <string name="find_friends_title">Vind vriende</string>
+    <string name="search_for_friends_hint">Soek volgens naam</string>
+    <string name="no_search_results_title">Geen resultate nie</string>
+    <string name="no_search_results_body">Probeer \'n ander naam</string>
+    <string name="search_friends_prompt_title">Vind vriende volgens naam</string>
+    <string name="search_friends_prompt_body">Tik op soek of druk enter wanneer jy gereed is</string>
+    <string name="following_empty_title">Volg is nog nie beskikbaar nie</string>
+    <string name="following_empty_body">Kom kyk weer sodra dit gebou is</string>
+    <string name="no_friends_title_empty">Dis net jy vir eers</string>
+    <string name="no_friends_body_empty">Almal op jou vriendelys word gerangskik volgens punte wat hierdie maand verdien is, en die ranglys begin op die 1ste weer van voor af.</string>
+    <string name="share_invite_link">Deel uitnodigingskakel</string>
+    <string name="find_by_username">Vind volgens gebruikersnaam</string>
+    <string name="invite_share_text">Voeg my by op Backlog Battlers! Soek my volgens naam sodra jy aangeteken is.</string>
+
+    <!-- sign in screen -->
+    <string name="login_tagline">Hou jou speletjies dop, verdien punte vir elke prestasie en kompeteer elke maand met vriende.</string>
+    <string name="login_continue_with_google">Gaan voort met Google</string>
+    <string name="login_signing_in">Teken tans aan</string>
+    <string name="login_account_hint">Nuut hier? Dit skep jou rekening. Speel jy reeds? Dit teken jou weer aan.</string>
+    <string name="login_terms_notice">Deur voort te gaan, stem jy in tot die Bepalings en Privaatheidsbeleid.</string>
+    <string name="login_terms_link">Bepalings</string>
+    <string name="login_privacy_link">Privaatheidsbeleid</string>
+
+    <string name="cd_home_backdrop">Golwende heuwels onder \'n helder lug</string>
+
+    <!-- settings, section headers -->
+    <string name="settings_section_account">REKENING</string>
+    <string name="settings_section_preferences">VOORKEURE</string>
+    <string name="settings_section_support">ONDERSTEUNING</string>
+
+    <!-- settings, rows -->
+    <string name="settings_edit_profile">Wysig profiel</string>
+    <string name="settings_connected_accounts">Gekoppelde rekeninge</string>
+    <string name="settings_connected_accounts_pending">Kom binnekort</string>
+    <string name="settings_notifications">Kennisgewings</string>
+    <string name="settings_appearance">Voorkoms</string>
+    <string name="settings_language">Taal</string>
+    <string name="settings_language_dialog_title">Kies jou taal</string>
+    <string name="settings_default_platform">Verstekplatform</string>
+    <string name="settings_default_platform_dialog_title">Waar speel jy meestal?</string>
+    <string name="settings_default_platform_saved">Nuwe speletjies word as %1$s bygevoeg wanneer hulle daar beskikbaar is</string>
+    <string name="settings_privacy">Privaatheid &amp; data</string>
+    <string name="settings_help">Hulp &amp; ondersteuning</string>
+    <string name="settings_about">Meer oor</string>
+    <string name="settings_notifications_all_on">Almal aan</string>
+    <string name="settings_notifications_all_off">Almal af</string>
+    <string name="settings_notifications_some_on">%1$d van %2$d aan</string>
+
+    <!-- settings, log out -->
+    <string name="log_out_confirm_title">Teken uit?</string>
+    <string name="log_out_confirm_body">Jy sal weer met Google moet aanteken om by jou agterstand uit te kom.</string>
+    <string name="log_out_confirm_action">Teken uit</string>
+    <string name="delete_account">Skrap rekening</string>
+    <string name="delete_account_in_progress">Skrap tans jou rekening…</string>
+    <string name="delete_account_confirm_title">Skrap jou rekening?</string>
+    <string name="delete_account_confirm_body">Dit skrap jou profiel, speletjiebiblioteek, punte en vriende permanent van Backlog Battlers. Dit kan nie ontdoen word nie.</string>
+    <string name="delete_account_confirm_action">Skrap</string>
+    <string name="delete_account_done">Jou rekening is geskrap</string>
+    <string name="delete_account_sign_in_again">Jou sessie het verval. Teken weer aan en skrap dan jou rekening.</string>
+    <string name="delete_account_no_connection">Kon nie Backlog Battlers bereik nie. Kyk na jou verbinding en probeer weer.</string>
+    <string name="delete_account_failed">Iets het verkeerd geloop met die skrap van jou rekening. Probeer asseblief weer.</string>
+    <string name="cancel">Kanselleer</string>
+
+    <!-- edit profile -->
+    <string name="title_edit_profile">Wysig profiel</string>
+    <string name="edit_profile_display_name">Vertoonnaam</string>
+    <string name="edit_profile_display_name_hint">Hoe vriende jou sien</string>
+    <string name="edit_profile_email">E-pos</string>
+    <string name="edit_profile_email_locked">Jou e-pos kom van die Google-rekening waarmee jy aangeteken het.</string>
+    <string name="edit_profile_avatar_note">Jou foto kom van jou Google-rekening.</string>
+    <string name="edit_profile_save">Stoor veranderinge</string>
+    <string name="edit_profile_saved">Profiel opgedateer</string>
+    <string name="edit_profile_name_empty">Voer \'n vertoonnaam in</string>
+    <string name="edit_profile_name_too_long">Vertoonname is 24 karakters of minder</string>
+    <string name="edit_profile_signed_out">Teken aan om jou profiel te wysig</string>
+    <string name="cd_avatar">Profielfoto</string>
+
+    <!-- notification settings -->
+    <string name="title_notifications">Kennisgewings</string>
+    <string name="notifications_intro">Kies waaroor Backlog Battlers jou laat weet.</string>
+    <string name="notifications_section_progress">JOU VORDERING</string>
+    <string name="notifications_section_competition">KOMPETISIE</string>
+    <string name="notif_achievements">Prestasies</string>
+    <string name="notif_achievements_body">Wanneer jy \'n prestasie ontsluit in \'n speletjie wat jy dophou</string>
+    <string name="notif_rank">Rangveranderinge</string>
+    <string name="notif_rank_body">Wanneer jy op die maandelikse ranglys op of af beweeg</string>
+    <string name="notif_season">Seisoen begin oor</string>
+    <string name="notif_season_body">Wanneer \'n nuwe maand begin en punte teruggestel word</string>
+    <string name="notif_friends">Vriendaktiwiteit</string>
+    <string name="notif_friends_body">Wanneer \'n vriend \'n speletjie voltooi of by jou verbygaan</string>
+
+    <!-- appearance -->
+    <string name="title_appearance">Voorkoms</string>
+    <string name="appearance_section_theme">TEMA</string>
+    <string name="appearance_section_backdrop">TUISAGTERGROND</string>
+    <string name="appearance_theme_dark">Donker</string>
+    <string name="appearance_theme_dark_body">Die verstek. Sag op die oë in die nag.</string>
+    <string name="appearance_theme_light">Lig</string>
+    <string name="appearance_theme_light_body">Helderder, beter in daglig.</string>
+    <string name="appearance_backdrop_body">Die kunswerk agter die opskrif op jou tuisskerm.</string>
+    <string name="backdrop_hills">Golwende heuwels</string>
+    <string name="backdrop_mountain">Bergvallei</string>
+    <string name="backdrop_meadow">Somerweiveld</string>
+    <string name="backdrop_forest">Dennebos</string>
+    <string name="backdrop_coast">Kalkkus</string>
+    <string name="cd_backdrop_preview">Agtergrondvoorskou</string>
+    <string name="cd_selected">Gekies</string>
+
+    <!-- privacy and data -->
+    <string name="title_privacy">Privaatheid &amp; data</string>
+    <string name="privacy_section_security">SEKURITEIT</string>
+    <string name="privacy_section_data">JOU DATA</string>
+    <string name="privacy_biometric">Biometriese aanmelding</string>
+    <string name="privacy_biometric_body">Gebruik jou vingerafdruk of gesig om die app te ontsluit</string>
+    <string name="privacy_what_we_store">Wat ons stoor</string>
+    <string name="privacy_what_we_store_body">Jou vertoonnaam, e-pos en avatar kom van die Google-rekening waarmee jy aanteken. Jou biblioteek, speeltyd en prestasievordering word op hierdie toestel gehou en met jou rekening gesinkroniseer sodat jou posisie op die ranglys akkuraat bly.</string>
+    <string name="privacy_policy">Privaatheidsbeleid</string>
+    <string name="privacy_terms">Gebruiksbepalings</string>
+    <string name="biometric_lock_title">Vingerafdruk nodig</string>
+    <string name="biometric_lock_body">Bevestig dat dit jy is om Backlog Battlers oop te maak</string>
+    <string name="biometric_prompt_title">Ontsluit Backlog Battlers</string>
+    <string name="biometric_prompt_subtitle">Skandeer jou vingerafdruk om voort te gaan</string>
+    <string name="biometric_prompt_negative_button">Kanselleer</string>
+    <string name="biometric_signed_out_message">Vingerafdrukkontrole gekanselleer. Teken asseblief weer aan.</string>
+    <string name="cd_fingerprint_icon">Vingerafdrukikoon</string>
+
+    <!-- help and support -->
+    <string name="title_help">Hulp &amp; ondersteuning</string>
+    <string name="help_section_faq">ALGEMENE VRAE</string>
+    <string name="help_faq_points_q">Hoe word punte bereken?</string>
+    <string name="help_faq_points_a">Elke prestasie wat jy ontsluit, is punte werd na gelang van hoe skaars dit in die gemeenskap is. Skaarser prestasies is meer werd, so om \'n moeilike speletjie klaar te speel, klop om \'n maklike een te maal.</string>
+    <string name="help_faq_season_q">Wanneer begin die seisoen oor?</string>
+    <string name="help_faq_season_a">Ranglyspunte word op die eerste dag van elke maand teruggestel. Jou biblioteek, speeltyd en ontsluite prestasies bly behoue; net die maandelikse ranglys begin van voor af.</string>
+    <string name="help_faq_platform_q">Hoekom ontbreek my speeltyd?</string>
+    <string name="help_faq_platform_a">Speeltyd word ingetrek wanneer jy \'n speletjierekening koppel. Rekeningkoppeling word nog gebou, so vir eers kan jy self ure op \'n speletjie se besonderhedeskerm invoer.</string>
+    <string name="help_faq_friends_q">Hoe voeg ek vriende by?</string>
+    <string name="help_faq_friends_a">Maak die Vriende-oortjie oop en soek vir \'n vertoonnaam, of stuur \'n uitnodiging. Sodra hulle aanvaar, verskyn julle albei op mekaar se maandelikse ranglys.</string>
+
+    <!-- about -->
+    <string name="title_about">Meer oor</string>
+    <string name="about_tagline">Werk jou agterstand weg. Klop jou vriende.</string>
+    <string name="about_section_app">APP</string>
+    <string name="about_section_legal">REGSAAKLIK</string>
+    <string name="about_version">Weergawe</string>
+    <string name="about_build">Bou</string>
+    <string name="about_build_debug">Ontfouting</string>
+    <string name="about_build_release">Vrystelling</string>
+    <string name="about_blurb">Backlog Battlers hou die speletjies wat jy besit dop, gee punte vir die prestasies wat jy ontsluit en plaas jou op \'n maandelikse ranglys teen jou vriende. Gebou as \'n PROG7314-portefeuljeprojek.</string>
+    <string name="about_open_source">Oopbronlisensies</string>
+    <string name="about_terms_body">Backlog Battlers is \'n studenteportefeuljeprojek, verskaf soos dit is en sonder waarborg. Gebruik dit om jou eie speletjies dop te hou. Moenie probeer om prestasies of ranglysposisies te vervals nie, en moenie die app gebruik om ander spelers te teister nie. Rekeninge wat een van dié doen, kan verwyder word. Omdat dit \'n kursuswerkweergawe is, kan funksies tussen weergawes verander of verdwyn, en daar is geen waarborg dat data \'n herinstallasie sal oorleef nie.</string>
+    <string name="about_privacy_body">Wanneer jy met Google aanteken, kry die app jou vertoonnaam, e-posadres en profielfoto. Dit, saam met jou biblioteek, speeltyd, prestasies en maandelikse punte, word op hierdie toestel en op die projek se bediener gestoor sodat jou posisie op die ranglys akkuraat is.\n\nJou data word nooit verkoop of met adverteerders gedeel nie. Vriende kan jou vertoonnaam, foto, punte en onlangse aktiwiteit sien. Niemand kan jou e-posadres sien nie.\n\nAs jy uitteken, word jou sessie en die plaaslike kopie van jou profiel van hierdie toestel verwyder.</string>
+    <string name="about_licences_body">Hierdie app is gebou op oopbronwerk wat onder die Apache-lisensie 2.0 vrygestel is:\n\n• AndroidX en Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines en kotlinx.serialization\n• Ktor Client\n\nDie volledige lisensietekste is by elke projek se bewaarplek beskikbaar.</string>
+
+    <!-- activity feed -->
+    <string name="activity_no_standings_title">Nog geen ranglys nie</string>
+    <string name="activity_no_standings_body">Voeg \'n vriend by, dan word julle albei gerangskik volgens punte wat hierdie maand verdien is.</string>
+    <string name="view_standings">Sien ranglys</string>
+    <string name="activity_today">Vandag</string>
+    <string name="activity_event_joined">Jy het by <b>Backlog Battlers</b> aangesluit</string>
+    <string name="activity_just_now">Pas</string>
+    <string name="activity_feed_hint" formatted="false">Ontsluite prestasies, 100% voltooiings en rangveranderinge van jou en jou vriende sal hier verskyn, gegroepeer per dag.</string>
+
+    <!-- profile -->
+    <string name="profile_level">Vlak 1</string>
+    <string name="profile_xp_progress">0 / 500 XP · ontsluit \'n prestasie om te begin</string>
+    <string name="badges_earned_count">0 van 4 verdien</string>
+    <string name="badge_completionist">Voltooier</string>
+    <string name="badge_achievement_hunter">Prestasiejagter</string>
+    <string name="badge_monthly_competitor">Maandelikse mededinger</string>
+    <string name="badge_early_bird">Vroegopstaner</string>
+    <string name="showcase_body">Wys jou skaarsste prestasies, voltooide speletjies en gemiddelde voltooiingspersentasie</string>
+    <string name="recent_activity_empty">Speletjies wat jy speel, sal hier verskyn</string>
+    <string name="add_a_game">Voeg \'n speletjie by →</string>
+
+    <plurals name="search_result_count">
+        <item quantity="one">%1$d resultaat</item>
+        <item quantity="other">%1$d resultate</item>
+    </plurals>
+
+    <plurals name="library_game_count">
+        <item quantity="one">%1$d speletjie in jou biblioteek</item>
+        <item quantity="other">%1$d speletjies in jou biblioteek</item>
+    </plurals>
+
+    <!-- platforms (brand names stay as they are) -->
+    <string name="platform_steam">Steam</string>
+    <string name="platform_playstation">PlayStation</string>
+    <string name="platform_xbox">Xbox</string>
+    <string name="platform_switch">Switch</string>
+    <string name="platform_other">Ander</string>
+
+    <!-- "u" for uur -->
+    <string name="hours_short">%1$du</string>
+    <string name="points_short">%1$s punte</string>
+
+    <!-- friends and leaderboard -->
+    <string name="friend_online">Aanlyn</string>
+    <string name="friend_offline">Vanlyn</string>
+    <string name="friends_error_load">Kon nie jou vriende laai nie. Kyk na jou verbinding en probeer weer.</string>
+    <string name="friends_error_search">Kon nie na spelers soek nie. Kyk na jou verbinding en probeer weer.</string>
+    <string name="friends_error_send">Kon nie die vriendversoek stuur nie. Probeer asseblief weer.</string>
+    <string name="friends_error_accept">Kon nie die vriendversoek aanvaar nie. Probeer asseblief weer.</string>
+    <string name="friends_error_reject">Kon nie die vriendversoek van die hand wys nie. Probeer asseblief weer.</string>
+    <string name="standings_error_load">Kon nie die ranglys laai nie. Kyk na jou verbinding en probeer weer.</string>
+
+    <!-- signing in -->
+    <string name="sign_in_cancelled">Aanmelding is gekanselleer</string>
+    <string name="sign_in_no_account">Geen Google-rekening is op hierdie foon gevind nie. Voeg een in jou foon se instellings by en probeer weer.</string>
+    <string name="sign_in_no_connection">Kon nie Backlog Battlers bereik nie. Kyk na jou verbinding en probeer weer.</string>
+    <string name="sign_in_failed">Aanmelding het nie gewerk nie. Probeer asseblief weer.</string>
+</resources>
