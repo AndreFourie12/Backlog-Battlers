@@ -94,4 +94,22 @@ class GameApiTest {
         }
         assertTrue(error.message!!.contains("502"))
     }
+
+    @Test
+    fun `starter games carry their Steam chart rank, and hand picks have none`() = runBlocking {
+        val body = """
+            [
+              {"game":{"gameId":113112,"title":"Hades","platforms":["PC"],"genres":["Adventure"]},
+               "reason":"#3 most played on Steam right now","steamRank":3},
+              {"game":{"gameId":7344,"title":"Ori and the Blind Forest","platforms":["PC"],"genres":["Platform"]},
+               "reason":"A great first pick for your backlog"}
+            ]
+        """.trimIndent()
+
+        val starters = api(body = body).starterGames()
+
+        assertEquals(listOf(3, null), starters.map { it.steamRank })
+        assertEquals("A great first pick for your backlog", starters[1].reason)
+        assertTrue(seen.single().url.encodedPath.endsWith("/games/starter"))
+    }
 }

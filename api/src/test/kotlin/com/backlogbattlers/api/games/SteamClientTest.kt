@@ -98,4 +98,26 @@ class SteamClientTest {
 
         assertFalse(error.message.orEmpty().contains("super-secret-key"))
     }
+
+    @Test
+    fun `the most played chart comes back most played first, without needing a key`() = runBlocking {
+        val seen = mutableListOf<HttpRequestData>()
+        // Steam's own order is followed by rank, not by where a row sits in the JSON
+        val body = """{"response":{"rollup_date":1793577600,"ranks":[
+            {"rank":2,"appid":570,"last_week_rank":2,"peak_in_game":701331},
+            {"rank":1,"appid":730,"last_week_rank":1,"peak_in_game":1089723},
+            {"rank":3,"appid":1145360,"last_week_rank":-1,"peak_in_game":50000}]}}"""
+        val steam = steamWith(apiKey = "", seen = seen) { HttpStatusCode.OK to body }
+
+        assertEquals(listOf(730, 570, 1145360), steam.mostPlayedAppIds())
+        assertTrue(seen.single().url.encodedPath.contains("ISteamChartsService/GetMostPlayedGames"))
+        assertNull(seen.single().url.parameters["key"])
+    }
+
+    @Test
+    fun `a failed most played request is an error`() {
+        val steam = steamWith { HttpStatusCode.ServiceUnavailable to "" }
+
+        assertFailsWith<SteamException> { runBlocking { steam.mostPlayedAppIds() } }
+    }
 }

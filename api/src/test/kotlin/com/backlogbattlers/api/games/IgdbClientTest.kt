@@ -171,6 +171,37 @@ class IgdbClientTest {
     }
 
     @Test
+    fun `Steam app ids are turned into IGDB games, the lowest id winning between editions`() = runBlocking {
+        val seen = mutableListOf<HttpRequestData>()
+        // two IGDB entries list Hades' Steam app; Ori's app is listed once
+        val body = """[{"id":1,"game":200000,"uid":"1145360"},{"id":2,"game":113112,"uid":"1145360"},
+            {"id":3,"game":7344,"uid":"261570"}]"""
+        val client = clientWith(handler = fakeServices(seen, igdbBody = body))
+
+        val games = client.gameIdsForSteamApps(listOf(1145360, 261570, 730))
+
+        assertEquals(mapOf(1145360 to 113112, 261570 to 7344), games)
+        assertEquals("/v4/external_games", seen.last().url.encodedPath)
+        assertTrue(bodyOf(seen.last()).contains("""where uid = ("1145360","261570","730") & external_game_source = 1;"""))
+    }
+
+    @Test
+    fun `single player games are asked for by id and game mode, and no ids asks nothing`() = runBlocking {
+        val seen = mutableListOf<HttpRequestData>()
+        val client = clientWith(handler = fakeServices(seen))
+
+        val games = client.singlePlayerGames(listOf(113112, 7344))
+
+        assertEquals("Hades", games.single().name)
+        assertEquals("/v4/games", seen.last().url.encodedPath)
+        assertTrue(bodyOf(seen.last()).contains("where id = (113112,7344) & game_modes = (1);"))
+
+        seen.clear()
+        assertEquals(emptyList(), client.singlePlayerGames(emptyList()))
+        assertTrue(seen.isEmpty())
+    }
+
+    @Test
     fun `browse filters by the category and puts the most rated games first`() = runBlocking {
         val seen = mutableListOf<HttpRequestData>()
         val client = clientWith(handler = fakeServices(seen))
