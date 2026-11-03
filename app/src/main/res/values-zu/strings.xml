@@ -238,7 +238,15 @@
     <string name="privacy_section_security">UKUPHEPHA</string>
     <string name="privacy_section_data">IDATHA YAKHO</string>
     <string name="privacy_biometric">Ukungena nge-biometric</string>
-    <string name="privacy_biometric_body">Sebenzisa isigxivizo somunwe noma ubuso ukuvula uhlelo</string>
+    <string name="privacy_biometric_body">Sebenzisa isigxivizo somunwe, ubuso noma i-PIN yefoni yakho ukuvula uhlelo</string>
+    <string name="biometric_unavailable_no_hardware">Le foni ayinaso isifundi sezigxivizo zeminwe noma ukuvula ngobuso</string>
+    <string name="biometric_unavailable_not_enrolled">Qala ngokwengeza isigxivizo somunwe noma ukukhiya isikrini kuzilungiselelo zefoni yakho, bese uvula lokhu</string>
+    <string name="biometric_unavailable_other">Ukuvula ngesigxivizo somunwe akutholakali kule foni okwamanje</string>
+    <string name="biometric_offer_title">Vula ngesigxivizo somunwe wakho?</string>
+    <string name="biometric_offer_body">Ngokuzayo uma uvula i-Backlog Battlers, sebenzisa isigxivizo somunwe, ubuso noma i-PIN yefoni yakho esikhundleni sokungena. Ungakushintsha lokhu noma nini ku-Izilungiselelo → Ubumfihlo nedatha.</string>
+    <string name="biometric_offer_accept">Vula</string>
+    <string name="biometric_offer_decline">Hhayi manje</string>
+    <string name="biometric_offer_enabled">Ukuvula ngesigxivizo somunwe kuvuliwe</string>
     <string name="privacy_what_we_store">Esikugcinayo</string>
     <string name="privacy_what_we_store_body">Igama lakho elibonakalayo, i-imeyili nesithombe kuvela ku-akhawunti ye-Google ongena ngayo. Umtapo wakho, isikhathi sokudlala nenqubekela phambili yezimpumelelo kugcinwa kule divayisi futhi kuvumelaniswa ne-akhawunti yakho ukuze indawo yakho ebhodini labaphambili ihlale inembile.</string>
     <string name="privacy_policy">Inqubomgomo yobumfihlo</string>
@@ -246,9 +254,12 @@
     <string name="biometric_lock_title">Kudingeka isigxivizo somunwe</string>
     <string name="biometric_lock_body">Qinisekisa ukuthi nguwe ukuze uvule i-Backlog Battlers</string>
     <string name="biometric_prompt_title">Vula i-Backlog Battlers</string>
-    <string name="biometric_prompt_subtitle">Skena isigxivizo somunwe wakho ukuze uqhubeke</string>
-    <string name="biometric_prompt_negative_button">Khansela</string>
-    <string name="biometric_signed_out_message">Ukuhlolwa kwesigxivizo somunwe kukhanseliwe. Sicela ungene futhi.</string>
+    <string name="biometric_prompt_subtitle">Sebenzisa isigxivizo somunwe wakho, noma i-PIN, iphethini noma iphasiwedi yefoni yakho</string>
+    <string name="biometric_lock_cancelled">Ukuvula kukhanseliwe. Zama futhi, noma ungene nge-Google esikhundleni salokho.</string>
+    <string name="biometric_lock_locked_out">Imizamo iminingi kakhulu. Sebenzisa i-PIN, iphethini noma iphasiwedi yefoni yakho, noma ungene nge-Google esikhundleni salokho.</string>
+    <string name="biometric_lock_unavailable">Isigxivizo somunwe wakho noma ukukhiya isikrini akutholakali okwamanje. Ngena nge-Google esikhundleni salokho.</string>
+    <string name="biometric_lock_retry">Zama futhi</string>
+    <string name="biometric_lock_sign_in_again">Ngena futhi</string>
     <string name="cd_fingerprint_icon">Isithonjana sesigxivizo somunwe</string>
 
     <!-- help and support -->
