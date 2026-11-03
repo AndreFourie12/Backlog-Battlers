@@ -1,6 +1,8 @@
 package com.backlogbattlers.app.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.backlogbattlers.app.data.local.Converters
@@ -45,11 +47,15 @@ data class CachedGameEntity(
 )
 
 //------------------------------
-// LibraryEntryEntity class defines the local database table for user game library items
-@Entity(tableName = "library_entries")
+// LibraryEntryEntity class defines the local database table for user game library items.
+// every row belongs to one account, so a second account signed in on the same phone
+// never sees (or edits) the first account's library
+@Entity(tableName = "library_entries", indices = [Index("userId")])
 @TypeConverters(Converters::class)
 data class LibraryEntryEntity(
     @PrimaryKey val libraryEntryId: String,
+    //the account this entry belongs to. the default matches MIGRATION_4_5 for rows that existed before it
+    @ColumnInfo(defaultValue = "") val userId: String,
     val gameId: Int,
     val platform: String,
     val status: String,

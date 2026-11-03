@@ -55,29 +55,30 @@ interface CachedGameDao {
 }
 
 //------------------------------
-// this interface provides database access ops for LibraryEntryEntity
+// this interface provides database access ops for LibraryEntryEntity.
+// every read and delete takes the signed-in account's id, so one account never reaches another's rows
 @Dao
 interface LibraryEntryDao {
 
-    // observes all library entries ordered by update time as a Flow
-    @Query("SELECT * FROM library_entries ORDER BY updatedAt DESC")
-    fun observeAll(): Flow<List<LibraryEntryEntity>>
+    // observes one account's library entries ordered by update time as a Flow
+    @Query("SELECT * FROM library_entries WHERE userId = :userId ORDER BY updatedAt DESC")
+    fun observeAll(userId: String): Flow<List<LibraryEntryEntity>>
 
-    // observes library entries filtered by status as a Flow
-    @Query("SELECT * FROM library_entries WHERE status = :status ORDER BY updatedAt DESC")
-    fun observeByStatus(status: String): Flow<List<LibraryEntryEntity>>
+    // observes one account's library entries filtered by status as a Flow
+    @Query("SELECT * FROM library_entries WHERE userId = :userId AND status = :status ORDER BY updatedAt DESC")
+    fun observeByStatus(userId: String, status: String): Flow<List<LibraryEntryEntity>>
 
-    // fetches a library entry by id
-    @Query("SELECT * FROM library_entries WHERE libraryEntryId = :id LIMIT 1")
-    suspend fun getById(id: String): LibraryEntryEntity?
+    // fetches one of the account's library entries by id. null if it belongs to someone else
+    @Query("SELECT * FROM library_entries WHERE userId = :userId AND libraryEntryId = :id LIMIT 1")
+    suspend fun getById(userId: String, id: String): LibraryEntryEntity?
 
-    // observes the entry for one game, e.g. for the game detail screen. Null once removed, or if it was never added
-    @Query("SELECT * FROM library_entries WHERE gameId = :gameId LIMIT 1")
-    fun observeByGameId(gameId: Int): Flow<LibraryEntryEntity?>
+    // observes the account's entry for one game, e.g. for the game detail screen. Null once removed, or if it was never added
+    @Query("SELECT * FROM library_entries WHERE userId = :userId AND gameId = :gameId LIMIT 1")
+    fun observeByGameId(userId: String, gameId: Int): Flow<LibraryEntryEntity?>
 
-    // fetches all library entries marked as pending sync
-    @Query("SELECT * FROM library_entries WHERE pendingSync = 1")
-    suspend fun getPendingSync(): List<LibraryEntryEntity>
+    // fetches the account's library entries marked as pending sync
+    @Query("SELECT * FROM library_entries WHERE userId = :userId AND pendingSync = 1")
+    suspend fun getPendingSync(userId: String): List<LibraryEntryEntity>
 
     // inserts/ replaces a library entry
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -87,8 +88,8 @@ interface LibraryEntryDao {
     @Delete
     suspend fun delete(entry: LibraryEntryEntity)
 
-    // deletes every library entry, when the account they belong to is deleted
-    @Query("DELETE FROM library_entries")
-    suspend fun clear()
+    // deletes every library entry belonging to one account, when that account is deleted
+    @Query("DELETE FROM library_entries WHERE userId = :userId")
+    suspend fun clear(userId: String)
 }
 //------------------------------EOF------------------------------\\
