@@ -51,7 +51,6 @@ interface LibraryRepository {
 // Room backed implementation of LibraryRepository using LibraryEntryDao.
 // currentUserId gives the signed-in account's id (null when signed out); every query and write is
 // scoped to it, so a second account on the same phone starts with its own, empty library
-// modify when RestAPI integrated
 class LibraryRepositoryImpl(
     private val dao: LibraryEntryDao,
     private val currentUserId: () -> String?,

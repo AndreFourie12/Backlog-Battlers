@@ -108,6 +108,42 @@ class IgdbClient(
     /** The game's Steam app id, or null when IGDB has no Steam listing for it. */
     suspend fun steamAppId(gameId: Int): Int? = steamAppIds(listOf(gameId))[gameId]
 
+    /**
+     * The other way round from [steamAppIds]: Steam app id to IGDB game id, for the apps IGDB has a
+     * Steam listing for. When several IGDB entries share one app (editions), the lowest id wins.
+     */
+    suspend fun gameIdsForSteamApps(appIds: List<Int>): Map<Int, Int> {
+        val ids = appIds.distinct()
+        if (ids.isEmpty()) return emptyMap()
+
+        // uid is text in IGDB, so each app id is quoted. they are Ints, so nothing else can get in
+        val uids = ids.joinToString(",") { "\"$it\"" }
+        val limit = (ids.size * 2).coerceAtMost(MAX_ROWS)
+        val listings = query<List<IgdbExternalGame>>(
+            "external_games",
+            "fields game,uid; where uid = ($uids) & external_game_source = $STEAM_SOURCE_ID; limit $limit;",
+        )
+        return listings
+            .mapNotNull { listing -> listing.uid.toIntOrNull()?.let { it to listing.game } }
+            .groupBy({ it.first }, { it.second })
+            .mapValues { (_, gameIds) -> gameIds.min() }
+    }
+
+    /**
+     * The games among [gameIds] that can be played alone (IGDB lists a single player mode), in no
+     * particular order. Multiplayer-only games, like most free-to-play shooters, are left out.
+     */
+    suspend fun singlePlayerGames(gameIds: List<Int>): List<IgdbGame> {
+        val ids = gameIds.distinct()
+        if (ids.isEmpty()) return emptyList()
+
+        return query(
+            "games",
+            "$GAME_FIELDS where id = (${ids.joinToString(",")}) & game_modes = ($SINGLE_PLAYER_MODE_ID); " +
+                "limit ${ids.size.coerceAtMost(MAX_ROWS)};",
+        )
+    }
+
     /** Sends one Apicalypse query to an IGDB endpoint and decodes the JSON list it returns. */
     private suspend inline fun <reified T> query(endpoint: String, apicalypse: String): T {
         val accessToken = accessToken()
@@ -163,6 +199,7 @@ class IgdbClient(
         private const val MAX_ROWS = 500
         private const val MIN_RATING_COUNT = 5
         private const val STEAM_SOURCE_ID = 1 // IGDB's id for Steam in its external game sources
+        private const val SINGLE_PLAYER_MODE_ID = 1 // IGDB's id for the "Single player" game mode
         private const val TOKEN_MARGIN_SECONDS = 60L
 
         /**
