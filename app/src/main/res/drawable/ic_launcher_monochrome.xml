@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- adaptive launcher icon monochrome layer, for themed icons on Android 13+. the launcher only reads its
+     transparency and tints it with the wallpaper colours. it is made from the same original logo as the
+     foreground: the darker a pixel is in the logo, the more solid it is here, so the stacked layers keep
+     their depth and the white controller shows as a cut-out. inset like the foreground -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/img_logo_launcher_monochrome"
+    android:inset="20%" />

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- the home suggestion badge's circle, drawn inset so the badge view can be a bigger tap target
+     (recommendation_badge_touch) while the circle stays 22dp wide, in the same place -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/bg_circle_scrim"
+    android:inset="@dimen/recommendation_badge_inset" />
