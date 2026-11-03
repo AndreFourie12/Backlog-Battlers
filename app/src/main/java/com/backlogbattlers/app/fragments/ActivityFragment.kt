@@ -11,7 +11,7 @@ import com.backlogbattlers.app.R
 // the activity feed.
 // the standings card and the day grouped feed below it are laid out in
 // fragment_activity, so all this has to do is send the card's button to
-// the leaderboard.
+// the leaderboard and the header's gear to settings.
 class ActivityFragment : Fragment() {
 
     // inflates the activity fragment layout
@@ -24,9 +24,13 @@ class ActivityFragment : Fragment() {
     }
 
     // MainActivity already pads the root with the status bar inset for this
-    // destination, so the only wiring left is the leaderboard button
+    // destination, so the only wiring left is the header and leaderboard buttons
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.findViewById<View>(R.id.btn_settings).setOnClickListener {
+            findNavController().navigate(R.id.action_activityFragment_to_settingsFragment)
+        }
 
         view.findViewById<View>(R.id.btn_view_standings).setOnClickListener {
             findNavController().navigate(R.id.action_activityFragment_to_standingsFragment)
