@@ -151,7 +151,7 @@ class FakeLibraryRepository : LibraryRepository {
         entries.value = entries.value.filterNot { it.libraryEntryId == libraryEntryId }
     }
 
-    override suspend fun clear() {
+    override suspend fun clear(userId: String) {
         entries.value = emptyList()
     }
 }
