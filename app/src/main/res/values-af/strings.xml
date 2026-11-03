@@ -83,6 +83,7 @@
     <string name="search_error">Kon nie die speletjiekatalogus bereik nie.</string>
     <string name="try_again_body">Kyk na jou verbinding en probeer weer.</string>
     <string name="added_to_library">%1$s is by jou agterstand gevoeg</string>
+    <string name="recommendation_steam_rank">Nr. %1$d mees gespeel op Steam op die oomblik</string>
 
     <!-- games screen -->
     <string name="search_library">Soek in jou biblioteek</string>

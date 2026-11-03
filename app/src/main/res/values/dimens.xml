@@ -41,8 +41,9 @@
     <dimen name="recommendation_thumb_width">123dp</dimen>
     <dimen name="recommendation_thumb_height">70dp</dimen>
     <dimen name="recommendation_thumb_radius">8dp</dimen>
-    <dimen name="recommendation_badge">22dp</dimen>
     <dimen name="recommendation_badge_inset">5dp</dimen>
+    <!-- the badge view: its visible 22dp circle plus recommendation_badge_inset on each side, so it is easier to tap -->
+    <dimen name="recommendation_badge_touch">32dp</dimen>
     <dimen name="recommendation_chevron">14dp</dimen>
  
     <dimen name="search_bar_button">38dp</dimen>

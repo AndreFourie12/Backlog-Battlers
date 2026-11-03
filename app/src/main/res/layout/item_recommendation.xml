@@ -18,20 +18,20 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription" />
 
+    <!-- adds the game to the library (a tick once it is there). the view is the bigger tap target and
+         the circle is drawn inset by the old margin, so it looks the same as the plain 22dp badge did -->
     <ImageView
         android:id="@+id/img_add_badge"
-        android:layout_width="@dimen/recommendation_badge"
-        android:layout_height="@dimen/recommendation_badge"
-        android:layout_marginTop="@dimen/recommendation_badge_inset"
-        android:layout_marginEnd="@dimen/recommendation_badge_inset"
-        android:background="@drawable/bg_circle_scrim"
-        android:importantForAccessibility="no"
-        android:padding="5dp"
+        android:layout_width="@dimen/recommendation_badge_touch"
+        android:layout_height="@dimen/recommendation_badge_touch"
+        android:background="@drawable/bg_recommendation_badge"
+        android:contentDescription="@string/cd_add_to_library"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:padding="10dp"
         android:src="@drawable/ic_plus"
         app:layout_constraintEnd_toEndOf="@id/img_game_art"
         app:layout_constraintTop_toTopOf="@id/img_game_art"
-        app:tint="@color/text_primary"
-        tools:ignore="ContentDescription" />
+        app:tint="@color/text_primary" />
 
     <TextView
         android:id="@+id/tv_game_title"
