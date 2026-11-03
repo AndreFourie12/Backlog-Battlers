@@ -33,6 +33,8 @@ data class GameDto(
 data class RecommendationDto(
     val game: GameDto,
     val reason: String,
+    // the game's place on Steam's most played chart, null for the API's hand picked games
+    val steamRank: Int? = null,
 )
 
 @Serializable

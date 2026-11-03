@@ -29,10 +29,13 @@ data class Game(
     val totalAchievements: Int? = null,
 )
 
-// Recommendation data class pairs a game with the line shown under its name, e.g. on the home screen
+// Recommendation data class pairs a game with the line shown under its name, e.g. on the home screen.
+// steamRank is its place on Steam's most played chart (1 = most played), so the line can be worded in
+// the user's language; null for hand picked games, which show reason as the API sends it
 data class Recommendation(
     val game: Game,
     val reason: String,
+    val steamRank: Int? = null,
 )
 
 // Achievement data class represents domain model for one of a game's achievements.

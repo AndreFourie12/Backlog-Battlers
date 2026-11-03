@@ -6,6 +6,7 @@ import com.backlogbattlers.api.games.GameDto
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.IgdbGame
 import com.backlogbattlers.api.games.StarterGames
+import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.saveGame
 import com.backlogbattlers.api.games.steamArtUrl
 import com.backlogbattlers.api.games.toDto
@@ -18,9 +19,13 @@ private const val MAX_QUERY_LENGTH = 100
 private const val DEFAULT_LIMIT = 20
 private const val MAX_LIMIT = 50
 
-/** Game catalogue: search IGDB, and fetch one game with its time-to-beat. */
-fun Route.gameRoutes(igdb: IgdbClient) {
-    val starterGames = StarterGames(igdb)
+/**
+ * Game catalogue: search IGDB, fetch one game with its time-to-beat, and the home screen's suggestions.
+ * With a [steam] client the suggestions are popular games from Steam's most played chart; without one
+ * they are the hand picked starter games.
+ */
+fun Route.gameRoutes(igdb: IgdbClient, steam: SteamClient? = null) {
+    val starterGames = StarterGames(igdb, steam)
 
     // GET /games/starter
     get("/games/starter") {
