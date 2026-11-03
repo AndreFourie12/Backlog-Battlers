@@ -59,7 +59,7 @@ object ServiceLocator {
 
     val database: AppDatabase by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing database")
-        AppDatabase.getInstance(context)
+        AppDatabase.getInstance(context, currentUserId = { tokenStorage.getUserId() })
     }
 
     val tokenStorage: TokenStorage by lazy {
@@ -111,7 +111,7 @@ object ServiceLocator {
     }
 
     val libraryRepository: LibraryRepository by lazy {
-        LibraryRepositoryImpl(database.libraryEntryDao())
+        LibraryRepositoryImpl(database.libraryEntryDao(), currentUserId = { tokenStorage.getUserId() })
     }
 
     val searchHistoryRepository: SearchHistoryRepository by lazy {

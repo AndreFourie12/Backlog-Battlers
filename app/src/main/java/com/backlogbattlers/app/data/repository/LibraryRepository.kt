@@ -7,11 +7,14 @@ import com.backlogbattlers.app.domain.model.LibraryEntry
 import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 
 //------------------------------
-// interface providing operations for managing user library entries
+// interface providing operations for managing the signed-in user's library entries.
+// everything here only ever sees the account that is signed in right now
 interface LibraryRepository {
 
     // observes all library entries as a Flow
@@ -38,50 +41,63 @@ interface LibraryRepository {
     // removes a library entry by id
     suspend fun remove(libraryEntryId: String)
 
-    // removes every library entry on this device, when the account is deleted
-    suspend fun clear()
+    // removes every library entry belonging to userId on this device, when that account is deleted.
+    // takes the id rather than reading the session, because the session is already gone by then
+    suspend fun clear(userId: String)
 }
 
 
 //------------------------------
-// Room backed implementation of LibraryRepository using LibraryEntryDao
+// Room backed implementation of LibraryRepository using LibraryEntryDao.
+// currentUserId gives the signed-in account's id (null when signed out); every query and write is
+// scoped to it, so a second account on the same phone starts with its own, empty library
 // modify when RestAPI integrated
 class LibraryRepositoryImpl(
     private val dao: LibraryEntryDao,
+    private val currentUserId: () -> String?,
 ) : LibraryRepository {
 
     //------------------------------
     // observes library entries by delegating to LibraryEntryDao and mapping to domain list
     override fun observeLibrary(): Flow<List<LibraryEntry>> {
-        return dao.observeAll().map { entities ->
-            entities.map { it.toDomain() }
+        return forCurrentUser(signedOut = emptyList()) { userId ->
+            dao.observeAll(userId).map { entities ->
+                entities.map { it.toDomain() }
+            }
         }
     }
 
     //------------------------------
     // observes library entries filtered by status by delegating to LibraryEntryDao and mapping to domain list
     override fun observeByStatus(status: LibraryStatus): Flow<List<LibraryEntry>> {
-        return dao.observeByStatus(status.name).map { entities ->
-            entities.map { it.toDomain() }
+        return forCurrentUser(signedOut = emptyList()) { userId ->
+            dao.observeByStatus(userId, status.name).map { entities ->
+                entities.map { it.toDomain() }
+            }
         }
     }
 
     //------------------------------
     // observes the entry for one game by delegating to LibraryEntryDao and mapping to domain
     override fun observeByGameId(gameId: Int): Flow<LibraryEntry?> {
-        return dao.observeByGameId(gameId).map { it?.toDomain() }
+        return forCurrentUser(signedOut = null) { userId ->
+            dao.observeByGameId(userId, gameId).map { it?.toDomain() }
+        }
     }
 
     //------------------------------
-    // creates and upserts a new LibraryEntryEntity with a random UUID
+    // creates and upserts a new LibraryEntryEntity with a random UUID, owned by the signed-in user.
+    // does nothing when nobody is signed in
     override suspend fun addToLibrary(
         gameId: Int,
         platform: Platform,
         status: LibraryStatus,
     ) {
+        val userId = currentUserId() ?: return
         val now = System.currentTimeMillis()
         val entity = LibraryEntryEntity(
             libraryEntryId = UUID.randomUUID().toString(),
+            userId = userId,
             gameId = gameId,
             platform = platform.name,
             status = status.name,
@@ -101,7 +117,7 @@ class LibraryRepositoryImpl(
         libraryEntryId: String,
         status: LibraryStatus,
     ) {
-        val existing = dao.getById(libraryEntryId) ?: return
+        val existing = ownedEntry(libraryEntryId) ?: return
         val updated = existing.copy(
             status = status.name,
             updatedAt = System.currentTimeMillis(),
@@ -116,7 +132,7 @@ class LibraryRepositoryImpl(
         libraryEntryId: String,
         hours: Float,
     ) {
-        val existing = dao.getById(libraryEntryId) ?: return
+        val existing = ownedEntry(libraryEntryId) ?: return
         val updated = existing.copy(
             hoursPlayed = hours,
             updatedAt = System.currentTimeMillis(),
@@ -132,7 +148,7 @@ class LibraryRepositoryImpl(
         achievementId: String,
         unlocked: Boolean,
     ) {
-        val existing = dao.getById(libraryEntryId) ?: return
+        val existing = ownedEntry(libraryEntryId) ?: return
         val ids = if (unlocked) {
             if (achievementId in existing.unlockedAchievementIds) return
             existing.unlockedAchievementIds + achievementId
@@ -151,14 +167,30 @@ class LibraryRepositoryImpl(
     //------------------------------
     // fetches entry by id and deletes it from database
     override suspend fun remove(libraryEntryId: String) {
-        val existing = dao.getById(libraryEntryId) ?: return
+        val existing = ownedEntry(libraryEntryId) ?: return
         dao.delete(existing)
     }
 
     //------------------------------
-    // removes every library entry by delegating to LibraryEntryDao
-    override suspend fun clear() {
-        dao.clear()
+    // removes every library entry of one account by delegating to LibraryEntryDao
+    override suspend fun clear(userId: String) {
+        dao.clear(userId)
+    }
+
+    //------------------------------
+    // the signed-in user's entry with this id. null when signed out, or when the id belongs to another account
+    private suspend fun ownedEntry(libraryEntryId: String): LibraryEntryEntity? {
+        val userId = currentUserId() ?: return null
+        return dao.getById(userId, libraryEntryId)
+    }
+
+    //------------------------------
+    // runs query for whoever is signed in when the flow starts being collected (not when it was
+    // created), so a screen opened after switching accounts reads the new account's rows.
+    // emits signedOut once when nobody is signed in
+    private fun <T> forCurrentUser(signedOut: T, query: (String) -> Flow<T>): Flow<T> = flow {
+        val userId = currentUserId()
+        if (userId == null) emit(signedOut) else emitAll(query(userId))
     }
 
     //------------------------------

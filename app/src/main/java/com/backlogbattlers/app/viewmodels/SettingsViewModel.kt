@@ -104,12 +104,14 @@ class SettingsViewModel : ViewModel() {
     // deletes the account on the backend. once it is gone, everything it left on this device
     // goes too (library, recent searches, the fingerprint lock) so the next person to sign in
     // starts clean. runs on the application scope so leaving the screen mid-request can't
-    // leave the account deleted on the backend but still on the device
+    // leave the account deleted on the backend but still on the device. the account id is read
+    // first, because deleting signs out and the library is cleared by whose it was
     fun deleteAccount(onDone: (DeleteAccountResult) -> Unit) {
         ServiceLocator.applicationScope.launch {
+            val userId = ServiceLocator.tokenStorage.getUserId()
             val result = authRepository.deleteAccount()
             if (result == DeleteAccountResult.DELETED) {
-                ServiceLocator.libraryRepository.clear()
+                if (userId != null) ServiceLocator.libraryRepository.clear(userId)
                 ServiceLocator.searchHistoryRepository.clear()
                 settingsRepository.setBiometricLoginEnabled(false)
                 settingsRepository.setSyncPending(false)
