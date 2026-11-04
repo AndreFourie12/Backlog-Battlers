@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,8 +63,10 @@ class PrivacyDataFragment : Fragment() {
             val availability = ServiceLocator.biometricAvailabilityChecker.check()
             if (enabled && availability != BiometricAvailability.Available) {
                 biometric.setSettingsToggleChecked(false)
+                Log.w(TAG, "Biometric unlock can't be turned on: $availability")
                 Toast.makeText(requireContext(), unavailableMessage(availability), Toast.LENGTH_LONG).show()
             } else {
+                Log.i(TAG, "Biometric unlock turned ${if (enabled) "on" else "off"}")
                 viewModel.setBiometricLogin(enabled)
             }
         }
@@ -82,6 +85,10 @@ class PrivacyDataFragment : Fragment() {
         BiometricAvailability.NotEnrolled -> R.string.biometric_unavailable_not_enrolled
         BiometricAvailability.Unavailable,
         BiometricAvailability.Available -> R.string.biometric_unavailable_other
+    }
+
+    private companion object {
+        const val TAG = "PrivacyDataFragment"
     }
 }
 //------------------------------EOF------------------------------\\

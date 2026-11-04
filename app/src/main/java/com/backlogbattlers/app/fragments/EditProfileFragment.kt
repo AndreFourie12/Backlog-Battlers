@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -71,10 +72,12 @@ class EditProfileFragment : Fragment() {
 
         when {
             name.isEmpty() -> {
+                Log.d(TAG, "Not saving an empty display name")
                 Toast.makeText(requireContext(), R.string.edit_profile_name_empty, Toast.LENGTH_SHORT).show()
                 return
             }
             name.length > MAX_NAME_LENGTH -> {
+                Log.d(TAG, "Not saving a display name over $MAX_NAME_LENGTH characters")
                 Toast.makeText(requireContext(), R.string.edit_profile_name_too_long, Toast.LENGTH_SHORT).show()
                 return
             }
@@ -87,9 +90,11 @@ class EditProfileFragment : Fragment() {
             if (!isAdded) return@launch
 
             if (saved) {
+                Log.i(TAG, "Display name saved")
                 Toast.makeText(requireContext(), R.string.edit_profile_saved, Toast.LENGTH_SHORT).show()
                 findNavController().navigateUp()
             } else {
+                Log.w(TAG, "Display name not saved: nobody is signed in")
                 Toast.makeText(requireContext(), R.string.edit_profile_signed_out, Toast.LENGTH_LONG).show()
             }
         }
@@ -101,6 +106,7 @@ class EditProfileFragment : Fragment() {
     }
 
     private companion object {
+        const val TAG = "EditProfileFragment"
         const val MAX_NAME_LENGTH = 24
     }
 }

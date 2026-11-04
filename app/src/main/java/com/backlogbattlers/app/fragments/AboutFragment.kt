@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -74,11 +75,16 @@ class AboutFragment : Fragment() {
     }
 
     private fun showDocument(@StringRes title: Int, @StringRes body: Int) {
+        Log.d(TAG, "Showing the ${resources.getResourceEntryName(title)} document")
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(title)
             .setMessage(body)
             .setPositiveButton(android.R.string.ok, null)
             .show()
+    }
+
+    private companion object {
+        const val TAG = "AboutFragment"
     }
 }
 //------------------------------EOF------------------------------\\

@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.data.repository
 
+import android.util.Log
 import com.backlogbattlers.app.data.local.dao.CachedGameDao
 import com.backlogbattlers.app.data.local.entity.CachedGameEntity
 import com.backlogbattlers.app.data.remote.AchievementDto
@@ -59,11 +60,15 @@ class GameRepositoryImpl(
     }
 
     override suspend fun searchOnline(query: String, limit: Int): List<Game> {
-        return cacheAll(gameApi.searchGames(query, limit))
+        return cacheAll(gameApi.searchGames(query, limit)).also {
+            Log.d(TAG, "Search found ${it.size} games, now cached")
+        }
     }
 
     override suspend fun browse(category: String, limit: Int): List<Game> {
-        return cacheAll(gameApi.browseGames(category, limit))
+        return cacheAll(gameApi.browseGames(category, limit)).also {
+            Log.d(TAG, "Browsing $category found ${it.size} games, now cached")
+        }
     }
 
     //------------------------------
@@ -75,7 +80,9 @@ class GameRepositoryImpl(
     //------------------------------
     // refreshes one game from the API for its real time-to-beat, which search and browse skip
     override suspend fun refreshGame(gameId: Int): Game {
-        return cacheGame(gameApi.getGame(gameId).toDomain(System.currentTimeMillis()))
+        val game = cacheGame(gameApi.getGame(gameId).toDomain(System.currentTimeMillis()))
+        Log.d(TAG, "Refreshed game $gameId (${game.title}) from the API")
+        return game
     }
 
     //------------------------------
@@ -85,6 +92,7 @@ class GameRepositoryImpl(
         val recommendations = gameApi.starterGames().map { dto ->
             Recommendation(game = dto.game.toDomain(cachedAt), reason = dto.reason, steamRank = dto.steamRank)
         }
+        Log.d(TAG, "Loaded ${recommendations.size} starter games")
         recommendations.forEach { cacheGame(it.game) }
         return recommendations
     }
@@ -97,6 +105,7 @@ class GameRepositoryImpl(
         val cached = cachedGameDao.getGame(gameId)
         if (cached != null && cached.totalAchievements != achievements.size) {
             cachedGameDao.upsert(cached.copy(totalAchievements = achievements.size))
+            Log.d(TAG, "Game $gameId's achievement total updated to ${achievements.size}")
         }
         return achievements
     }
@@ -196,6 +205,10 @@ class GameRepositoryImpl(
             cachedAt = cachedAt,
             artworkUrls = artworkUrls,
         )
+    }
+
+    private companion object {
+        const val TAG = "GameRepository"
     }
 }
 //------------------------------EOF------------------------------\\

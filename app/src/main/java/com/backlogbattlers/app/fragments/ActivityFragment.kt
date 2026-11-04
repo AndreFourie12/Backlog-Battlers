@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,12 +30,18 @@ class ActivityFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<View>(R.id.btn_settings).setOnClickListener {
+            Log.d(TAG, "Opening settings from the activity feed")
             findNavController().navigate(R.id.action_activityFragment_to_settingsFragment)
         }
 
         view.findViewById<View>(R.id.btn_view_standings).setOnClickListener {
+            Log.d(TAG, "Opening the standings from the activity feed")
             findNavController().navigate(R.id.action_activityFragment_to_standingsFragment)
         }
+    }
+
+    private companion object {
+        const val TAG = "ActivityFragment"
     }
 }
 //------------------------------EOF------------------------------\\

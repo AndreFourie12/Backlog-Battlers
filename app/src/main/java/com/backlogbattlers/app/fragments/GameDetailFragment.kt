@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -67,7 +68,11 @@ class GameDetailFragment : Fragment() {
         }
 
         val gameId = arguments?.getString(ARG_GAME_ID)?.toIntOrNull()
-        if (gameId != null) viewModel.load(gameId)
+        if (gameId != null) {
+            viewModel.load(gameId)
+        } else {
+            Log.e(TAG, "Opened without a valid game id: ${arguments?.getString(ARG_GAME_ID)}")
+        }
     }
 
     private fun render(state: GameDetailUiState) {
@@ -86,6 +91,11 @@ class GameDetailFragment : Fragment() {
     private fun toggleFavourite() {
         isFavourite = !isFavourite
         headerAdapter.setFavourite(isFavourite)
+        Log.d(TAG, "Favourite turned ${if (isFavourite) "on" else "off"}")
+    }
+
+    private companion object {
+        const val TAG = "GameDetailFragment"
     }
 }
 //------------------------------EOF------------------------------\\

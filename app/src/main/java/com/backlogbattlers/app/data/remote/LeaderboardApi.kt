@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.data.remote
 
+import android.util.Log
 import com.backlogbattlers.app.data.local.TokenStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -53,9 +54,14 @@ class LeaderboardApi(
     private suspend inline fun <reified T> HttpResponse.checkedBody(): T {
         if (!status.isSuccess()) {
             val errorText = runCatching { body<String>() }.getOrDefault("HTTP ${status.value}")
+            Log.e(TAG, "${call.request.url.encodedPath} failed [${status.value}]: $errorText")
             throw IllegalStateException("server returned HTTP ${status.value}: $errorText")
         }
         return body()
+    }
+
+    private companion object {
+        const val TAG = "LeaderboardApi"
     }
 }
 //------------------------------EOF------------------------------\\

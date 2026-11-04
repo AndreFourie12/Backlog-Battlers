@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.viewmodels
 
+import android.util.Log
 import androidx.annotation.StringRes
 import com.backlogbattlers.app.R
 import androidx.lifecycle.ViewModel
@@ -55,6 +56,7 @@ class FriendsViewModel(
                 val self = authRepository.getCurrentUser()
                 val friends = friendsRepository.getFriends()
                 val requests = friendsRepository.getIncomingRequests()
+                Log.d(TAG, "Loaded ${friends.size} friends and ${requests.size} requests")
 
                 // this if statement builds the signed in user's own row, with achievementCount
                 val selfFriend = self?.let {
@@ -73,6 +75,7 @@ class FriendsViewModel(
                     )
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Loading friends failed", e)
                 _uiState.update { it.copy(isLoading = false, errorMessage = R.string.friends_error_load) }
             }
         }
@@ -81,6 +84,7 @@ class FriendsViewModel(
     //------------------------------
     // switches the visible tab, does not trigger a network call
     fun selectTab(tab: FriendsTab) {
+        Log.d(TAG, "Friends tab $tab selected")
         _uiState.update { it.copy(selectedTab = tab) }
     }
 
@@ -96,8 +100,10 @@ class FriendsViewModel(
         viewModelScope.launch {
             try {
                 friendsRepository.acceptRequest(requestId)
+                Log.i(TAG, "Friend request accepted")
                 refresh()
             } catch (e: Exception) {
+                Log.e(TAG, "Accepting a friend request failed", e)
                 _uiState.update { it.copy(errorMessage = R.string.friends_error_accept) }
             }
         }
@@ -109,8 +115,10 @@ class FriendsViewModel(
         viewModelScope.launch {
             try {
                 friendsRepository.rejectRequest(requestId)
+                Log.i(TAG, "Friend request rejected")
                 refresh()
             } catch (e: Exception) {
+                Log.e(TAG, "Rejecting a friend request failed", e)
                 _uiState.update { it.copy(errorMessage = R.string.friends_error_reject) }
             }
         }
@@ -123,6 +131,10 @@ class FriendsViewModel(
         // this if statement skips filtering entirely when there's nothing typed
         if (query.isBlank()) return friends
         return friends.filter { it.displayName.contains(query, ignoreCase = true) }
+    }
+
+    private companion object {
+        const val TAG = "FriendsViewModel"
     }
 }
 //------------------------------EOF------------------------------\\

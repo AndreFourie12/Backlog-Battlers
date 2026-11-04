@@ -3,6 +3,7 @@ package com.backlogbattlers.app.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -113,6 +114,7 @@ class GamesFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.btn_retry_popular).setOnClickListener {
+            Log.d(TAG, "Retrying the popular games")
             viewModel.loadPopular()
         }
 
@@ -177,7 +179,10 @@ class GamesFragment : Fragment() {
         LibraryFilterChip.entries.forEach { chip ->
             val chipView = container.inflateChild(R.layout.partial_chip) as TextView
             chipView.setText(chip.labelRes)
-            chipView.setOnClickListener { viewModel.setStatusFilter(chip.status) }
+            chipView.setOnClickListener {
+                Log.d(TAG, "Library filtered to ${chip.status ?: "all games"}")
+                viewModel.setStatusFilter(chip.status)
+            }
             if (container.isNotEmpty()) {
                 (chipView.layoutParams as LinearLayout.LayoutParams).marginStart =
                     resources.getDimensionPixelSize(R.dimen.list_gap)
@@ -191,6 +196,7 @@ class GamesFragment : Fragment() {
         val menu = PopupMenu(requireContext(), anchor)
         LibrarySort.entries.forEach { sort ->
             menu.menu.add(librarySortLabel(sort)).setOnMenuItemClickListener {
+                Log.d(TAG, "Library sorted by $sort")
                 viewModel.setLibrarySort(sort)
                 true
             }
@@ -266,6 +272,7 @@ class GamesFragment : Fragment() {
     }
 
     private fun openGame(gameId: Int) {
+        Log.d(TAG, "Opening game $gameId from the Games tab")
         hideKeyboard()
         findNavController().navigate(
             R.id.action_gamesFragment_to_gameDetailFragment,
@@ -276,5 +283,9 @@ class GamesFragment : Fragment() {
     private fun hideKeyboard() {
         WindowCompat.getInsetsController(requireActivity().window, searchInput).hide(WindowInsetsCompat.Type.ime())
         searchInput.clearFocus()
+    }
+
+    private companion object {
+        const val TAG = "GamesFragment"
     }
 }

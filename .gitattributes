@@ -1,0 +1,15 @@
+# The Gradle wrapper scripts run on Linux CI runners, so they must keep LF line endings even
+# when checked out on Windows with core.autocrlf on (a CRLF gradlew fails with "bad interpreter").
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Windows-only scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Never touch binary files
+*.jar binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.ttf binary

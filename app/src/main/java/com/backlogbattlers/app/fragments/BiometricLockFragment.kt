@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,8 +48,14 @@ class BiometricLockFragment : Fragment() {
         val body = view.findViewById<TextView>(R.id.tvBiometricLockBody)
         val retry = view.findViewById<View>(R.id.btnBiometricRetry)
         val signInAgain = view.findViewById<View>(R.id.btnBiometricSignInAgain)
-        retry.setOnClickListener { showBiometricPrompt() }
-        signInAgain.setOnClickListener { viewModel.onSignInAgain() }
+        retry.setOnClickListener {
+            Log.d(TAG, "Trying the unlock again")
+            showBiometricPrompt()
+        }
+        signInAgain.setOnClickListener {
+            Log.i(TAG, "Signing in again instead of unlocking")
+            viewModel.onSignInAgain()
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -62,10 +69,12 @@ class BiometricLockFragment : Fragment() {
                     when (state) {
                         is BiometricLockUiState.Success -> {
                             // the settings sync SplashFragment holds back until the user is in
+                            Log.i(TAG, "Unlocked, going to home")
                             ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
                             findNavController().navigate(R.id.action_biometricLockFragment_to_homeFragment)
                         }
                         is BiometricLockUiState.SignedOut -> {
+                            Log.i(TAG, "Signed out from the lock screen, going to login")
                             findNavController().navigate(R.id.action_biometricLockFragment_to_loginFragment)
                         }
                         BiometricLockUiState.Idle,
@@ -99,6 +108,7 @@ class BiometricLockFragment : Fragment() {
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                Log.w(TAG, "Unlock prompt closed with error $errorCode: $errString")
                 viewModel.onAuthenticationError(errorCode)
             }
         }
@@ -111,6 +121,10 @@ class BiometricLockFragment : Fragment() {
             .build()
 
         prompt.authenticate(promptInfo)
+    }
+
+    private companion object {
+        const val TAG = "BiometricLockFragment"
     }
 }
 //------------------------------EOF------------------------------\

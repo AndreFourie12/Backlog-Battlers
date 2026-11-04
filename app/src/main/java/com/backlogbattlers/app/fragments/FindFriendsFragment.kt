@@ -3,6 +3,7 @@ package com.backlogbattlers.app.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -99,6 +100,7 @@ class FindFriendsFragment : Fragment() {
                     progressBarSearch.visibility = if (state.isLoading) View.VISIBLE else View.GONE
 
                     if (state.errorMessage != null) {
+                        Log.w(TAG, "Showing the friend search error: ${resources.getResourceEntryName(state.errorMessage)}")
                         Toast.makeText(requireContext(), state.errorMessage, Toast.LENGTH_SHORT).show()
                     }
 
@@ -133,6 +135,10 @@ class FindFriendsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "FindFriendsFragment"
     }
 }
 //------------------------------EOF------------------------------\\

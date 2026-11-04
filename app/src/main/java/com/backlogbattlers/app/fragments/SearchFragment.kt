@@ -3,6 +3,7 @@ package com.backlogbattlers.app.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -168,6 +169,7 @@ class SearchFragment : Fragment() {
             chip.setOnClickListener {
                 hideKeyboard()
                 setSearchText("")
+                Log.d(TAG, "Browsing $category")
                 viewModel.browse(category)
             }
             if (container.isNotEmpty()) {
@@ -200,7 +202,10 @@ class SearchFragment : Fragment() {
         )
         resultsState.findViewById<RecyclerView>(R.id.list_results).adapter = resultAdapter
 
-        resultsState.findViewById<View>(R.id.btn_retry_results).setOnClickListener { viewModel.retry() }
+        resultsState.findViewById<View>(R.id.btn_retry_results).setOnClickListener {
+            Log.d(TAG, "Retrying the search")
+            viewModel.retry()
+        }
 
         val container = resultsState.findViewById<LinearLayout>(R.id.container_filters)
         FilterChip.entries.forEach { kind ->
@@ -351,6 +356,7 @@ class SearchFragment : Fragment() {
                 }
                 state.platformOptions.forEach { platform ->
                     menu.menu.add(requireContext().platformLabel(platform)).setOnMenuItemClickListener {
+                        Log.d(TAG, "Results filtered to $platform")
                         viewModel.setPlatformFilter(platform)
                         true
                     }
@@ -364,6 +370,7 @@ class SearchFragment : Fragment() {
                 }
                 state.genreOptions.forEach { genre ->
                     menu.menu.add(genre).setOnMenuItemClickListener {
+                        Log.d(TAG, "Results filtered to the $genre genre")
                         viewModel.setGenreFilter(genre)
                         true
                     }
@@ -373,6 +380,7 @@ class SearchFragment : Fragment() {
             FilterChip.SORT -> {
                 SearchSort.entries.forEach { sort ->
                     menu.menu.add(searchSortLabel(sort)).setOnMenuItemClickListener {
+                        Log.d(TAG, "Results sorted by $sort")
                         viewModel.setSort(sort)
                         true
                     }
@@ -389,6 +397,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun replaySearch(query: String) {
+        Log.d(TAG, "Repeating a recent search")
         setSearchText(query)
         hideKeyboard()
         viewModel.runSearch(query)
@@ -407,6 +416,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun openGame(gameId: Int) {
+        Log.d(TAG, "Opening game $gameId from search")
         hideKeyboard()
         findNavController().navigate(
             R.id.action_searchFragment_to_gameDetailFragment,
@@ -426,5 +436,9 @@ class SearchFragment : Fragment() {
     private fun hideKeyboard() {
         insetsController()?.hide(WindowInsetsCompat.Type.ime())
         searchInput.clearFocus()
+    }
+
+    private companion object {
+        const val TAG = "SearchFragment"
     }
 }

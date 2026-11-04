@@ -1,6 +1,7 @@
 package com.backlogbattlers.app
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            Log.d(TAG, "Showing ${resources.getResourceEntryName(destination.id)}")
             contentDrawsBehindStatusBar = destination.id in fullBleedDestinations
             ViewCompat.requestApplyInsets(root)
 
@@ -70,6 +72,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "MainActivity"
     }
 }
 //------------------------------EOF------------------------------\\

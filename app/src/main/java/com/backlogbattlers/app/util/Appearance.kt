@@ -1,7 +1,10 @@
 package com.backlogbattlers.app.util
 
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import com.backlogbattlers.app.domain.model.ThemeMode
+
+private const val TAG = "Appearance"
 
 
 // the one place night mode is turned on or off.
@@ -12,6 +15,7 @@ import com.backlogbattlers.app.domain.model.ThemeMode
 // applies the stored appearance. calling this while an activity is on screen
 // recreates it, which is how the change shows up immediately
 fun applyThemeMode(mode: ThemeMode) {
+    Log.i(TAG, "Applying the $mode theme")
     AppCompatDelegate.setDefaultNightMode(
         when (mode) {
             ThemeMode.DARK -> AppCompatDelegate.MODE_NIGHT_YES

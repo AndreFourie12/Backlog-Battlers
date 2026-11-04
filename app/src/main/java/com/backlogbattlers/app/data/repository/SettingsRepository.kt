@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.data.repository
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -212,6 +213,7 @@ class SettingsRepositoryImpl(
     //------------------------------
     // writes every synced setting in a single DataStore edit, so the screens see one change
     override suspend fun replaceSyncedSettings(settings: UserSettings) {
+        Log.d(TAG, "Replacing the local settings with the synced copy")
         context.dataStore.edit { prefs ->
             prefs[Keys.LANGUAGE] = settings.language.name
             prefs[Keys.THEME_MODE] = settings.themeMode.name
@@ -229,6 +231,7 @@ class SettingsRepositoryImpl(
     }
 
     override suspend fun setSyncPending(pending: Boolean) {
+        Log.d(TAG, "Settings upload pending: $pending")
         context.dataStore.edit { prefs -> prefs[Keys.SYNC_PENDING] = pending }
     }
 
@@ -238,5 +241,9 @@ class SettingsRepositoryImpl(
 
     override suspend fun setBiometricUnlockOffered() {
         context.dataStore.edit { prefs -> prefs[Keys.BIOMETRIC_OFFERED] = true }
+    }
+
+    private companion object {
+        const val TAG = "SettingsRepository"
     }
 }

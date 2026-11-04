@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.viewmodels
 
+import android.util.Log
 import androidx.annotation.StringRes
 import com.backlogbattlers.app.R
 import androidx.lifecycle.ViewModel
@@ -44,6 +45,7 @@ class StandingsViewModel(
         viewModelScope.launch {
             try {
                 val board = leaderboardRepository.getMonthlyLeaderboard()
+                Log.d(TAG, "Loaded ${board.entries.size} standings, own row ${if (board.me != null) "included" else "missing"}")
                 val me = board.me
                 val entries = if (me != null && board.entries.none { it.userId == me.userId }) {
                     board.entries + me
@@ -55,9 +57,14 @@ class StandingsViewModel(
                     it.copy(isLoading = false, entries = entries, selfUserId = board.me?.userId)
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Loading the standings failed", e)
                 _uiState.update { it.copy(isLoading = false, errorMessage = R.string.standings_error_load) }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "StandingsViewModel"
     }
 }
 //------------------------------EOF------------------------------\\

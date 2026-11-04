@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.data.local
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -15,6 +16,8 @@ import com.backlogbattlers.app.data.local.entity.UserEntity
 
 //------------------------------
 // this class provides the Room database for the application
+private const val TAG = "AppDatabase"
+
 @Database(
     entities = [
         UserEntity::class,
@@ -72,8 +75,12 @@ class Migration4To5(private val currentUserId: () -> String?) : Migration(4, 5) 
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE `library_entries` ADD COLUMN `userId` TEXT NOT NULL DEFAULT ''")
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_library_entries_userId` ON `library_entries` (`userId`)")
-        currentUserId()?.let { userId ->
+        val userId = currentUserId()
+        if (userId != null) {
             db.execSQL("UPDATE `library_entries` SET `userId` = ?", arrayOf(userId))
+            Log.i(TAG, "Database 4 -> 5: library entries given to the signed-in account")
+        } else {
+            Log.i(TAG, "Database 4 -> 5: nobody signed in, library entries left unowned")
         }
     }
 }
@@ -85,6 +92,7 @@ class Migration4To5(private val currentUserId: () -> String?) : Migration(4, 5) 
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE `cached_games` ADD COLUMN `artworkUrls` TEXT NOT NULL DEFAULT ''")
+        Log.i(TAG, "Database 5 -> 6: cached games can now hold several landscape pictures")
     }
 }
 //------------------------------EOF------------------------------\\

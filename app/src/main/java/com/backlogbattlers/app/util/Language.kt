@@ -1,9 +1,12 @@
 package com.backlogbattlers.app.util
 
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.backlogbattlers.app.domain.model.AppLanguage
 import java.util.Locale
+
+private const val TAG = "Language"
 
 // the one place the app's language is switched.
 // it uses the per-app language that AndroidX provides: android 13+ keeps it in the system
@@ -14,6 +17,7 @@ import java.util.Locale
 // switches the whole app to the language. calling this while an activity is on screen
 // recreates it, which is how the change shows up immediately
 fun applyLanguage(language: AppLanguage) {
+    Log.i(TAG, "Applying the ${language.tag} language")
     AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language.tag))
 }
 

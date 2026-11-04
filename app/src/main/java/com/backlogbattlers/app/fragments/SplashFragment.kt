@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,6 +48,7 @@ class SplashFragment : Fragment() {
 
                 // this if statement decides between the fingerprint gate and going straight
                 if (shouldRequireBiometricUnlock(settings.biometricLoginEnabled, availability)) {
+                    Log.i(TAG, "Signed in with the fingerprint lock on, asking to unlock")
                     findNavController().navigate(R.id.action_splashFragment_to_biometricLockFragment)
                 } else {
                     // uploads a settings change that didn't make it last time, or else picks up
@@ -54,12 +56,18 @@ class SplashFragment : Fragment() {
                     // network. behind the fingerprint gate this waits for the unlock instead, so a
                     // pulled theme or language can't recreate the screen under the prompt
                     ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
+                    Log.i(TAG, "Signed in, going to home")
                     findNavController().navigate(R.id.action_splashFragment_to_homeFragment)
                 }
             } else {
+                Log.i(TAG, "Nobody is signed in, going to login")
                 findNavController().navigate(R.id.action_splashFragment_to_loginFragment)
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "SplashFragment"
     }
 }
 //------------------------------EOF------------------------------\\

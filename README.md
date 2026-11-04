@@ -11,6 +11,9 @@
     <a href="https://github.com/AndreFourie12/Backlog-Battlers/actions/workflows/android-ci.yml">
       <img src="https://github.com/AndreFourie12/Backlog-Battlers/actions/workflows/android-ci.yml/badge.svg" alt="Android CI status">
     </a>
+    <a href="https://github.com/AndreFourie12/Backlog-Battlers/actions/workflows/api-ci.yml">
+      <img src="https://github.com/AndreFourie12/Backlog-Battlers/actions/workflows/api-ci.yml/badge.svg" alt="API CI status">
+    </a>
   </p>
 </div>
 

@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.data.remote
 
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -107,11 +108,17 @@ class GameApi(
             val response = request()
             if (!response.status.isSuccess()) {
                 val errorText = runCatching { response.bodyAsText() }.getOrDefault("")
+                Log.e(TAG, "${response.call.request.url.encodedPath} failed [${response.status.value}]: ${errorText.take(200)}")
                 throw IllegalStateException("Server returned HTTP ${response.status.value}: ${errorText.take(200)}")
             }
             response.body<T>()
         }
+        if (body == null) Log.w(TAG, "A game request got no answer within ${REQUEST_TIMEOUT_MS / 1000} seconds")
         return body ?: throw IOException("The server did not answer within ${REQUEST_TIMEOUT_MS / 1000} seconds")
+    }
+
+    private companion object {
+        const val TAG = "GameApi"
     }
 }
 //------------------------------EOF------------------------------\\

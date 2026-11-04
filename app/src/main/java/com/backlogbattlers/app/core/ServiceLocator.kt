@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.core
 
 import android.content.Context
+import android.util.Log
 import com.backlogbattlers.app.BuildConfig
 import com.backlogbattlers.app.data.local.AppDatabase
 import com.backlogbattlers.app.data.local.TokenStorage
@@ -31,9 +32,13 @@ import com.backlogbattlers.app.util.applyThemeMode
 import com.backlogbattlers.app.util.currentLanguage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
+import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.plugin
 import io.ktor.http.ContentType
+import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -46,6 +51,8 @@ object ServiceLocator {
     // the android engine defaults both timeouts to 100s, which leaves screens loading for over a minute when the backend is unreachable
     private const val CONNECT_TIMEOUT_MS = 10_000
     private const val SOCKET_TIMEOUT_MS = 30_000
+    private const val TAG = "ServiceLocator"
+    private const val HTTP_TAG = "Http"
 
     @Volatile
     private var applicationContext: Context? = null
@@ -116,7 +123,7 @@ object ServiceLocator {
 
     val searchHistoryRepository: SearchHistoryRepository by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing searchHistoryRepository")
-        SearchHistoryRepositoryImpl(context)
+        SearchHistoryRepositoryImpl(context, currentUserId = { tokenStorage.getUserId() })
     }
 
     val settingsRepository: SettingsRepository by lazy {
@@ -156,6 +163,7 @@ object ServiceLocator {
             synchronized(this) {
                 if (applicationContext == null) {
                     applicationContext = context.applicationContext
+                    Log.d(TAG, "Initialised with the application context")
                 }
             }
         }
@@ -177,6 +185,25 @@ object ServiceLocator {
                     },
                     contentType = ContentType.Any,
                 )
+            }
+        }.apply {
+            // one Logcat line per request: method, path, status and how long it took. never the query,
+            // headers or body, so no token or personal detail ends up in the log
+            plugin(HttpSend).intercept { request ->
+                val call = "${request.method.value} ${request.url.encodedPath}"
+                val started = System.currentTimeMillis()
+                try {
+                    execute(request).also {
+                        Log.d(HTTP_TAG, "$call -> ${it.response.status.value} in ${System.currentTimeMillis() - started}ms")
+                    }
+                } catch (e: CancellationException) {
+                    // the screen stopped waiting (a newer search replaced it, or it closed): not a failure
+                    Log.d(HTTP_TAG, "$call cancelled after ${System.currentTimeMillis() - started}ms")
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(HTTP_TAG, "$call failed after ${System.currentTimeMillis() - started}ms: ${e.javaClass.simpleName}")
+                    throw e
+                }
             }
         }
     }

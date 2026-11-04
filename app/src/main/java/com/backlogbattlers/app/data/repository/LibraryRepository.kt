@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.data.repository
 
+import android.util.Log
 import com.backlogbattlers.app.data.local.dao.LibraryEntryDao
 import com.backlogbattlers.app.data.local.entity.LibraryEntryEntity
 import com.backlogbattlers.app.domain.model.CompletionType
@@ -92,7 +93,11 @@ class LibraryRepositoryImpl(
         platform: Platform,
         status: LibraryStatus,
     ) {
-        val userId = currentUserId() ?: return
+        val userId = currentUserId()
+        if (userId == null) {
+            Log.w(TAG, "Not adding game $gameId: nobody is signed in")
+            return
+        }
         val now = System.currentTimeMillis()
         val entity = LibraryEntryEntity(
             libraryEntryId = UUID.randomUUID().toString(),
@@ -108,6 +113,7 @@ class LibraryRepositoryImpl(
             pendingSync = true,
         )
         dao.upsert(entity)
+        Log.d(TAG, "Added game $gameId to the library as $status on $platform")
     }
 
     //------------------------------
@@ -123,6 +129,7 @@ class LibraryRepositoryImpl(
             pendingSync = true,
         )
         dao.upsert(updated)
+        Log.d(TAG, "Library entry moved to $status")
     }
 
     //------------------------------
@@ -138,6 +145,7 @@ class LibraryRepositoryImpl(
             pendingSync = true,
         )
         dao.upsert(updated)
+        Log.d(TAG, "Hours played set to $hours")
     }
 
     //------------------------------
@@ -161,6 +169,7 @@ class LibraryRepositoryImpl(
             pendingSync = true,
         )
         dao.upsert(updated)
+        Log.d(TAG, "Achievement $achievementId ${if (unlocked) "unlocked" else "locked again"}")
     }
 
     //------------------------------
@@ -168,12 +177,14 @@ class LibraryRepositoryImpl(
     override suspend fun remove(libraryEntryId: String) {
         val existing = ownedEntry(libraryEntryId) ?: return
         dao.delete(existing)
+        Log.d(TAG, "Removed a game from the library")
     }
 
     //------------------------------
     // removes every library entry of one account by delegating to LibraryEntryDao
     override suspend fun clear(userId: String) {
         dao.clear(userId)
+        Log.d(TAG, "Cleared the library of a deleted account")
     }
 
     //------------------------------
@@ -209,6 +220,10 @@ class LibraryRepositoryImpl(
             updatedAt = updatedAt,
             pendingSync = pendingSync,
         )
+    }
+
+    private companion object {
+        const val TAG = "LibraryRepository"
     }
 }
 //------------------------------EOF------------------------------\\
