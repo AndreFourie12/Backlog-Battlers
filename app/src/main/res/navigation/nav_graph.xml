@@ -113,8 +113,8 @@
             android:id="@+id/action_profileFragment_to_gameDetailFragment"
             app:destination="@id/gameDetailFragment" />
         <action
-            android:id="@+id/action_profileFragment_to_appearanceFragment"
-            app:destination="@id/appearanceFragment" />
+            android:id="@+id/action_profileFragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
         <action
             android:id="@+id/action_profileFragment_to_searchFragment"
             app:destination="@id/searchFragment" />
