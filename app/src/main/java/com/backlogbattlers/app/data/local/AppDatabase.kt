@@ -27,7 +27,7 @@ private const val TAG = "AppDatabase"
     // !!!changing an entity? increment the version AND add a Migration below (see MIGRATION_4_5).
     // from version 4 on the database is migrated, not wiped, so library changes that have not
     // synced yet survive an app update. a version bump with no migration now crashes on purpose
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -55,7 +55,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "backlog_battlers.db",
                 )
-                    .addMigrations(Migration4To5(currentUserId), MIGRATION_5_6)
+                    .addMigrations(Migration4To5(currentUserId), MIGRATION_5_6, MIGRATION_6_7)
                     // the Part 2 builds (versions 1-3) only ever held test data, so those are still wiped
                     .fallbackToDestructiveMigrationFrom(true, 1, 2, 3)
                     .build()
@@ -93,6 +93,16 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE `cached_games` ADD COLUMN `artworkUrls` TEXT NOT NULL DEFAULT ''")
         Log.i(TAG, "Database 5 -> 6: cached games can now hold several landscape pictures")
+    }
+}
+
+//------------------------------
+// version 6 -> 7: a removed library entry is kept hidden (pendingDelete) until the account has been told,
+// so syncing the library can't bring back something the user removed while offline
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `library_entries` ADD COLUMN `pendingDelete` INTEGER NOT NULL DEFAULT 0")
+        Log.i(TAG, "Database 6 -> 7: library entries can now wait to be deleted from the account")
     }
 }
 //------------------------------EOF------------------------------\\

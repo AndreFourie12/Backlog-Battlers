@@ -55,6 +55,8 @@ interface LibraryRepository {
 class LibraryRepositoryImpl(
     private val dao: LibraryEntryDao,
     private val currentUserId: () -> String?,
+    // called after every change made here, so the app can upload it. must not block
+    private val onChanged: () -> Unit = {},
 ) : LibraryRepository {
 
     //------------------------------
@@ -114,6 +116,7 @@ class LibraryRepositoryImpl(
         )
         dao.upsert(entity)
         Log.d(TAG, "Added game $gameId to the library as $status on $platform")
+        onChanged()
     }
 
     //------------------------------
@@ -130,6 +133,7 @@ class LibraryRepositoryImpl(
         )
         dao.upsert(updated)
         Log.d(TAG, "Library entry moved to $status")
+        onChanged()
     }
 
     //------------------------------
@@ -146,6 +150,7 @@ class LibraryRepositoryImpl(
         )
         dao.upsert(updated)
         Log.d(TAG, "Hours played set to $hours")
+        onChanged()
     }
 
     //------------------------------
@@ -170,14 +175,17 @@ class LibraryRepositoryImpl(
         )
         dao.upsert(updated)
         Log.d(TAG, "Achievement $achievementId ${if (unlocked) "unlocked" else "locked again"}")
+        onChanged()
     }
 
     //------------------------------
-    // fetches entry by id and deletes it from database
+    // hides the entry and marks the removal for upload. the row is deleted for good once the account
+    // has been told (see LibrarySync), so a removal made offline survives until the phone is back online
     override suspend fun remove(libraryEntryId: String) {
         val existing = ownedEntry(libraryEntryId) ?: return
-        dao.delete(existing)
+        dao.upsert(existing.copy(pendingDelete = true, pendingSync = true, updatedAt = System.currentTimeMillis()))
         Log.d(TAG, "Removed a game from the library")
+        onChanged()
     }
 
     //------------------------------

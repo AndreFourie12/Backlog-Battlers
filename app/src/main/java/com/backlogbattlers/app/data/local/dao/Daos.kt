@@ -61,24 +61,38 @@ interface CachedGameDao {
 interface LibraryEntryDao {
 
     // observes one account's library entries ordered by update time as a Flow
-    @Query("SELECT * FROM library_entries WHERE userId = :userId ORDER BY updatedAt DESC")
+    // (entries the user removed but the account has not been told about yet are hidden from every read below)
+    @Query("SELECT * FROM library_entries WHERE userId = :userId AND pendingDelete = 0 ORDER BY updatedAt DESC")
     fun observeAll(userId: String): Flow<List<LibraryEntryEntity>>
 
     // observes one account's library entries filtered by status as a Flow
-    @Query("SELECT * FROM library_entries WHERE userId = :userId AND status = :status ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM library_entries WHERE userId = :userId AND pendingDelete = 0 AND status = :status ORDER BY updatedAt DESC")
     fun observeByStatus(userId: String, status: String): Flow<List<LibraryEntryEntity>>
 
     // fetches one of the account's library entries by id. null if it belongs to someone else
-    @Query("SELECT * FROM library_entries WHERE userId = :userId AND libraryEntryId = :id LIMIT 1")
+    @Query("SELECT * FROM library_entries WHERE userId = :userId AND pendingDelete = 0 AND libraryEntryId = :id LIMIT 1")
     suspend fun getById(userId: String, id: String): LibraryEntryEntity?
 
     // observes the account's entry for one game, e.g. for the game detail screen. Null once removed, or if it was never added
-    @Query("SELECT * FROM library_entries WHERE userId = :userId AND gameId = :gameId LIMIT 1")
+    @Query("SELECT * FROM library_entries WHERE userId = :userId AND pendingDelete = 0 AND gameId = :gameId LIMIT 1")
     fun observeByGameId(userId: String, gameId: Int): Flow<LibraryEntryEntity?>
 
-    // fetches the account's library entries marked as pending sync
+    // fetches the account's library entries marked as pending sync, removals included
     @Query("SELECT * FROM library_entries WHERE userId = :userId AND pendingSync = 1")
     suspend fun getPendingSync(userId: String): List<LibraryEntryEntity>
+
+    // every row of the account, removals not yet uploaded included. for merging the account's library in
+    @Query("SELECT * FROM library_entries WHERE userId = :userId")
+    suspend fun getAll(userId: String): List<LibraryEntryEntity>
+
+    // clears the pending flag after an upload, but only if the entry was not edited again meanwhile
+    // (an edit changes updatedAt), so a change made during the upload is still sent next time
+    @Query("UPDATE library_entries SET pendingSync = 0 WHERE libraryEntryId = :id AND updatedAt = :updatedAt")
+    suspend fun markSynced(id: String, updatedAt: Long)
+
+    // deletes one row by id, whoever it belongs to. only for rows the sync already holds
+    @Query("DELETE FROM library_entries WHERE libraryEntryId = :id")
+    suspend fun deleteById(id: String)
 
     // inserts/ replaces a library entry
     @Insert(onConflict = OnConflictStrategy.REPLACE)

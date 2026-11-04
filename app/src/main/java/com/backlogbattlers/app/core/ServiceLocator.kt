@@ -9,6 +9,7 @@ import com.backlogbattlers.app.data.remote.AuthApi
 import com.backlogbattlers.app.data.remote.FriendsApi
 import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.remote.LeaderboardApi
+import com.backlogbattlers.app.data.remote.LibraryApi
 import com.backlogbattlers.app.data.remote.SettingsApi
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthRepositoryImpl
@@ -20,6 +21,7 @@ import com.backlogbattlers.app.data.repository.LeaderboardRepository
 import com.backlogbattlers.app.data.repository.LeaderboardRepositoryImpl
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.LibraryRepositoryImpl
+import com.backlogbattlers.app.data.repository.LibrarySync
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepository
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepositoryImpl
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
@@ -44,6 +46,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
@@ -120,7 +123,25 @@ object ServiceLocator {
     }
 
     val libraryRepository: LibraryRepository by lazy {
-        LibraryRepositoryImpl(database.libraryEntryDao(), currentUserId = { tokenStorage.getUserId() })
+        LibraryRepositoryImpl(
+            database.libraryEntryDao(),
+            currentUserId = { tokenStorage.getUserId() },
+            // uploads each change as it is made; if that fails it stays pending until the next sync
+            onChanged = { applicationScope.launch { librarySync.sync() } },
+        )
+    }
+
+    val libraryApi: LibraryApi by lazy {
+        LibraryApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
+    }
+
+    val librarySync: LibrarySync by lazy {
+        LibrarySync(
+            dao = database.libraryEntryDao(),
+            libraryApi = libraryApi,
+            accessToken = { authRepository.freshAccessToken() },
+            currentUserId = { tokenStorage.getUserId() },
+        )
     }
 
     val searchHistoryRepository: SearchHistoryRepository by lazy {
