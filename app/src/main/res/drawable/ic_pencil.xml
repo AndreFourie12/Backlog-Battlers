@@ -1,0 +1,14 @@
+<!-- outlined pencil, drawn in the same 2px rounded stroke as ic_sun and ic_gear -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="@color/text_primary">
+    <path
+        android:pathData="M16.5,3.5 A2.12,2.12 0 0,1 19.5,6.5 L7.5,18.5 L3.5,19.5 L4.5,15.5 Z M14.5,5.5 L17.5,8.5"
+        android:strokeWidth="2"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>
