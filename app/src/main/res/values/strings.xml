@@ -400,6 +400,23 @@
     <string name="sign_in_no_connection">Couldn\'t reach Backlog Battlers. Check your connection and try again.</string>
     <string name="sign_in_failed">Sign-in didn\'t work. Please try again.</string>
 
+    <!-- push notifications -->
+    <string name="channel_friend_activity">Friend activity</string>
+    <string name="channel_friend_activity_body">Friend requests, and friends finishing games</string>
+    <string name="channel_competition">Competition</string>
+    <string name="channel_competition_body">When someone passes you on the monthly leaderboard</string>
+    <string name="push_friend_request_title">New friend request</string>
+    <string name="push_friend_request_body">%1$s wants to be your friend</string>
+    <string name="push_friend_accepted_title">Friend request accepted</string>
+    <string name="push_friend_accepted_body">You and %1$s are now friends</string>
+    <string name="push_friend_completed_title">%1$s finished a game</string>
+    <string name="push_friend_completed_body">%1$s just completed %2$s</string>
+    <string name="push_overtaken_title">You\'ve been overtaken</string>
+    <string name="push_overtaken_body">%1$s passed you on this month\'s leaderboard</string>
+    <string name="notification_permission_title">Turn on notifications?</string>
+    <string name="notification_permission_body">Find out when someone sends you a friend request, a friend finishes a game, or someone passes you on the leaderboard. Choose which ones in Settings → Notifications.</string>
+    <string name="notification_permission_allow">Allow</string>
+    <string name="notification_permission_decline">Not now</string>
     <!-- Steam account (Settings > Connected Accounts) -->
     <string name="settings_connected_accounts_value">Steam</string>
     <string name="title_steam_account">Steam account</string>

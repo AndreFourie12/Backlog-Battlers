@@ -1,6 +1,10 @@
 package com.backlogbattlers.app.search
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import okio.Path.Companion.toOkioPath
+import okio.FileSystem
+import androidx.datastore.core.okio.OkioStorage
+import androidx.datastore.preferences.core.PreferencesSerializer
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.backlogbattlers.app.data.repository.SearchHistoryRepositoryImpl
@@ -23,9 +27,12 @@ class SearchHistoryRepositoryTest {
     val folder = TemporaryFolder()
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val store = PreferenceDataStoreFactory.create(scope = scope) {
-        folder.newFile("search_history.preferences_pb").also { it.delete() }
-    }
+    // okio storage replaces the file with an atomic move, which windows allows. the default
+    // file storage (datastore 1.1.7, the version firebase needs) can't rename over the old file there
+    private val store = PreferenceDataStoreFactory.create(
+        storage = OkioStorage(FileSystem.SYSTEM, PreferencesSerializer) { folder.root.toOkioPath() / "search_history.preferences_pb" },
+        scope = scope,
+    )
 
     // whoever is "signed in" for the repository
     private var signedIn: String? = "alice"

@@ -94,6 +94,8 @@ class AuthRepositoryImpl(
     private val authApi: AuthApi,
     private val tokenStorage: TokenStorage,
     private val serverClientId: String,
+    // runs first on sign-out, given the session's access token (null once it has expired)
+    private val beforeSignOut: suspend (accessToken: String?) -> Unit = {},
     // called when the session has ended on the backend's side, after the local sign out
     private val onSessionEnded: () -> Unit = {},
 ) : AuthRepository {
@@ -201,6 +203,10 @@ class AuthRepositoryImpl(
     //------------------------------
     // clears encrypted token storage, local user database table, and credential state.
     override suspend fun signOut() {
+        // the stored access token while it is still valid, never a renewed one: renewing can end
+        // the session, and ending the session signs out, which would come straight back here
+        val accessToken = tokenStorage.getAccessToken()?.takeUnless { tokenStorage.isAccessTokenExpired() }
+        beforeSignOut(accessToken)
         try {
             tokenStorage.clear()
             userDao.clear()

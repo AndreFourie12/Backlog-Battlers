@@ -165,6 +165,41 @@ The app's preferences, saved to the account so they follow the user to another p
 
 How the app uses them: every change in Settings is uploaded straight away. If the upload fails (for example offline), the change is kept and uploaded the next time the app opens. Otherwise, opening the app or signing in downloads the account's settings, so a change made on another phone shows up.
 
+The API also reads the notification switches before it sends a push (see below).
+
+### `POST /devices` and `DELETE /devices/{token}`
+
+The phones the signed-in user gets push notifications on. Both need `Authorization: Bearer <access token>`. The token is the phone's Firebase Cloud Messaging registration token.
+
+`POST /devices` with `{"token": "<FCM token>"}` stores the token for the caller. The app sends it on sign-in, on launch and whenever Firebase issues a new token. Sending the same token again is harmless. If another account had that token (someone else signed in on the same phone), it moves to the caller.
+
+`DELETE /devices/{token}` (token URL-encoded) forgets it. The app calls it on sign-out. Deleting the account removes all of its devices.
+
+| Status | Meaning |
+|---|---|
+| 204 | Stored or removed. No body. `DELETE` answers 204 even when the token wasn't stored. |
+| 400 | `POST` only: `{"error":"token is required"}`, or a token longer than 512 characters |
+| 401 | `{"error":"Sign in to get notifications"}` |
+
+### Push notifications
+
+The API sends these through Firebase Cloud Messaging to every phone the recipient is signed in on:
+
+| Push (`type`) | Sent to | When | Switch that turns it off | Tapping it opens |
+|---|---|---|---|---|
+| `FRIEND_REQUEST_RECEIVED` | the person asked | a friend request is sent | Friend activity | Friends, Requests tab |
+| `FRIEND_REQUEST_ACCEPTED` | whoever sent the request | it is accepted | Friend activity | Friends |
+| `FRIEND_COMPLETED_GAME` | each of the completer's friends | a game is marked complete | Friend activity | Activity |
+| `OVERTAKEN` | everyone the completer passed this month | a completion lifts them past you | Rank changes | Standings |
+
+"Passed" means you had at least as many points as them before the completion and fewer after it.
+
+Pushes are data-only messages: `type`, `userId` (the recipient), `actorName` and, for `FRIEND_COMPLETED_GAME`, `gameTitle`. The app writes the text itself in the user's language and drops a push meant for an account that is no longer signed in. Nothing is sent when the recipient switched that kind off, or when the account-wide `push_notifications_enabled` flag is off. A user who has never saved settings gets everything, because the app ships with every switch on. Tokens that FCM reports as gone are deleted.
+
+The Achievements and Season resets switches are synced and stored, but no push uses them yet.
+
+Configure the sender with `FIREBASE_SERVICE_ACCOUNT_FILE` (path to the service-account JSON) or `FIREBASE_SERVICE_ACCOUNT_JSON` (the JSON itself). Without either, the API runs normally and only logs the pushes it would have sent.
+
 ## Planned endpoints
 
 Routes follow the Part 1 design document, the below routes are yet to be built:
@@ -182,6 +217,7 @@ Routes follow the Part 1 design document, the below routes are yet to be built:
 | `GET /leaderboard/monthly` | This month's standings |
 | `GET /users/me/progression` | XP, level and badges |
 | `GET /users/me/streak` | Login streak |
+| Season reset and achievement pushes | Pushes for the two notification switches the four live pushes don't cover |
 
 Conventions once these exist:
 

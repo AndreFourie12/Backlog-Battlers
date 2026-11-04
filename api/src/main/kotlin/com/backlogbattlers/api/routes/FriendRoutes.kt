@@ -11,6 +11,7 @@ import com.backlogbattlers.api.friends.listIncomingRequests
 import com.backlogbattlers.api.friends.rejectRequest
 import com.backlogbattlers.api.friends.searchUsers
 import com.backlogbattlers.api.friends.sendRequest
+import com.backlogbattlers.api.notifications.Notifier
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -24,7 +25,7 @@ import kotlin.uuid.Uuid
 
 //------------------------------
 // defines ktor route handlers for friend management ops
-fun Route.friendRoutes(currentUser: CurrentUser) {
+fun Route.friendRoutes(notifier: Notifier = Notifier.Disabled, currentUser: CurrentUser) {
     route("/users/me/friends") {
 
         // GET /users/me/friends
@@ -63,7 +64,10 @@ fun Route.friendRoutes(currentUser: CurrentUser) {
                 }
 
                 when (val result = sendRequest(owner, targetId)) {
-                    is SendRequestResult.Sent -> call.respond(HttpStatusCode.Created, result.request)
+                    is SendRequestResult.Sent -> {
+                        notifier.friendRequestReceived(receiver = targetId, sender = owner)
+                        call.respond(HttpStatusCode.Created, result.request)
+                    }
                     SendRequestResult.CannotAddSelf -> call.respond(HttpStatusCode.BadRequest, ApiError("you cannot send a friend request to yourself"))
                     SendRequestResult.UserNotFound -> call.respond(HttpStatusCode.NotFound, ApiError("user was not found"))
                     SendRequestResult.AlreadyFriends -> call.respond(HttpStatusCode.Conflict, ApiError("you are already friends with this person"))
@@ -76,7 +80,10 @@ fun Route.friendRoutes(currentUser: CurrentUser) {
                 val owner = call.signedInUser(currentUser) ?: return@post
                 val requestId = call.requestId() ?: return@post
                 when (val result = acceptRequest(owner, requestId)) {
-                    is RespondToRequestResult.Accepted -> call.respond(result.friend)
+                    is RespondToRequestResult.Accepted -> {
+                        notifier.friendRequestAccepted(requestSender = Uuid.parse(result.friend.userId), accepter = owner)
+                        call.respond(result.friend)
+                    }
                     RespondToRequestResult.NotFound -> call.respond(HttpStatusCode.NotFound, ApiError("friend request was not found"))
                     RespondToRequestResult.Rejected -> Unit // acceptRequest never returns Rejected, branch kept for exhaustiveness
                 }

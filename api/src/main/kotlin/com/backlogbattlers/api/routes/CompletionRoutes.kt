@@ -8,6 +8,8 @@ import com.backlogbattlers.api.steam.checkUnlocks
 import com.backlogbattlers.api.scoring.CompleteRequest
 import com.backlogbattlers.api.scoring.CompletionResult
 import com.backlogbattlers.api.scoring.completeLibraryEntry
+import com.backlogbattlers.api.scoring.currentMonthPeriod
+import com.backlogbattlers.api.notifications.Notifier
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
@@ -16,8 +18,16 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlin.uuid.Uuid
 
-/** Marking a library entry complete and awarding its points. */
-fun Route.completionRoutes(igdb: IgdbClient, steam: SteamClient, currentUser: CurrentUser) {
+/**
+ * Marking a library entry complete and awarding its points. [currentUser] stays last, so tests
+ * can pass it as a trailing lambda: `completionRoutes(igdb, steam) { caller }`.
+ */
+fun Route.completionRoutes(
+    igdb: IgdbClient,
+    steam: SteamClient,
+    notifier: Notifier = Notifier.Disabled,
+    currentUser: CurrentUser,
+) {
 
     // POST /users/me/library/{id}/complete   {"completionType": "MAIN_STORY"}
     // Achievement points are paid only for achievements Steam confirms the user unlocked. If Steam
@@ -30,7 +40,17 @@ fun Route.completionRoutes(igdb: IgdbClient, steam: SteamClient, currentUser: Cu
 
         val steamCheck = checkUnlocks(owner, entryId, igdb, steam)
         when (val result = completeLibraryEntry(owner, entryId, request.completionType, steamCheck)) {
-            is CompletionResult.Completed -> call.respond(HttpStatusCode.OK, result.response)
+            is CompletionResult.Completed -> {
+                val response = result.response
+                notifier.gameCompleted(
+                    completer = owner,
+                    entryId = entryId,
+                    pointsBefore = response.monthlyPoints - response.pointsAwarded,
+                    pointsAfter = response.monthlyPoints,
+                    monthPeriod = currentMonthPeriod(),
+                )
+                call.respond(HttpStatusCode.OK, response)
+            }
             CompletionResult.NotFound -> call.respond(HttpStatusCode.NotFound, ApiError("Library entry was not found"))
             CompletionResult.AlreadyCompleted -> call.respond(
                 HttpStatusCode.Conflict,

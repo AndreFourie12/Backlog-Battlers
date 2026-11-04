@@ -362,6 +362,23 @@
     <string name="sign_in_no_connection">Kon nie Backlog Battlers bereik nie. Kyk na jou verbinding en probeer weer.</string>
     <string name="sign_in_failed">Aanmelding het nie gewerk nie. Probeer asseblief weer.</string>
 
+    <!-- push notifications -->
+    <string name="channel_friend_activity">Vriende se aktiwiteit</string>
+    <string name="channel_friend_activity_body">Vriendversoeke, en vriende wat speletjies klaarspeel</string>
+    <string name="channel_competition">Kompetisie</string>
+    <string name="channel_competition_body">Wanneer iemand jou op die maandelikse ranglys verbysteek</string>
+    <string name="push_friend_request_title">Nuwe vriendversoek</string>
+    <string name="push_friend_request_body">%1$s wil jou vriend wees</string>
+    <string name="push_friend_accepted_title">Vriendversoek aanvaar</string>
+    <string name="push_friend_accepted_body">Jy en %1$s is nou vriende</string>
+    <string name="push_friend_completed_title">%1$s het \'n speletjie klaargespeel</string>
+    <string name="push_friend_completed_body">%1$s het pas %2$s voltooi</string>
+    <string name="push_overtaken_title">Iemand het jou verbygesteek</string>
+    <string name="push_overtaken_body">%1$s het jou op hierdie maand se ranglys verbygesteek</string>
+    <string name="notification_permission_title">Skakel kennisgewings aan?</string>
+    <string name="notification_permission_body">Hoor wanneer iemand vir jou \'n vriendversoek stuur, \'n vriend \'n speletjie klaarspeel, of iemand jou op die ranglys verbysteek. Kies watter in Instellings → Kennisgewings.</string>
+    <string name="notification_permission_allow">Laat toe</string>
+    <string name="notification_permission_decline">Nie nou nie</string>
     <!-- Steam account (Settings > Connected Accounts) -->
     <string name="settings_connected_accounts_value">Steam</string>
     <string name="title_steam_account">Steam-rekening</string>

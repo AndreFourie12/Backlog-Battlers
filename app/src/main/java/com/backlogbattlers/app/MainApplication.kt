@@ -4,6 +4,7 @@ import android.app.Application
 import android.os.StrictMode
 import android.util.Log
 import com.backlogbattlers.app.core.ServiceLocator
+import com.backlogbattlers.app.notifications.PushNotifications
 import com.backlogbattlers.app.util.applyThemeMode
 import kotlinx.coroutines.launch
 
@@ -19,6 +20,7 @@ class MainApplication : Application() {
         System.setProperty("slf4j.provider", "org.slf4j.helpers.NOP_FallbackServiceProvider")
         if (BuildConfig.DEBUG) enableStrictMode()
         ServiceLocator.init(this)
+        PushNotifications.createChannels(this)
 
         applyThemeMode(ServiceLocator.settingsRepository.getSettingsBlocking().themeMode)
 
