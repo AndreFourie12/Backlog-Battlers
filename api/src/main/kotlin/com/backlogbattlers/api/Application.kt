@@ -4,6 +4,7 @@ import com.backlogbattlers.api.auth.GoogleIdTokenVerifier
 import com.backlogbattlers.api.auth.JwtService
 import com.backlogbattlers.api.auth.bearerCurrentUser
 import com.backlogbattlers.api.db.DatabaseFactory
+import com.backlogbattlers.api.logging.configureRequestLogging
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.igdbHttpClient
@@ -28,6 +29,8 @@ import io.ktor.server.routing.routing
  */
 fun Application.module() {
     DatabaseFactory.init()
+    // Configure request ID tracing and structured request logging across all routes
+    configureRequestLogging()
 
     install(ContentNegotiation) { json() }
     configureErrors()

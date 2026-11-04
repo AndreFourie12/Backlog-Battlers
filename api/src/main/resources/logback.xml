@@ -1,11 +1,27 @@
 <configuration>
+    <!--
+      Console appender writing all logs to standard output.
+      Cloud hosts capture stdout/stderr streams, whereas container file systems
+      are ephemeral and wiped upon restart or deployment.
+
+      The pattern includes [%X{callId:- -}] (via MDC) to trace each request by ID,
+      or '-' when a log line is emitted outside a request (e.g. server startup).
+      %logger{0} outputs the short logger/class name for clean readability.
+    -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%X{callId:--}] %logger{0} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="INFO">
+    <!-- Suppress verbose Netty initialization messages -->
+    <logger name="io.netty" level="WARN"/>
+
+    <!--
+      Root logging level configurable via the LOG_LEVEL environment variable.
+      Defaults to INFO for production/hosting, and can be set to DEBUG locally.
+    -->
+    <root level="${LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

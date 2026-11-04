@@ -2,6 +2,7 @@ package com.backlogbattlers.api.auth
 
 import com.backlogbattlers.api.CurrentUser
 import com.backlogbattlers.api.db.Users
+import com.backlogbattlers.api.logging.SignedInUserKey
 import io.ktor.http.HttpHeaders
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -19,6 +20,7 @@ private const val BEARER_PREFIX = "Bearer "
  * Gives the id of the caller's row in the Users table, or null (which the routes turn into a 401)
  * when the header is missing or malformed, the token is invalid, expired or a refresh token,
  * or the user it names no longer exists.
+ * Once verified, only the user's internal UUID is stored under [SignedInUserKey] in call attributes for request logging; the token is never stored.
  */
 fun bearerCurrentUser(jwtService: JwtService): CurrentUser = { call ->
     val token = call.request.headers[HttpHeaders.Authorization]?.let(::bearerToken)
@@ -27,7 +29,9 @@ fun bearerCurrentUser(jwtService: JwtService): CurrentUser = { call ->
         ?.let { runCatching { Uuid.parse(it) }.getOrNull() }
 
     // A valid token for a deleted user must not pass: library writes would then fail on a missing user row
-    userId?.takeIf(::userExists)
+    userId?.takeIf(::userExists)?.also { id ->
+        call.attributes.put(SignedInUserKey, id)
+    }
 }
 
 /** The token part of a `Bearer <token>` header, or null. The scheme name is case-insensitive. */
