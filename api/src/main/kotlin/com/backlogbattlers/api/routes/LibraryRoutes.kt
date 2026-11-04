@@ -24,6 +24,9 @@ import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import kotlin.uuid.Uuid
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger("com.backlogbattlers.api.routes.LibraryRoutes")
 
 private const val MAX_HOURS_PLAYED = 100_000.0
 private const val MAX_UNLOCKED_PER_UPDATE = 1000
@@ -60,8 +63,14 @@ fun Route.libraryRoutes(igdb: IgdbClient, currentUser: CurrentUser) {
             }
 
             when (val result = createEntry(owner, request, entryId)) {
-                is CreateResult.Created -> call.respond(HttpStatusCode.Created, result.entry)
-                is CreateResult.AlreadyExists -> call.respond(HttpStatusCode.OK, result.entry)
+                is CreateResult.Created -> {
+                    log.info("User {} added game {} on {} as library entry {}", owner, result.entry.gameId, result.entry.platform, result.entry.libraryEntryId)
+                    call.respond(HttpStatusCode.Created, result.entry)
+                }
+                is CreateResult.AlreadyExists -> {
+                    log.debug("User {} re-sent library entry {} (already saved, nothing changed)", owner, result.entry.libraryEntryId)
+                    call.respond(HttpStatusCode.OK, result.entry)
+                }
                 CreateResult.Conflict -> call.respond(
                     HttpStatusCode.Conflict,
                     ApiError("This game is already in your library on that platform, or that entry id is already in use"),
@@ -79,7 +88,17 @@ fun Route.libraryRoutes(igdb: IgdbClient, currentUser: CurrentUser) {
             if (problem != null) return@patch call.respond(HttpStatusCode.BadRequest, ApiError(problem))
 
             when (val result = updateEntry(owner, entryId, request)) {
-                is UpdateResult.Updated -> call.respond(result.entry)
+                is UpdateResult.Updated -> {
+                    log.info(
+                        "User {} updated library entry {}: status={}, hours={}, achievements unlocked={}",
+                        owner,
+                        entryId,
+                        request.status ?: "-",
+                        request.hoursPlayed ?: "-",
+                        request.unlockedAchievementIds?.size ?: "-",
+                    )
+                    call.respond(result.entry)
+                }
                 UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound, ApiError("Library entry was not found"))
                 is UpdateResult.UnknownAchievements -> call.respond(
                     HttpStatusCode.BadRequest,
@@ -94,6 +113,7 @@ fun Route.libraryRoutes(igdb: IgdbClient, currentUser: CurrentUser) {
             val entryId = call.entryId() ?: return@delete
 
             if (deleteEntry(owner, entryId)) {
+                log.info("User {} removed library entry {}", owner, entryId)
                 call.respond(HttpStatusCode.NoContent)
             } else {
                 call.respond(HttpStatusCode.NotFound, ApiError("Library entry was not found"))

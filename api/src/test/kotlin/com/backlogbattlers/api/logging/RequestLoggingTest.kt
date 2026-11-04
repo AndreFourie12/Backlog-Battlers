@@ -59,8 +59,24 @@ class RequestLoggingTest {
     private val issuer = "request-logging-test-issuer"
     private val jwt = JwtService(secret, issuer)
 
-    private val unusedIgdb = IgdbClient(
-        igdbHttpClient(MockEngine { respond("[]", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json")) }),
+    private val jsonHeaders = headersOf(HttpHeaders.ContentType, "application/json")
+    private val tokenJson = """{"access_token":"tok","expires_in":3600,"token_type":"bearer"}"""
+    private val hadesJson = """[{"id":113112,"name":"Hades","platforms":[{"id":6,"name":"PC (Microsoft Windows)"}]}]"""
+    private val hadesTimeJson = """[{"id":2005,"game_id":113112,"normally":253600,"completely":542700,"count":13}]"""
+
+    private val authHttpClient = igdbHttpClient(MockEngine { respond("[]", HttpStatusCode.OK, jsonHeaders) })
+
+    private fun fakeIgdb(games: String = hadesJson) = IgdbClient(
+        igdbHttpClient(
+            MockEngine { request ->
+                when (request.url.encodedPath) {
+                    "/oauth2/token" -> respond(tokenJson, HttpStatusCode.OK, jsonHeaders)
+                    "/v4/games" -> respond(games, HttpStatusCode.OK, jsonHeaders)
+                    "/v4/game_time_to_beats" -> respond(hadesTimeJson, HttpStatusCode.OK, jsonHeaders)
+                    else -> respond("", HttpStatusCode.NotFound)
+                }
+            },
+        ),
         clientId = "id",
         clientSecret = "secret",
     )
@@ -78,6 +94,7 @@ class RequestLoggingTest {
     }
 
     private fun ApplicationTestBuilder.installApi() {
+        val igdb = fakeIgdb()
         application {
             configureRequestLogging()
             install(ContentNegotiation) { json() }
@@ -85,10 +102,10 @@ class RequestLoggingTest {
             routing {
                 healthRoutes()
                 authRoutes(
-                    googleVerifier = GoogleIdTokenVerifier(unusedIgdb.httpClient, "test-client-id"),
+                    googleVerifier = GoogleIdTokenVerifier(authHttpClient, "test-client-id"),
                     jwtService = jwt,
                 )
-                libraryRoutes(unusedIgdb, currentUser = bearerCurrentUser(jwt))
+                libraryRoutes(igdb, currentUser = bearerCurrentUser(jwt))
                 accountRoutes(currentUser = bearerCurrentUser(jwt))
                 settingsRoutes(currentUser = bearerCurrentUser(jwt))
             }
@@ -187,6 +204,10 @@ class RequestLoggingTest {
     fun `every line written during a request carries its request id`() = testApplication {
         installApi()
         val expectedTraceId = "trace1234567"
+        // Trigger server startup before the test request so startup events don't pollute this test
+        client.get("/health")
+        logCapture.clear()
+
         client.get("/users/me/library") {
             header(HttpHeaders.XRequestId, expectedTraceId)
         }
@@ -237,6 +258,22 @@ class RequestLoggingTest {
         }
         assertEquals(HttpStatusCode.OK, response.status)
         assertTrue(logCapture.messages.any { it.contains("saved settings: language=") })
+    }
+
+    @Test
+    fun `adding a game to the library logs an event`() = testApplication {
+        installApi()
+        val user = newUser()
+        val token = jwt.generateAccessToken(user.toString())
+        val response = client.post("/users/me/library") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+            contentType(ContentType.Application.Json)
+            setBody("""{"gameId":113112,"platform":"PC"}""")
+        }
+        assertEquals(HttpStatusCode.Created, response.status)
+        assertTrue(logCapture.messages.any {
+            it.contains("User $user added game 113112 on PC as library entry")
+        })
     }
 }
 //------------------------------EOF------------------------------\\
