@@ -5,6 +5,7 @@ on:
     branches: [ '**' ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-and-test:
@@ -42,3 +43,76 @@ jobs:
         with:
           name: api-test-results
           path: api/build/reports/tests/
+
+  # POE evidence: cloud hosting. The API runs on an Azure Web App with an Azure PostgreSQL database.
+  # This deploy job builds the fat jar stamped with the commit SHA and deploys it to Azure App Service
+  # only after unit tests pass on main, then verifies health and database connectivity.
+  deploy:
+    needs: build-and-test
+    # PRs and feature branches never deploy; only pushes and manual runs on main trigger deployment.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    concurrency:
+      group: deploy-api
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: |
+            api/**/*.gradle*
+            api/gradle/wrapper/gradle-wrapper.properties
+            api/gradle/libs.versions.toml
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build fat jar with commit version
+        run: ./gradlew buildFatJar -PbuildVersion=${GITHUB_SHA::7} --stacktrace
+
+      # Deploys app.jar to Azure App Service using the publish profile secret.
+      # Action inputs are relative to repo root regardless of defaults.run.working-directory.
+      # Reference: https://github.com/Azure/webapps-deploy
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: api/build/libs/app.jar
+
+      # Smoke check: proves the newly deployed commit is live and connected to the database.
+      - name: Smoke check /health
+        run: |
+          URL="${{ vars.AZURE_WEBAPP_URL }}"
+          URL="${URL%/}"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "Probing $URL/health for version $SHORT_SHA with database: ok..."
+
+          SUCCESS=0
+          for i in {1..18}; do
+            BODY=$(curl -fsS "$URL/health" 2>/dev/null || true)
+            echo "Attempt $i: $BODY"
+            if echo "$BODY" | grep -q '"database":"ok"' && echo "$BODY" | grep -q "\"version\":\"$SHORT_SHA\""; then
+              echo "Smoke check succeeded! Deployment verified:"
+              echo "$BODY"
+              SUCCESS=1
+              break
+            fi
+            sleep 10
+          done
+
+          if [ $SUCCESS -ne 1 ]; then
+            echo "Smoke check failed after 3 minutes. Expected \"database\":\"ok\" and \"version\":\"$SHORT_SHA\"."
+            exit 1
+          fi
