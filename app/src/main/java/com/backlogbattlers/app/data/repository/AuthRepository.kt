@@ -55,8 +55,18 @@ interface AuthRepository {
     suspend fun signOut()
 
     // the access token for an authenticated request, renewed first if it has expired. null when
-    // nobody is signed in or the session can no longer be renewed; a network failure is thrown
+    // nobody is signed in or the session can no longer be renewed (the session is ended then, see
+    // endSession); a network or server failure while renewing is thrown, so it is not mistaken for
+    // a dead session
     suspend fun freshAccessToken(): String?
+
+    // gets a new access token even though the stored one has not expired yet, for when the backend
+    // refused it anyway. same result as freshAccessToken
+    suspend fun renewAccessToken(): String?
+
+    // the backend will no longer accept this session: signs out locally and tells the app to send
+    // the user back to login with a message (see ServiceLocator.sessionEnded)
+    suspend fun endSession()
 
     // permanently deletes the signed-in user's account on the backend, then signs out locally
     suspend fun deleteAccount(): DeleteAccountResult
@@ -84,6 +94,8 @@ class AuthRepositoryImpl(
     private val authApi: AuthApi,
     private val tokenStorage: TokenStorage,
     private val serverClientId: String,
+    // called when the session has ended on the backend's side, after the local sign out
+    private val onSessionEnded: () -> Unit = {},
 ) : AuthRepository {
 
     //------------------------------
@@ -222,18 +234,25 @@ class AuthRepositoryImpl(
 
     //------------------------------
     // the stored access token, renewed with the refresh token first if it has expired.
-    // null when there is no session, or the backend will no longer renew it. a network
-    // failure while renewing is thrown, so it is reported as a connection problem
+    // null when there is no session, or the backend will no longer renew it. a network or
+    // server failure while renewing is thrown, so it is reported as a connection problem
     override suspend fun freshAccessToken(): String? {
         val accessToken = tokenStorage.getAccessToken() ?: return null
         if (!tokenStorage.isAccessTokenExpired()) return accessToken
+        return renewAccessToken()
+    }
 
+    //------------------------------
+    // trades the refresh token for a new access token. a refresh token the backend rejects
+    // means the session is over, so it is ended; anything else (offline, a server error) is
+    // thrown and leaves the session alone, because the user is still signed in
+    override suspend fun renewAccessToken(): String? {
         val refreshToken = tokenStorage.getRefreshToken() ?: return null
         val renewed = try {
             authApi.refresh(refreshToken)
-        } catch (e: IOException) {
-            throw e
-        } catch (_: Exception) {
+        } catch (_: SessionExpiredException) {
+            Log.w("AuthRepository", "The refresh token was rejected, ending the session")
+            endSession()
             return null
         }
         tokenStorage.saveTokens(
@@ -242,6 +261,13 @@ class AuthRepositoryImpl(
             expiresInSeconds = renewed.expiresIn,
         )
         return renewed.accessToken
+    }
+
+    //------------------------------
+    // signs out locally, then lets the app know so it can go back to login
+    override suspend fun endSession() {
+        signOut()
+        onSessionEnded()
     }
 
     //------------------------------

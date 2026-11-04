@@ -129,6 +129,8 @@ class BiometricLockViewModelTest {
         }
         override suspend fun deleteAccount(): DeleteAccountResult = DeleteAccountResult.FAILED
         override suspend fun freshAccessToken(): String? = null
+        override suspend fun renewAccessToken(): String? = null
+        override suspend fun endSession() = Unit
     }
 
     // fake SettingsRepository for testing
