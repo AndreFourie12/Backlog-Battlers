@@ -6,6 +6,14 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
+// push notifications need the Firebase project's google-services.json in this folder (it is
+// git-ignored). without it the app still builds and runs, it just never gets a push token
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+} else {
+    logger.warn("app/google-services.json is missing: push notifications are off in this build")
+}
+
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
@@ -88,9 +96,15 @@ dependencies {
     // ConcatAdapter (1.2.0+), which the game detail screen uses to join its header, its
     // achievements-loading row and its achievement list into a single RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.4.0")
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    // 1.1.7, not older: the version Firebase needs (Gradle would pick it anyway)
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+
+    // push notifications: Firebase Cloud Messaging, and await() for its Tasks
+    implementation(platform("com.google.firebase:firebase-bom:35.1.0"))
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
