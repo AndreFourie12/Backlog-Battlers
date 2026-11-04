@@ -94,6 +94,7 @@
     <string name="added_to_library">%1$s added to your backlog</string>
     <!-- a place on the chart (#3), not a count of things, so it never needs a plural -->
     <string name="recommendation_steam_rank" tools:ignore="PluralsCandidate">#%1$d most played on Steam right now</string>
+    <string name="no_image_found">No Image Found</string>
 
     <!-- games screen -->
     <string name="search_library">Search your library</string>

@@ -84,6 +84,7 @@
     <string name="try_again_body">Hlola uxhumano lwakho bese uzama futhi.</string>
     <string name="added_to_library">U-%1$s wengeziwe ohlwini lwakho</string>
     <string name="recommendation_steam_rank">Inombolo %1$d kwezidlalwa kakhulu ku-Steam manje</string>
+    <string name="no_image_found">Asikho isithombe esitholakele</string>
 
     <!-- games screen -->
     <string name="search_library">Sesha emtapweni wakho</string>
