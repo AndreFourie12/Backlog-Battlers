@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -21,6 +20,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
 import androidx.navigation.ui.setupWithNavController
+import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.notifications.NotificationPermission
 import com.backlogbattlers.app.notifications.PushNotifications
 import com.backlogbattlers.app.notifications.PushType
@@ -29,9 +29,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.backlogbattlers.app.core.ServiceLocator
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.coroutines.launch
 
 // main activity of the application hosting fragment navigation and bottom navigation bar
 class MainActivity : AppCompatActivity() {
@@ -117,6 +114,23 @@ class MainActivity : AppCompatActivity() {
             if (destination.id == R.id.homeFragment) askForNotificationPermissionOnce()
             openPendingPush()
         }
+
+        // the backend stopped accepting the session (its refresh token was rejected): back to login
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { ServiceLocator.sessionEnded.collect { backToLogin(navController) } }
+
+                // a session can also end while the app is in the background, when nothing is listening.
+                // login and splash are the only screens a signed out user belongs on; the storage is
+                // only touched once past them, because it is slow to build and splash avoids that
+                val destination = navController.currentDestination?.id
+                if (destination != R.id.loginFragment && destination != R.id.splashFragment &&
+                    ServiceLocator.tokenStorage.getUserId() == null
+                ) {
+                    backToLogin(navController)
+                }
+            }
+        }
     }
 
     //------------------------------
@@ -174,23 +188,6 @@ class MainActivity : AppCompatActivity() {
                     notificationPermissionRequest.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
                 .show()
-        }
-
-        // the backend stopped accepting the session (its refresh token was rejected): back to login
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { ServiceLocator.sessionEnded.collect { backToLogin(navController) } }
-
-                // a session can also end while the app is in the background, when nothing is listening.
-                // login and splash are the only screens a signed out user belongs on; the storage is
-                // only touched once past them, because it is slow to build and splash avoids that
-                val destination = navController.currentDestination?.id
-                if (destination != R.id.loginFragment && destination != R.id.splashFragment &&
-                    ServiceLocator.tokenStorage.getUserId() == null
-                ) {
-                    backToLogin(navController)
-                }
-            }
         }
     }
 

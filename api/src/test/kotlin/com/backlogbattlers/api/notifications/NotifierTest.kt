@@ -16,6 +16,13 @@ import com.backlogbattlers.api.scoring.currentMonthPeriod
 import com.backlogbattlers.api.settings.SettingsDto
 import com.backlogbattlers.api.settings.saveSettings
 import com.backlogbattlers.api.friends.FriendRequestDto
+import com.backlogbattlers.api.games.IgdbClient
+import com.backlogbattlers.api.games.SteamClient
+import com.backlogbattlers.api.games.igdbHttpClient
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respondError
+import io.ktor.http.HttpStatusCode
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -55,13 +62,18 @@ class NotifierTest {
     private val sender = PushSender { tokens, data -> sent += Sent(tokens, data); deadTokens }
     private val notifier = Notifier(sender, launch = Notifier.inline)
 
+    // completing a game first asks Steam to confirm unlocked achievements. these tests unlock none,
+    // so neither is ever called: any request they did get would be answered with a 500
+    private val unusedIgdb = IgdbClient(igdbHttpClient(MockEngine { respondError(HttpStatusCode.InternalServerError) }), clientId = "id", clientSecret = "secret")
+    private val unusedSteam = SteamClient(HttpClient(MockEngine { respondError(HttpStatusCode.InternalServerError) }), apiKey = "key")
+
     private fun ApplicationTestBuilder.installApi() {
         application {
             install(ContentNegotiation) { json() }
             configureErrors()
             routing {
                 friendRoutes(notifier) { caller }
-                completionRoutes(notifier) { caller }
+                completionRoutes(unusedIgdb, unusedSteam, notifier) { caller }
             }
         }
     }

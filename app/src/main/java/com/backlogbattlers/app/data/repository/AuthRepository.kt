@@ -19,7 +19,6 @@ import com.backlogbattlers.app.data.remote.SessionExpiredException
 import com.backlogbattlers.app.domain.model.User
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -95,7 +94,7 @@ class AuthRepositoryImpl(
     private val authApi: AuthApi,
     private val tokenStorage: TokenStorage,
     private val serverClientId: String,
-    // runs first on sign-out, given the session's access token (null if it can't be renewed)
+    // runs first on sign-out, given the session's access token (null once it has expired)
     private val beforeSignOut: suspend (accessToken: String?) -> Unit = {},
     // called when the session has ended on the backend's side, after the local sign out
     private val onSessionEnded: () -> Unit = {},
@@ -204,13 +203,9 @@ class AuthRepositoryImpl(
     //------------------------------
     // clears encrypted token storage, local user database table, and credential state.
     override suspend fun signOut() {
-        val accessToken = try {
-            freshAccessToken()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Exception) {
-            null // offline: sign out anyway
-        }
+        // the stored access token while it is still valid, never a renewed one: renewing can end
+        // the session, and ending the session signs out, which would come straight back here
+        val accessToken = tokenStorage.getAccessToken()?.takeUnless { tokenStorage.isAccessTokenExpired() }
         beforeSignOut(accessToken)
         try {
             tokenStorage.clear()

@@ -18,13 +18,15 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlin.uuid.Uuid
 
-/** Marking a library entry complete and awarding its points. */
-/** Marking a library entry complete and awarding its points. */
+/**
+ * Marking a library entry complete and awarding its points. [currentUser] stays last, so tests
+ * can pass it as a trailing lambda: `completionRoutes(igdb, steam) { caller }`.
+ */
 fun Route.completionRoutes(
     igdb: IgdbClient,
     steam: SteamClient,
-    currentUser: CurrentUser,
     notifier: Notifier = Notifier.Disabled,
+    currentUser: CurrentUser,
 ) {
 
     // POST /users/me/library/{id}/complete   {"completionType": "MAIN_STORY"}

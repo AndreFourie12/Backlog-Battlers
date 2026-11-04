@@ -64,7 +64,7 @@ fun Application.module() {
         authRoutes(googleVerifier, jwtService)
         libraryRoutes(igdb, currentUser = bearerCurrentUser(jwtService))
         friendRoutes(notifier, currentUser = bearerCurrentUser(jwtService))
-        completionRoutes(igdb, steam, currentUser = bearerCurrentUser(jwtService), notifier = notifier)
+        completionRoutes(igdb, steam, notifier, currentUser = bearerCurrentUser(jwtService))
         steamRoutes(currentUser = bearerCurrentUser(jwtService))
         leaderboardRoutes(currentUser = bearerCurrentUser(jwtService))
         accountRoutes(currentUser = bearerCurrentUser(jwtService))

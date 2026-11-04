@@ -50,7 +50,7 @@ class SplashFragment : Fragment() {
                 if (shouldRequireBiometricUnlock(settings.biometricLoginEnabled, availability)) {
                     Log.i(TAG, "Signed in with the fingerprint lock on, asking to unlock")
                     findNavController().navigate(R.id.action_splashFragment_to_biometricLockFragment)
-                }  else {
+                } else {
                     // uploads a settings change that didn't make it last time, or else picks up
                     // changes made on another phone. in the background: launch never waits on the
                     // network. behind the fingerprint gate this waits for the unlock instead, so a
@@ -66,8 +66,6 @@ class SplashFragment : Fragment() {
                 Log.i(TAG, "Nobody is signed in, going to login")
                 findNavController().navigate(R.id.action_splashFragment_to_loginFragment)
             }
-        }
-    }
         }
     }
 
