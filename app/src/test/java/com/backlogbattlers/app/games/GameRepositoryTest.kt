@@ -4,6 +4,7 @@ import com.backlogbattlers.app.data.local.dao.CachedGameDao
 import com.backlogbattlers.app.data.local.entity.CachedGameEntity
 import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.repository.GameRepositoryImpl
+import com.backlogbattlers.app.domain.model.Game
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import kotlinx.coroutines.flow.Flow
@@ -86,5 +87,45 @@ class GameRepositoryTest {
         repository.getPopularGames()
 
         assertEquals(4.5f, dao.rows.getValue(9061).avgCompletionHours)
+    }
+
+    private val steamArt = listOf(
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145360/capsule_616x353.jpg",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145360/header.jpg",
+        "https://images.igdb.com/igdb/image/upload/t_screenshot_big/ar1.jpg",
+    )
+
+    private fun hades(artworkUrls: List<String>) = Game(
+        gameId = 113112,
+        title = "Hades",
+        coverImageUrl = null,
+        artworkUrl = artworkUrls.firstOrNull(),
+        platforms = listOf("PC"),
+        avgCompletionHours = null,
+        avg100PercentHours = null,
+        cachedAt = 0L,
+        artworkUrls = artworkUrls,
+    )
+
+    @Test
+    fun `every landscape picture to try is cached and read back in order`() = runTest {
+        repository.cacheGame(hades(steamArt))
+
+        assertEquals(steamArt, repository.getGame(113112)?.artworkUrls)
+    }
+
+    @Test
+    fun `a response without pictures keeps the cached ones`() = runTest {
+        repository.cacheGame(hades(steamArt))
+
+        repository.cacheGame(hades(emptyList()))
+
+        assertEquals(steamArt, repository.getGame(113112)?.landscapeArtUrls)
+    }
+
+    @Test
+    fun `a game with only a single picture, or none, still has a list to try`() {
+        assertEquals(listOf("https://art/one.jpg"), hades(emptyList()).copy(artworkUrl = "https://art/one.jpg").landscapeArtUrls)
+        assertEquals(emptyList<String>(), hades(emptyList()).landscapeArtUrls)
     }
 }

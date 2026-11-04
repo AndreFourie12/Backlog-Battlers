@@ -23,6 +23,12 @@ data class IgdbGenre(
     val name: String,
 )
 
+/** One of a game's official artworks or screenshots. Like [IgdbCover], IGDB only gives the image id. */
+@Serializable
+data class IgdbImage(
+    @SerialName("image_id") val imageId: String,
+)
+
 /** One game from `POST /v4/games`. */
 @Serializable
 data class IgdbGame(
@@ -31,6 +37,9 @@ data class IgdbGame(
     val cover: IgdbCover? = null,
     val platforms: List<IgdbPlatform>? = null,
     val genres: List<IgdbGenre>? = null,
+    // landscape pictures, used when Steam has none for the game
+    val artworks: List<IgdbImage>? = null,
+    val screenshots: List<IgdbImage>? = null,
 )
 
 /** One row from `POST /v4/game_time_to_beats`. Times are in seconds. */

@@ -24,7 +24,7 @@ import com.backlogbattlers.app.data.local.entity.UserEntity
     // !!!changing an entity? increment the version AND add a Migration below (see MIGRATION_4_5).
     // from version 4 on the database is migrated, not wiped, so library changes that have not
     // synced yet survive an app update. a version bump with no migration now crashes on purpose
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -52,7 +52,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "backlog_battlers.db",
                 )
-                    .addMigrations(Migration4To5(currentUserId))
+                    .addMigrations(Migration4To5(currentUserId), MIGRATION_5_6)
                     // the Part 2 builds (versions 1-3) only ever held test data, so those are still wiped
                     .fallbackToDestructiveMigrationFrom(true, 1, 2, 3)
                     .build()
@@ -75,6 +75,16 @@ class Migration4To5(private val currentUserId: () -> String?) : Migration(4, 5) 
         currentUserId()?.let { userId ->
             db.execSQL("UPDATE `library_entries` SET `userId` = ?", arrayOf(userId))
         }
+    }
+}
+
+//------------------------------
+// version 5 -> 6: cached games keep every landscape picture the API found (artworkUrls), so a wide tile
+// can try the next one when a picture is missing. games cached before this have none, and fall back to
+// their single artworkUrl until the API sends them again
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `cached_games` ADD COLUMN `artworkUrls` TEXT NOT NULL DEFAULT ''")
     }
 }
 //------------------------------EOF------------------------------\\

@@ -10,8 +10,10 @@ import androidx.navigation.fragment.findNavController
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.util.shouldRequireBiometricUnlock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // first destination on launch. it has nothing to show of its own: the system splash
 // (installSplashScreen in MainActivity) stays on screen until this has routed the user
@@ -34,7 +36,9 @@ class SplashFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val currentUser = ServiceLocator.authRepository.getCurrentUser()
+            // the first use of authRepository builds the encrypted token storage and the HTTP client, which
+            // read from disk, so it happens off the main thread and the splash never freezes on it
+            val currentUser = withContext(Dispatchers.IO) { ServiceLocator.authRepository.getCurrentUser() }
 
             // this if statement only looks at biometric state once a session already exist
             if (currentUser != null) {

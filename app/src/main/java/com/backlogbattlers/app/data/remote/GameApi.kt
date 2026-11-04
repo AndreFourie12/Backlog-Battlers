@@ -27,12 +27,16 @@ data class GameDto(
     val genres: List<String> = emptyList(),
     val avgCompletionHours: Double? = null,
     val avg100PercentHours: Double? = null,
+    // landscape pictures to try in order (Steam's, then IGDB's), see Game.landscapeArtUrls
+    val artworkUrls: List<String> = emptyList(),
 )
 
 @Serializable
 data class RecommendationDto(
     val game: GameDto,
     val reason: String,
+    // the game's place on Steam's most played chart, null for the API's hand picked games
+    val steamRank: Int? = null,
 )
 
 @Serializable

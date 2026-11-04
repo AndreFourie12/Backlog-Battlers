@@ -6,8 +6,8 @@ import com.backlogbattlers.api.games.GameDto
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.IgdbGame
 import com.backlogbattlers.api.games.StarterGames
+import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.saveGame
-import com.backlogbattlers.api.games.steamArtUrl
 import com.backlogbattlers.api.games.toDto
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -18,9 +18,13 @@ private const val MAX_QUERY_LENGTH = 100
 private const val DEFAULT_LIMIT = 20
 private const val MAX_LIMIT = 50
 
-/** Game catalogue: search IGDB, and fetch one game with its time-to-beat. */
-fun Route.gameRoutes(igdb: IgdbClient) {
-    val starterGames = StarterGames(igdb)
+/**
+ * Game catalogue: search IGDB, fetch one game with its time-to-beat, and the home screen's suggestions.
+ * With a [steam] client the suggestions are popular games from Steam's most played chart; without one
+ * they are the hand picked starter games.
+ */
+fun Route.gameRoutes(igdb: IgdbClient, steam: SteamClient? = null) {
+    val starterGames = StarterGames(igdb, steam)
 
     // GET /games/starter
     get("/games/starter") {
@@ -71,7 +75,8 @@ fun Route.gameRoutes(igdb: IgdbClient) {
         val game = igdb.game(id)
             ?: return@get call.respond(HttpStatusCode.NotFound, ApiError("Game $id was not found"))
 
-        val dto = game.toDto(igdb.timeToBeat(id))
+        // with its Steam listing too, so the detail screen's backdrop gets the same landscape pictures as search
+        val dto = game.toDto(igdb.timeToBeat(id), steamAppId = igdb.steamAppId(id))
         saveGame(dto)
         call.respond(dto)
     }
@@ -79,5 +84,5 @@ fun Route.gameRoutes(igdb: IgdbClient) {
 
 private suspend fun withSteamArt(igdb: IgdbClient, games: List<IgdbGame>): List<GameDto> {
     val steamAppIds = igdb.steamAppIds(games.map { it.id })
-    return games.map { it.toDto(artworkUrl = steamArtUrl(steamAppIds[it.id])) }
+    return games.map { it.toDto(steamAppId = steamAppIds[it.id]) }
 }

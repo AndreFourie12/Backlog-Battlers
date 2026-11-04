@@ -53,15 +53,27 @@ private data class SchemaAchievement(
     val icongray: String? = null,
 )
 
+@Serializable
+private data class MostPlayedResponse(val response: MostPlayedList = MostPlayedList())
+
+@Serializable
+private data class MostPlayedList(val ranks: List<MostPlayedRank> = emptyList())
+
+@Serializable
+private data class MostPlayedRank(val rank: Int, val appid: Int)
+
 /**
- * Reads achievement data from Steam.
+ * Reads achievement data and the most played games from Steam.
  *
- * Global rarity needs no key. Real names and descriptions need a free Steam Web API key;
- * without one, [displayNames] returns null and callers fall back to Steam's internal codes.
+ * Global rarity and the most played chart need no key. Real names and descriptions need a free
+ * Steam Web API key; without one, [displayNames] returns null and callers fall back to Steam's
+ * internal codes.
  *
  * Sources followed:
  *  - Steam Web API, ISteamUserStats/GetGlobalAchievementPercentagesForApp and GetSchemaForGame:
  *    https://partner.steamgames.com/doc/webapi/ISteamUserStats
+ *  - Steam Web API, ISteamChartsService/GetMostPlayedGames (the daily top 100 by peak players):
+ *    https://steamapi.xpaw.me/#ISteamChartsService/GetMostPlayedGames
  */
 class SteamClient(
     private val http: HttpClient,
@@ -109,8 +121,21 @@ class SteamClient(
             }
     }
 
+    /** Steam app ids of the most played games on Steam right now, most played first (Steam's top 100). */
+    suspend fun mostPlayedAppIds(): List<Int> {
+        val response = http.get(MOST_PLAYED_URL)
+        if (!response.status.isSuccess()) throw SteamException("Steam most played request failed: ${response.status}")
+
+        return json.decodeFromString<MostPlayedResponse>(response.bodyAsText())
+            .response.ranks
+            .sortedBy { it.rank }
+            .map { it.appid }
+            .distinct()
+    }
+
     companion object {
         private const val BASE_URL = "https://api.steampowered.com/ISteamUserStats"
+        private const val MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/"
 
         /** Builds the real client from STEAM_API_KEY (see [Config]). The key is optional. */
         fun fromConfig(): SteamClient = SteamClient(

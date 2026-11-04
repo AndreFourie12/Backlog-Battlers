@@ -57,6 +57,9 @@
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_notificationSettingsFragment"
+            app:destination="@id/notificationSettingsFragment" />
     </fragment>
 
     <fragment
@@ -109,6 +112,12 @@
         <action
             android:id="@+id/action_profileFragment_to_gameDetailFragment"
             app:destination="@id/gameDetailFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_appearanceFragment"
+            app:destination="@id/appearanceFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
     </fragment>
 
     <!-- drill downs, these hide the bottom navigation while they are open -->

@@ -47,14 +47,15 @@ fun Application.module() {
     val googleVerifier = GoogleIdTokenVerifier(httpClient, googleClientId)
     val jwtService = JwtService(jwtSecret, jwtIssuer)
     val igdb = IgdbClient.fromConfig()
+    val steam = SteamClient.fromConfig()
 
     // @Dylan, @Andre
     // To add a feature, create : routes/YourFeatureRoutes.kt with `fun Route.yourFeatureRoutes()`,
     // and call it below.
     routing {
         healthRoutes()
-        gameRoutes(igdb)
-        achievementRoutes(igdb, SteamClient.fromConfig())
+        gameRoutes(igdb, steam)
+        achievementRoutes(igdb, steam)
         authRoutes(googleVerifier, jwtService)
         libraryRoutes(igdb, currentUser = bearerCurrentUser(jwtService))
         friendRoutes(currentUser = bearerCurrentUser(jwtService))

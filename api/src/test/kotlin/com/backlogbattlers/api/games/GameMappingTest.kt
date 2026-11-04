@@ -86,4 +86,53 @@ class GameMappingTest {
         // Search results have no time-to-beat yet, so the hours stay null
         assertNull(hades.toDto().avgCompletionHours)
     }
+
+    private val steam = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145360"
+    private val igdbArt = "https://images.igdb.com/igdb/image/upload/t_screenshot_big"
+
+    @Test
+    fun `landscape pictures to try are Steam's three wide pictures, then IGDB's artwork and a screenshot`() {
+        val hades = IgdbGame(
+            id = 113112,
+            name = "Hades",
+            artworks = listOf(IgdbImage("ar1"), IgdbImage("ar2")),
+            screenshots = listOf(IgdbImage("sc1"), IgdbImage("sc2")),
+        )
+
+        val dto = hades.toDto(steamAppId = 1145360)
+
+        assertEquals(
+            listOf(
+                "$steam/capsule_616x353.jpg",
+                "$steam/header.jpg",
+                "$steam/library_hero.jpg",
+                "$igdbArt/ar1.jpg",
+                "$igdbArt/sc1.jpg",
+            ),
+            dto.artworkUrls,
+        )
+        // older app builds only read the first one
+        assertEquals("$steam/capsule_616x353.jpg", dto.artworkUrl)
+    }
+
+    @Test
+    fun `a game not on Steam starts with IGDB's pictures, and one with no pictures has none to try`() {
+        val withArt = IgdbGame(id = 1, name = "Console only", screenshots = listOf(IgdbImage("sc1")))
+        assertEquals(listOf("$igdbArt/sc1.jpg"), withArt.toDto().artworkUrls)
+        assertEquals("$igdbArt/sc1.jpg", withArt.toDto().artworkUrl)
+
+        val bare = IgdbGame(id = 2, name = "Unknown").toDto()
+        assertEquals(emptyList(), bare.artworkUrls)
+        assertNull(bare.artworkUrl)
+    }
+
+    @Test
+    fun `IGDB artworks and screenshots are read from its JSON`() {
+        val game = json.decodeFromString<IgdbGame>(
+            """{"id":7344,"name":"Ori","artworks":[{"id":9,"image_id":"arx"}],"screenshots":[{"id":8,"image_id":"scx"}]}""",
+        )
+
+        assertEquals("arx", game.artworks!!.single().imageId)
+        assertEquals("scx", game.screenshots!!.single().imageId)
+    }
 }

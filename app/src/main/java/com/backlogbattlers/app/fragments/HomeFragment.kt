@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -15,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.adapters.RecommendationAdapter
+import com.backlogbattlers.app.adapters.RecommendationRow
 import com.backlogbattlers.app.util.addRowDividers
 import com.backlogbattlers.app.util.applyTopSystemBarPadding
 import com.backlogbattlers.app.util.backdropArt
@@ -22,6 +24,7 @@ import com.backlogbattlers.app.util.setVisible
 import com.backlogbattlers.app.viewmodels.HomeUiState
 import com.backlogbattlers.app.viewmodels.HomeViewModel
 import com.backlogbattlers.app.viewmodels.SettingsViewModel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 // the home screen.
@@ -47,6 +50,11 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<View>(R.id.home_top_bar).applyTopSystemBarPadding()
+
+        // the bell opens the notification settings, the app's only notifications screen
+        view.findViewById<View>(R.id.btn_notifications).setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_notificationSettingsFragment)
+        }
 
         view.findViewById<View>(R.id.btn_settings).setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
@@ -80,7 +88,10 @@ class HomeFragment : Fragment() {
         val list = view.findViewById<RecyclerView>(R.id.container_recommendations)
         val progress = view.findViewById<View>(R.id.progress_recommendations)
         val errorState = view.findViewById<View>(R.id.state_recommendations_error)
-        val adapter = RecommendationAdapter()
+        val adapter = RecommendationAdapter(
+            onClick = { game -> openGame(game.gameId) },
+            onAdd = viewModel::addToLibrary,
+        )
         list.adapter = adapter
         list.addRowDividers()
 
@@ -90,16 +101,35 @@ class HomeFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    progress.setVisible(state is HomeUiState.Loading)
-                    errorState.setVisible(state is HomeUiState.Error)
-                    list.setVisible(state is HomeUiState.Loaded)
-                    if (state is HomeUiState.Loaded) {
-                        adapter.submitList(state.recommendations)
+                // the suggestions, each marked with whether it is already in the library
+                launch {
+                    combine(viewModel.uiState, viewModel.ownedGameIds, ::Pair).collect { (state, owned) ->
+                        progress.setVisible(state is HomeUiState.Loading)
+                        errorState.setVisible(state is HomeUiState.Error)
+                        list.setVisible(state is HomeUiState.Loaded)
+                        if (state is HomeUiState.Loaded) {
+                            adapter.submitList(
+                                state.recommendations.map { RecommendationRow(it, owned = it.game.gameId in owned) },
+                            )
+                        }
+                    }
+                }
+                launch {
+                    viewModel.addedGames.collect { title ->
+                        Toast.makeText(requireContext(), getString(R.string.added_to_library, title), Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
             }
         }
+    }
+
+    // opens the game detail screen for a suggestion
+    private fun openGame(gameId: Int) {
+        findNavController().navigate(
+            R.id.action_homeFragment_to_gameDetailFragment,
+            Bundle().apply { putString("gameId", gameId.toString()) },
+        )
     }
 }
 //------------------------------EOF------------------------------\\

@@ -42,9 +42,9 @@ interface GameRepository {
 
 
 //------------------------------
-// implementation of GameRepository using local CachedGameDao
-// room for search and lookup until RestAPI and RAWG integration where cache is checked first,
-// the starter games come from the API through GameApi
+// implementation of GameRepository: games come from our API through GameApi (which reads IGDB and
+// Steam), and every game fetched is cached in Room through CachedGameDao, so the library and other
+// screens can look a game up by id without asking the API again
 class GameRepositoryImpl(
     private val cachedGameDao: CachedGameDao,
     private val gameApi: GameApi,
@@ -83,7 +83,7 @@ class GameRepositoryImpl(
     override suspend fun getStarterGames(): List<Recommendation> {
         val cachedAt = System.currentTimeMillis()
         val recommendations = gameApi.starterGames().map { dto ->
-            Recommendation(game = dto.game.toDomain(cachedAt), reason = dto.reason)
+            Recommendation(game = dto.game.toDomain(cachedAt), reason = dto.reason, steamRank = dto.steamRank)
         }
         recommendations.forEach { cacheGame(it.game) }
         return recommendations
@@ -122,6 +122,7 @@ class GameRepositoryImpl(
         val existing = cachedGameDao.getGame(game.gameId)
         val merged = game.copy(
             artworkUrl = game.artworkUrl ?: existing?.artworkUrl,
+            artworkUrls = game.artworkUrls.ifEmpty { existing?.artworkUrls.orEmpty() },
             totalAchievements = game.totalAchievements ?: existing?.totalAchievements,
         )
         cachedGameDao.upsert(merged.toEntity())
@@ -145,6 +146,7 @@ class GameRepositoryImpl(
             avg100PercentHours = avg100PercentHours,
             cachedAt = System.currentTimeMillis(),
             totalAchievements = totalAchievements,
+            artworkUrls = artworkUrls,
         )
     }
 
@@ -162,6 +164,7 @@ class GameRepositoryImpl(
             avg100PercentHours = avg100PercentHours,
             cachedAt = cachedAt,
             totalAchievements = totalAchievements,
+            artworkUrls = artworkUrls,
         )
     }
 
@@ -191,6 +194,7 @@ class GameRepositoryImpl(
             avgCompletionHours = avgCompletionHours?.toFloat(),
             avg100PercentHours = avg100PercentHours?.toFloat(),
             cachedAt = cachedAt,
+            artworkUrls = artworkUrls,
         )
     }
 }

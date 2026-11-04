@@ -83,6 +83,8 @@
     <string name="search_error">Kon nie die speletjiekatalogus bereik nie.</string>
     <string name="try_again_body">Kyk na jou verbinding en probeer weer.</string>
     <string name="added_to_library">%1$s is by jou agterstand gevoeg</string>
+    <string name="recommendation_steam_rank">Nr. %1$d mees gespeel op Steam op die oomblik</string>
+    <string name="no_image_found">Geen prent gevind nie</string>
 
     <!-- games screen -->
     <string name="search_library">Soek in jou biblioteek</string>
@@ -238,7 +240,15 @@
     <string name="privacy_section_security">SEKURITEIT</string>
     <string name="privacy_section_data">JOU DATA</string>
     <string name="privacy_biometric">Biometriese aanmelding</string>
-    <string name="privacy_biometric_body">Gebruik jou vingerafdruk of gesig om die app te ontsluit</string>
+    <string name="privacy_biometric_body">Gebruik jou vingerafdruk, gesig of foon se PIN om die app te ontsluit</string>
+    <string name="biometric_unavailable_no_hardware">Hierdie foon het nie \'n vingerafdrukleser of gesigontsluiting nie</string>
+    <string name="biometric_unavailable_not_enrolled">Voeg eers \'n vingerafdruk of skermslot in jou foon se instellings by, en skakel dit dan aan</string>
+    <string name="biometric_unavailable_other">Vingerafdrukontsluiting is nie nou op hierdie foon beskikbaar nie</string>
+    <string name="biometric_offer_title">Ontsluit met jou vingerafdruk?</string>
+    <string name="biometric_offer_body">Gebruik jou vingerafdruk, gesig of foon se PIN in plaas daarvan om aan te teken wanneer jy Backlog Battlers weer oopmaak. Jy kan dit enige tyd in Instellings → Privaatheid &amp; data verander.</string>
+    <string name="biometric_offer_accept">Skakel aan</string>
+    <string name="biometric_offer_decline">Nie nou nie</string>
+    <string name="biometric_offer_enabled">Vingerafdrukontsluiting is aan</string>
     <string name="privacy_what_we_store">Wat ons stoor</string>
     <string name="privacy_what_we_store_body">Jou vertoonnaam, e-pos en avatar kom van die Google-rekening waarmee jy aanteken. Jou biblioteek, speeltyd en prestasievordering word op hierdie toestel gehou en met jou rekening gesinkroniseer sodat jou posisie op die ranglys akkuraat bly.</string>
     <string name="privacy_policy">Privaatheidsbeleid</string>
@@ -246,9 +256,12 @@
     <string name="biometric_lock_title">Vingerafdruk nodig</string>
     <string name="biometric_lock_body">Bevestig dat dit jy is om Backlog Battlers oop te maak</string>
     <string name="biometric_prompt_title">Ontsluit Backlog Battlers</string>
-    <string name="biometric_prompt_subtitle">Skandeer jou vingerafdruk om voort te gaan</string>
-    <string name="biometric_prompt_negative_button">Kanselleer</string>
-    <string name="biometric_signed_out_message">Vingerafdrukkontrole gekanselleer. Teken asseblief weer aan.</string>
+    <string name="biometric_prompt_subtitle">Gebruik jou vingerafdruk, of jou foon se PIN, patroon of wagwoord</string>
+    <string name="biometric_lock_cancelled">Ontsluiting is gekanselleer. Probeer weer, of teken eerder met Google aan.</string>
+    <string name="biometric_lock_locked_out">Te veel pogings. Gebruik jou foon se PIN, patroon of wagwoord, of teken eerder met Google aan.</string>
+    <string name="biometric_lock_unavailable">Jou vingerafdruk of skermslot is nie nou beskikbaar nie. Teken eerder met Google aan.</string>
+    <string name="biometric_lock_retry">Probeer weer</string>
+    <string name="biometric_lock_sign_in_again">Teken weer aan</string>
     <string name="cd_fingerprint_icon">Vingerafdrukikoon</string>
 
     <!-- help and support -->

@@ -180,6 +180,25 @@ class GameRoutesTest {
     }
 
     @Test
+    fun `game details carry the same landscape pictures as search, led by Steam's`() = testApplication {
+        application {
+            install(ContentNegotiation) { json() }
+            configureErrors()
+            routing { gameRoutes(fakeIgdb()) }
+        }
+
+        val game = Json.decodeFromString<GameDto>(client.get("/games/113112").bodyAsText())
+        val searched = Json.decodeFromString<List<GameDto>>(client.get("/games/search?q=hades").bodyAsText()).single()
+
+        assertEquals(
+            "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145360/capsule_616x353.jpg",
+            game.artworkUrl,
+        )
+        assertEquals(3, game.artworkUrls.size)
+        assertEquals(searched.artworkUrls, game.artworkUrls)
+    }
+
+    @Test
     fun `game details reject a non numeric id and report an unknown game`() = testApplication {
         application {
             install(ContentNegotiation) { json() }

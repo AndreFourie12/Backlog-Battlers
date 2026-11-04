@@ -27,12 +27,23 @@ data class Game(
     val cachedAt: Long,
     // null until this game's achievements have been fetched at least once
     val totalAchievements: Int? = null,
-)
+    // every landscape picture the API found for the game, best first: Steam's wide pictures, then IGDB's
+    // artwork and a screenshot. some may no longer exist, so the wide tiles try them in order
+    val artworkUrls: List<String> = emptyList(),
+) {
+    // the landscape pictures to try for a wide tile, in order. games cached before the API sent a list
+    // (and the built in popular games) only have artworkUrl
+    val landscapeArtUrls: List<String>
+        get() = artworkUrls.ifEmpty { listOfNotNull(artworkUrl) }
+}
 
-// Recommendation data class pairs a game with the line shown under its name, e.g. on the home screen
+// Recommendation data class pairs a game with the line shown under its name, e.g. on the home screen.
+// steamRank is its place on Steam's most played chart (1 = most played), so the line can be worded in
+// the user's language; null for hand picked games, which show reason as the API sends it
 data class Recommendation(
     val game: Game,
     val reason: String,
+    val steamRank: Int? = null,
 )
 
 // Achievement data class represents domain model for one of a game's achievements.
