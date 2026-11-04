@@ -12,6 +12,7 @@ import com.backlogbattlers.app.data.remote.LeaderboardApi
 import com.backlogbattlers.app.data.remote.LibraryApi
 import com.backlogbattlers.app.data.remote.SettingsApi
 import com.backlogbattlers.app.data.remote.SteamApi
+import com.backlogbattlers.app.data.repository.AccessTokenSource
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthRepositoryImpl
 import com.backlogbattlers.app.data.repository.FriendsRepository
@@ -49,6 +50,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -94,6 +98,11 @@ object ServiceLocator {
         GameApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
     }
 
+    // fires when the backend will no longer accept the signed in session (its refresh token was
+    // rejected). MainActivity answers it by going back to login with a message
+    private val _sessionEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val sessionEnded: SharedFlow<Unit> = _sessionEnded.asSharedFlow()
+
     val authRepository: AuthRepository by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing authRepository")
         AuthRepositoryImpl(
@@ -102,11 +111,22 @@ object ServiceLocator {
             authApi = authApi,
             tokenStorage = tokenStorage,
             serverClientId = BuildConfig.GOOGLE_SERVER_CLIENT_ID,
+            onSessionEnded = { _sessionEnded.tryEmit(Unit) },
+        )
+    }
+
+    // how the API clients that need a sign in get a valid access token (renewed when it has
+    // expired, or when the backend refuses it)
+    val accessTokenSource: AccessTokenSource by lazy {
+        AccessTokenSource(
+            fresh = { authRepository.freshAccessToken() },
+            renew = { authRepository.renewAccessToken() },
+            endSession = { authRepository.endSession() },
         )
     }
 
     val friendsApi: FriendsApi by lazy {
-        FriendsApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokenStorage = tokenStorage)
+        FriendsApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokens = accessTokenSource)
     }
 
     val friendsRepository: FriendsRepository by lazy {
@@ -114,7 +134,7 @@ object ServiceLocator {
     }
 
     val leaderboardApi: LeaderboardApi by lazy {
-        LeaderboardApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokenStorage = tokenStorage)
+        LeaderboardApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokens = accessTokenSource)
     }
 
     val leaderboardRepository: LeaderboardRepository by lazy {
