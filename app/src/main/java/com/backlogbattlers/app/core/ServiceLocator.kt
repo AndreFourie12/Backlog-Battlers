@@ -31,6 +31,7 @@ import com.backlogbattlers.app.data.repository.SettingsRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsSync
 import com.backlogbattlers.app.util.AndroidBiometricAvailabilityChecker
 import com.backlogbattlers.app.util.BiometricAvailabilityChecker
+import com.backlogbattlers.app.util.RequestIds
 import com.backlogbattlers.app.util.applyLanguage
 import com.backlogbattlers.app.util.applyThemeMode
 import com.backlogbattlers.app.util.currentLanguage
@@ -215,21 +216,26 @@ object ServiceLocator {
                 )
             }
         }.apply {
-            // one Logcat line per request: method, path, status and how long it took. never the query,
-            // headers or body, so no token or personal detail ends up in the log
+            // one Logcat line per request: method, path, status and how long it took.
+            // the id is sent to the api and printed here, so this Logcat line matches the api's
+            // line for the same request. query, headers and body are never logged, so no token
+            // or personal detail ends up in the log
+
             plugin(HttpSend).intercept { request ->
+                val requestId = RequestIds.next()
+                request.headers.append(RequestIds.HEADER, requestId)
                 val call = "${request.method.value} ${request.url.encodedPath}"
                 val started = System.currentTimeMillis()
                 try {
                     execute(request).also {
-                        Log.d(HTTP_TAG, "$call -> ${it.response.status.value} in ${System.currentTimeMillis() - started}ms")
+                        Log.d(HTTP_TAG, "[$requestId] $call -> ${it.response.status.value} in ${System.currentTimeMillis() - started}ms")
                     }
                 } catch (e: CancellationException) {
                     // the screen stopped waiting (a newer search replaced it, or it closed): not a failure
-                    Log.d(HTTP_TAG, "$call cancelled after ${System.currentTimeMillis() - started}ms")
+                    Log.d(HTTP_TAG, "[$requestId] $call cancelled after ${System.currentTimeMillis() - started}ms")
                     throw e
                 } catch (e: Exception) {
-                    Log.w(HTTP_TAG, "$call failed after ${System.currentTimeMillis() - started}ms: ${e.javaClass.simpleName}")
+                    Log.w(HTTP_TAG, "[$requestId] $call failed after ${System.currentTimeMillis() - started}ms: ${e.javaClass.simpleName}")
                     throw e
                 }
             }
