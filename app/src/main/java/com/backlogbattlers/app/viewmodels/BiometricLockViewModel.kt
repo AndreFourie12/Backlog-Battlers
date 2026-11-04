@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
@@ -57,6 +58,7 @@ class BiometricLockViewModel(
     // signed out: the screen stays locked and offers to try again or to sign in again
     fun onAuthenticationError(errorCode: Int) {
         _uiState.value = BiometricLockUiState.Locked(lockReasonFor(errorCode))
+        Log.d(TAG, "Unlock prompt closed, now ${_uiState.value}")
     }
 
     //------------------------------
@@ -65,9 +67,14 @@ class BiometricLockViewModel(
     fun onSignInAgain() {
         viewModelScope.launch {
             authRepository.signOut()
+            Log.i(TAG, "Signed out from the lock screen to sign in again")
             settingsRepository.setSyncPending(false)
             _uiState.value = BiometricLockUiState.SignedOut
         }
+    }
+
+    private companion object {
+        const val TAG = "BiometricLockViewModel"
     }
 }
 //------------------------------EOF------------------------------\\

@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -76,6 +77,7 @@ class SettingsFragment : Fragment() {
             value = getString(R.string.settings_connected_accounts_pending),
             showChevron = false,
         ) {
+            Log.d(TAG, "Connected accounts tapped, not built yet")
             Toast.makeText(
                 requireContext(),
                 R.string.settings_connected_accounts_pending,
@@ -196,6 +198,7 @@ class SettingsFragment : Fragment() {
                 dialog.dismiss()
                 val chosen = choices[which]
                 if (chosen != current) {
+                    Log.i(TAG, "Language changed from $current to $chosen")
                     viewModel.setLanguage(chosen)
                     applyLanguage(chosen)
                 }
@@ -222,6 +225,7 @@ class SettingsFragment : Fragment() {
             .setTitle(R.string.settings_default_platform_dialog_title)
             .setSingleChoiceItems(labels, platformChoices.indexOf(current)) { dialog, which ->
                 val chosen = platformChoices[which]
+                Log.i(TAG, "Default platform set to $chosen")
                 viewModel.setDefaultPlatform(chosen)
                 Toast.makeText(
                     requireContext(),
@@ -242,6 +246,7 @@ class SettingsFragment : Fragment() {
             .setMessage(R.string.log_out_confirm_body)
             .setNegativeButton(R.string.cancel, null)
             .setPositiveButton(R.string.log_out_confirm_action) { _, _ ->
+                Log.i(TAG, "Logging out")
                 viewModel.logOut {
                     if (isAdded) {
                         findNavController().navigate(R.id.action_settingsFragment_to_loginFragment)
@@ -264,6 +269,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun deleteAccount() {
+        Log.i(TAG, "Deleting the account")
         val button = view?.findViewById<View>(R.id.btnDeleteAccount) ?: return
         val label = button.findViewById<TextView>(R.id.tvDeleteAccount)
         button.isEnabled = false
@@ -271,6 +277,7 @@ class SettingsFragment : Fragment() {
 
         viewModel.deleteAccount { result ->
             if (!isAdded || view == null) return@deleteAccount
+            Log.i(TAG, "Account deletion finished: $result")
 
             when (result) {
                 DeleteAccountResult.DELETED -> {
@@ -296,6 +303,10 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "SettingsFragment"
     }
 }
 //------------------------------EOF------------------------------\\

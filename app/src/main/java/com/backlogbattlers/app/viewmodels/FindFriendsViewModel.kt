@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.viewmodels
 
+import android.util.Log
 import androidx.annotation.StringRes
 import com.backlogbattlers.app.R
 import androidx.lifecycle.ViewModel
@@ -49,8 +50,10 @@ class FindFriendsViewModel(
         viewModelScope.launch {
             try {
                 val results = friendsRepository.searchUsers(query)
+                Log.d(TAG, "Friend search found ${results.size} people")
                 _uiState.update { it.copy(isLoading = false, results = results, hasSearched = true) }
             } catch (e: Exception) {
+                Log.e(TAG, "Searching for friends failed", e)
                 _uiState.update { it.copy(isLoading = false, errorMessage = R.string.friends_error_search, hasSearched = true) }
             }
         }
@@ -62,11 +65,17 @@ class FindFriendsViewModel(
         viewModelScope.launch {
             try {
                 friendsRepository.sendRequest(targetUserId)
+                Log.i(TAG, "Friend request sent")
                 _uiState.update { it.copy(sentRequestUserIds = it.sentRequestUserIds + targetUserId) }
             } catch (e: Exception) {
+                Log.e(TAG, "Sending a friend request failed", e)
                 _uiState.update { it.copy(errorMessage = R.string.friends_error_send) }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "FindFriendsViewModel"
     }
 }
 //------------------------------EOF------------------------------\\
