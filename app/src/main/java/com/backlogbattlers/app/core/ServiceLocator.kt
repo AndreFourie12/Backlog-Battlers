@@ -11,6 +11,7 @@ import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.remote.LeaderboardApi
 import com.backlogbattlers.app.data.remote.LibraryApi
 import com.backlogbattlers.app.data.remote.SettingsApi
+import com.backlogbattlers.app.data.remote.SteamApi
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthRepositoryImpl
 import com.backlogbattlers.app.data.repository.FriendsRepository
@@ -27,6 +28,8 @@ import com.backlogbattlers.app.data.repository.ProfileCustomizationRepositoryImp
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsRepository
+import com.backlogbattlers.app.data.repository.SteamAccountRepository
+import com.backlogbattlers.app.data.repository.SteamAccountRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsSync
 import com.backlogbattlers.app.util.AndroidBiometricAvailabilityChecker
@@ -177,6 +180,14 @@ object ServiceLocator {
                 }
             },
         )
+    }
+
+    val steamApi: SteamApi by lazy {
+        SteamApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
+    }
+
+    val steamAccountRepository: SteamAccountRepository by lazy {
+        SteamAccountRepositoryImpl(steamApi, accessToken = { authRepository.freshAccessToken() })
     }
 
     val biometricAvailabilityChecker: BiometricAvailabilityChecker by lazy {

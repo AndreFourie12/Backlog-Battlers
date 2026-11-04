@@ -31,8 +31,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 // the settings list, reached from the gear on the home screen.
-// every row here opens one of the screens in this package, except Connected
-// Accounts which waits on account linking
+// every row here opens one of the screens in this package
 class SettingsFragment : Fragment() {
 
     private val viewModel: SettingsViewModel by viewModels()
@@ -69,20 +68,13 @@ class SettingsFragment : Fragment() {
             findNavController().navigate(R.id.action_settingsFragment_to_editProfileFragment)
         }
 
-        // account linking is not built yet, so this row shows its state and
-        // says so rather than opening an empty screen
+        // the only account that can be linked is Steam, so this opens its screen directly
         view.findViewById<View>(R.id.rowConnectedAccounts).bindSettingsRow(
             icon = R.drawable.ic_link,
             title = R.string.settings_connected_accounts,
-            value = getString(R.string.settings_connected_accounts_pending),
-            showChevron = false,
+            value = getString(R.string.settings_connected_accounts_value),
         ) {
-            Log.d(TAG, "Connected accounts tapped, not built yet")
-            Toast.makeText(
-                requireContext(),
-                R.string.settings_connected_accounts_pending,
-                Toast.LENGTH_SHORT,
-            ).show()
+            findNavController().navigate(R.id.action_settingsFragment_to_steamAccountFragment)
         }
 
         view.findViewById<View>(R.id.rowPrivacy).bindSettingsRow(
