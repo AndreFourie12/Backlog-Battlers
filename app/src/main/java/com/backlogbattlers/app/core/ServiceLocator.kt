@@ -20,6 +20,8 @@ import com.backlogbattlers.app.data.repository.LeaderboardRepository
 import com.backlogbattlers.app.data.repository.LeaderboardRepositoryImpl
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.LibraryRepositoryImpl
+import com.backlogbattlers.app.data.repository.ProfileCustomizationRepository
+import com.backlogbattlers.app.data.repository.ProfileCustomizationRepositoryImpl
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsRepository
@@ -124,6 +126,11 @@ object ServiceLocator {
     val searchHistoryRepository: SearchHistoryRepository by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing searchHistoryRepository")
         SearchHistoryRepositoryImpl(context, currentUserId = { tokenStorage.getUserId() })
+    }
+
+    val profileCustomizationRepository: ProfileCustomizationRepository by lazy {
+        val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing profileCustomizationRepository")
+        ProfileCustomizationRepositoryImpl(context, currentUserId = { tokenStorage.getUserId() })
     }
 
     val settingsRepository: SettingsRepository by lazy {

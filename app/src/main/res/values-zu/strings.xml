@@ -108,7 +108,6 @@
     <string name="cd_search">Sesha</string>
     <string name="cd_notifications">Izaziso</string>
     <string name="cd_settings">Izilungiselelo</string>
-    <string name="cd_appearance">Ukubukeka</string>
     <string name="cd_add_friend">Engeza umngane</string>
     <string name="cd_favourite">Engeza kokuthandayo</string>
     <string name="cd_sort">Hlunga umtapo</string>
@@ -194,15 +193,30 @@
     <string name="title_edit_profile">Hlela iphrofayela</string>
     <string name="edit_profile_display_name">Igama elibonakalayo</string>
     <string name="edit_profile_display_name_hint">Indlela abangane abakubona ngayo</string>
-    <string name="edit_profile_email">I-imeyili</string>
-    <string name="edit_profile_email_locked">I-imeyili yakho ivela ku-akhawunti ye-Google ongene ngayo.</string>
-    <string name="edit_profile_avatar_note">Isithombe sakho sivela ku-akhawunti yakho ye-Google.</string>
-    <string name="edit_profile_save">Londoloza izinguquko</string>
+    <string name="edit_profile_save">Londoloza</string>
     <string name="edit_profile_saved">Iphrofayela ibuyekeziwe</string>
     <string name="edit_profile_name_empty">Faka igama elibonakalayo</string>
-    <string name="edit_profile_name_too_long">Amagama abonakalayo anezinhlamvu ezingu-24 noma ngaphansi</string>
+    <string name="edit_profile_name_too_long">Amagama abonakalayo anezinhlamvu ezingu-20 noma ngaphansi</string>
     <string name="edit_profile_signed_out">Ngena ukuze uhlele iphrofayela yakho</string>
     <string name="cd_avatar">Isithombe sephrofayela</string>
+    <string name="edit_profile_change_photo">Shintsha isithombe</string>
+    <string name="edit_profile_remove_photo">Susa</string>
+    <string name="edit_profile_name_count">%1$d / %2$d</string>
+    <string name="edit_profile_name_helper">Indlela abangane abakubona ngayo emabhodini abaphambili nakokwenzekayo.</string>
+    <string name="edit_profile_section_shown">Okuboniswa kuphrofayela yakho</string>
+    <string name="profile_show_badges">Amabheji</string>
+    <string name="profile_show_badges_body">Amabheji owatholile</string>
+    <string name="profile_show_showcase">Izimpumelelo ezivela kancane</string>
+    <string name="profile_show_showcase_body">Izimpumelelo zakho ezivela kancane nezibalo zazo</string>
+    <string name="edit_profile_visibility_note">Abangane babona kuphela izigaba ozivulile. Izinga lakho, amaphuzu, indawo yakho kuligi nokwenzeke muva nje kuhlala kubonakala njalo.</string>
+    <string name="edit_profile_picker_title">Khetha isithombe sephrofayela</string>
+    <string name="edit_profile_picker_empty">Azikabikho izithombe ongakhetha kuzo okwamanje.</string>
+    <string name="edit_profile_discard_title">Lahla izinguquko?</string>
+    <string name="edit_profile_discard_body">Izinguquko zephrofayela yakho azikalondolozwa.</string>
+    <string name="edit_profile_keep_editing">Qhubeka uhlela</string>
+    <string name="edit_profile_discard">Lahla</string>
+    <string name="cd_change_photo">Shintsha isithombe sephrofayela</string>
+    <string name="cd_profile_picture_option">Isithombe sephrofayela %1$d</string>
 
     <!-- notification settings -->
     <string name="title_notifications">Izaziso</string>

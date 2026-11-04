@@ -104,7 +104,7 @@ class SettingsViewModel : ViewModel() {
 
     //------------------------------
     // deletes the account on the backend. once it is gone, everything it left on this device
-    // goes too (library, recent searches, the fingerprint lock) so the next person to sign in
+    // goes too (library, recent searches, profile setup, the fingerprint lock) so the next person to sign in
     // starts clean. runs on the application scope so leaving the screen mid-request can't
     // leave the account deleted on the backend but still on the device. the account id is read
     // first, because deleting signs out and the library is cleared by whose it was
@@ -117,6 +117,7 @@ class SettingsViewModel : ViewModel() {
                 Log.i(TAG, "Clearing what the deleted account left on this phone")
                 if (userId != null) ServiceLocator.libraryRepository.clear(userId)
                 if (userId != null) ServiceLocator.searchHistoryRepository.clear(userId)
+                if (userId != null) ServiceLocator.profileCustomizationRepository.clear(userId)
                 settingsRepository.setBiometricLoginEnabled(false)
                 settingsRepository.setSyncPending(false)
             }
