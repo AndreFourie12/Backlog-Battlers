@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,16 +29,23 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<View>(R.id.btn_appearance).setOnClickListener {
+            Log.d(TAG, "Opening appearance from the profile header")
             findNavController().navigate(R.id.action_profileFragment_to_appearanceFragment)
         }
 
         view.findViewById<View>(R.id.btn_settings).setOnClickListener {
+            Log.d(TAG, "Opening settings from the profile header")
             findNavController().navigate(R.id.action_profileFragment_to_settingsFragment)
         }
 
         view.findViewById<View>(R.id.btn_add_game).setOnClickListener {
+            Log.d(TAG, "Opening search to add a first game from the profile")
             findNavController().navigate(R.id.action_profileFragment_to_searchFragment)
         }
+    }
+
+    private companion object {
+        const val TAG = "ProfileFragment"
     }
 }
 //------------------------------EOF------------------------------\\

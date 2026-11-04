@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -59,6 +60,7 @@ class StandingsFragment : Fragment() {
 
                     // this if statement shows an error as a toast rather than replacing the whole screen for it
                     if (state.errorMessage != null) {
+                        Log.w(TAG, "Showing the standings error: ${resources.getResourceEntryName(state.errorMessage)}")
                         Toast.makeText(requireContext(), state.errorMessage, Toast.LENGTH_SHORT).show()
                     }
 
@@ -77,6 +79,10 @@ class StandingsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "StandingsFragment"
     }
 }
 //------------------------------EOF------------------------------\\

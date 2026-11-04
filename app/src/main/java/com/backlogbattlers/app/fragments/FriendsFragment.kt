@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -93,6 +94,7 @@ class FriendsFragment : Fragment() {
         }
 
         btnShareInvite.setOnClickListener {
+            Log.d(TAG, "Sharing a friend invite from friends")
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, getString(R.string.invite_share_text))
@@ -131,6 +133,7 @@ class FriendsFragment : Fragment() {
 
                     // this if statement displays a toast when an error message is present
                     if (state.errorMessage != null) {
+                        Log.w(TAG, "Showing the friends error: ${resources.getResourceEntryName(state.errorMessage)}")
                         Toast.makeText(requireContext(), state.errorMessage, Toast.LENGTH_SHORT).show()
                     }
 
@@ -211,6 +214,10 @@ class FriendsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "FriendsFragment"
     }
 }
 //------------------------------EOF------------------------------\\
