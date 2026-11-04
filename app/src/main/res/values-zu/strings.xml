@@ -381,4 +381,7 @@
     <string name="steam_account_failed">Kukhona okungahambanga kahle. Sicela uzame futhi</string>
     <string name="steam_account_load_failed">Ayikwazanga ukulayisha i-akhawunti yakho ye-Steam</string>
     <string name="steam_account_retry">Zama futhi</string>
+
+    <!-- shown when the backend stops accepting the session and the user is sent back to login -->
+    <string name="session_expired">Isikhathi sakho sesiphelile. Sicela ungene futhi.</string>
 </resources>

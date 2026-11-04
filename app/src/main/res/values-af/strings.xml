@@ -381,4 +381,7 @@
     <string name="steam_account_failed">Iets het skeefgeloop. Probeer asseblief weer</string>
     <string name="steam_account_load_failed">Kon nie jou Steam-rekening laai nie</string>
     <string name="steam_account_retry">Probeer weer</string>
+
+    <!-- shown when the backend stops accepting the session and the user is sent back to login -->
+    <string name="session_expired">Jou sessie het verval. Meld asseblief weer aan.</string>
 </resources>
