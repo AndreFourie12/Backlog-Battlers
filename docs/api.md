@@ -9,6 +9,7 @@
 | Base URL (Android emulator) | `http://10.0.2.2:8080` |
 | Authentication | Nothing so far, though once login is built, every route except `/health` is expected to need an `Authorization: Bearer <token>` header. |
 | Errors | Always `{"error": "message"}` |
+| Request IDs | Optional `X-Request-Id` header (8–64 letters, digits or `-`). Sent back on every response; generated when missing or invalid. The app sends one with every call so its Logcat line and the API's log line can be matched. |
 
 ## Status codes
 
@@ -223,6 +224,20 @@ Conventions once these exist:
 
 - Enum values use the app's names: `Platform` (`PC`, `PLAYSTATION`, `XBOX`, `SWITCH`, `OTHER`), `LibraryStatus` (`BACKLOG`, `PLAYING`, `COMPLETED`, `ABANDONED`) and `CompletionType` (`MAIN_STORY`, `MAIN_EXTRA`, `COMPLETIONIST`).
 - Timestamps are epoch milliseconds, matching the app's `Long` fields. Dates are `yyyy-MM-dd`.
+
+## Logging
+
+Every request is logged to the console with the request ID, HTTP status code, method, path, response time in milliseconds, and the signed in user's UUID (or `-` when unauthenticated).
+
+```
+14:02:11.532 INFO  [3f9a1c7e2b40] RequestLogging - 201 POST /users/me/library in 84ms user=7f3c2a1e-5b9d-4c11-9a0e-2d6f8b7e1c34
+14:02:11.530 INFO  [3f9a1c7e2b40] LibraryRoutes - User 7f3c2a1e-… added game 113112 on PC as library entry 0c5e…
+```
+
+- **Environment level:** `LOG_LEVEL` sets the root logger level. Defaults to `INFO` on hosted environments; set to `DEBUG` locally for detailed output.
+- **Excluded from logging:** `/health` check requests are omitted from request logging to keep log streams clean.
+- **Secrets and personal data:** Authorization headers, access tokens, refresh tokens, Google ID tokens, emails, display names, query parameters, and request bodies are never logged.
+- **Slow request warnings:** Any request taking longer than 1000ms triggers a `WARN` log line identifying the slow endpoint.
 
 ## How to run the API
 

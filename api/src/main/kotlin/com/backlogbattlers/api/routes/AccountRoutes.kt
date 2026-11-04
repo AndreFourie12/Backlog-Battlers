@@ -12,6 +12,9 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.uuid.Uuid
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger("com.backlogbattlers.api.routes.AccountRoutes")
 
 /** The signed-in user's own account. */
 fun Route.accountRoutes(currentUser: CurrentUser) {
@@ -25,6 +28,7 @@ fun Route.accountRoutes(currentUser: CurrentUser) {
         val me = call.signedInUser(currentUser) ?: return@delete
 
         if (deleteAccount(me)) {
+            log.info("Deleted account {} and everything it owned", me)
             call.respond(HttpStatusCode.NoContent)
         } else {
             call.respond(HttpStatusCode.NotFound, ApiError("Account was not found"))

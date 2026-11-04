@@ -17,6 +17,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlin.uuid.Uuid
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger("com.backlogbattlers.api.routes.CompletionRoutes")
 
 /**
  * Marking a library entry complete and awarding its points. [currentUser] stays last, so tests
@@ -42,6 +45,17 @@ fun Route.completionRoutes(
         when (val result = completeLibraryEntry(owner, entryId, request.completionType, steamCheck)) {
             is CompletionResult.Completed -> {
                 val response = result.response
+                log.info(
+                    "User {} completed library entry {} as {}: {} points (achievements {}, completion time {}, speed bonus {}), {} points this month",
+                    owner,
+                    response.libraryEntryId,
+                    response.completionType,
+                    response.pointsAwarded,
+                    response.achievementPoints,
+                    response.completionTimePoints,
+                    response.speedBonusPoints,
+                    response.monthlyPoints,
+                )
                 notifier.gameCompleted(
                     completer = owner,
                     entryId = entryId,
@@ -52,10 +66,13 @@ fun Route.completionRoutes(
                 call.respond(HttpStatusCode.OK, response)
             }
             CompletionResult.NotFound -> call.respond(HttpStatusCode.NotFound, ApiError("Library entry was not found"))
-            CompletionResult.AlreadyCompleted -> call.respond(
-                HttpStatusCode.Conflict,
-                ApiError("This entry was already completed as ${request.completionType}"),
-            )
+            CompletionResult.AlreadyCompleted -> {
+                log.info("User {} tried to complete library entry {} as {} again", owner, entryId, request.completionType)
+                call.respond(
+                    HttpStatusCode.Conflict,
+                    ApiError("This entry was already completed as ${request.completionType}"),
+                )
+            }
         }
     }
 }

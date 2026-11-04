@@ -15,6 +15,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import kotlin.uuid.Uuid
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger("com.backlogbattlers.api.routes.SettingsRoutes")
 
 /** The signed-in user's app preferences, kept here so they follow them to another phone. */
 fun Route.settingsRoutes(currentUser: CurrentUser) {
@@ -38,7 +41,9 @@ fun Route.settingsRoutes(currentUser: CurrentUser) {
             val problem = problemWith(request)
             if (problem != null) return@put call.respond(HttpStatusCode.BadRequest, ApiError(problem))
 
-            call.respond(saveSettings(me, request))
+            val saved = saveSettings(me, request)
+            log.info("User {} saved settings: language={}, theme={}, default platform={}", me, saved.language, saved.themeMode, saved.defaultPlatform)
+            call.respond(saved)
         }
     }
 }

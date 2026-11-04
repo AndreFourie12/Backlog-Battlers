@@ -56,6 +56,7 @@
   </li>
   <li><a href="#core-purpose-and-scope">Core Purpose and Scope</a></li>
   <li><a href="#design-consideration-and-architectural-choices">Design Consideration and Architectural Choices</a></li>
+  <li><a href="#logging-and-request-tracing">Logging and Request Tracing</a></li>
   <li>
     <a href="#comprehensive-summary">Comprehensive Summary</a>
     <ul>
@@ -99,6 +100,25 @@ The scope for this part was the Google sign in, settings, the REST API and datab
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## Logging and Request Tracing
+**What the API logs.** We log one line per request (status, method, path, time, user UUID), plus one line whenever data changes (sign in, completion and points, friend requests, settings, account deletion). `/health` is skipped.
+
+**Request IDs.** Every response carries an `X-Request-Id`, and every API log line shows it. The app sends an ID with every call and prints it in its Logcat line, so one tap can be followed from the phone to the API log and then to the database row.
+
+**We dont't log.** Tokens, the Authorization header, emails, names, query strings and request bodies, and a unit test checks this.
+
+**Log levels and log destinations.** `LOG_LEVEL` sets the level (default INFO). Output goes to the console, where container hosts capture it. Requests slower than 1000 ms also get a WARN line.
+
+**Android app logging.** The Android app logs throughout its ViewModels and repositories using Android's `Log` class and component specific `TAG` constants (for instance in `AuthRepository`, `FriendsViewModel`, and `SettingsViewModel`). In `ServiceLocator.kt`, an `HttpSend` interceptor on the shared Ktor HTTP client logs every outbound call under `HTTP_TAG` ("Http"), recording the method, path, response status, and duration in milliseconds, as well as cancellations and failures.
+
+```
+14:02:11.532 INFO  [3f9a1c7e2b40] RequestLogging - 201 POST /users/me/library in 84ms user=7f3c2a1e-5b9d-4c11-9a0e-2d6f8b7e1c34
+14:02:11.530 INFO  [3f9a1c7e2b40] LibraryRoutes - User 7f3c2a1e-… added game 113112 on PC as library entry 0c5e…
+D/Http: [3f9a1c7e2b40] POST /users/me/library -> 201 in 97ms
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 
 ## Comprehensive Summary
 
@@ -110,8 +130,6 @@ The format of branches were `feat/<initials>/<topic>`, then merged into `main` v
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 ### GitHub Actions
 
 There are two independent workflows run on every push: `api-ci.yml` builds the API tehn runs its unit and integration tests, `android-ci.yml`, similarly, builds the ANdroid app and runs its unit tests. Keeping the two separate matches the previously described Gradle builds.
@@ -120,7 +138,6 @@ There are two independent workflows run on every push: `api-ci.yml` builds the A
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 ## Video Demonstration
 
@@ -144,7 +161,7 @@ naveen.ctebs (2026). The UI.UX playbook. Tips tricks for exceptional design. [on
 
 ---
 
-Nishant (2023). UX case study — Enhancing steam’s navigation to increase user retention. [online] Medium. Available at: https://medium.com/design-bootcamp/enhancing-steams-navigation-to-increase-user-retention-product-design-case-study-72a165d9572f [Accessed 19 Sept. 2026].
+Nishant (2023). UX case study - Enhancing steam's navigation to increase user retention. [online] Medium. Available at: https://medium.com/design-bootcamp/enhancing-steams-navigation-to-increase-user-retention-product-design-case-study-72a165d9572f [Accessed 19 Sept. 2026].
 
 ---
 
@@ -152,7 +169,7 @@ OpenAI (2025). ChatGPT. [online] ChatGPT. Available at: https://chatgpt.com/ [Ac
 
 ---
 
-Saini, R. (2025). Implementing Google sign-in in your android app (complete 2025 guide — Java + kotlin). [online] Medium. Available at: https://medium.com/@rohitsaini3342/implementing-google-sign-in-in-your-android-app-complete-2025-guide-java-kotlin-7f314689c137 [Accessed 20 Sept. 2026].
+Saini, R. (2025). Implementing Google sign-in in your android app (complete 2025 guide - Java + kotlin). [online] Medium. Available at: https://medium.com/@rohitsaini3342/implementing-google-sign-in-in-your-android-app-complete-2025-guide-java-kotlin-7f314689c137 [Accessed 20 Sept. 2026].
 
 ---
 
@@ -190,6 +207,18 @@ GitHub, 2026. GitHub Actions Documentation. [Online] Available at: https://docs.
 
 Gradle, 2026. Gradle User Manual. [Online] Available at: https://docs.gradle.org/current/userguide/userguide.html [Accessed 22 September 2026].
 
+---
+
+Ktor, 2026. Call logging. https://ktor.io/docs/server-call-logging.html [Accessed 4 November 2026].
+
+---
+
+Ktor, 2026. Call ID. https://ktor.io/docs/server-call-id.html [Accessed 4 November 2026].
+
+---
+
+QOS.ch, 2026. Logback configuration. https://logback.qos.ch/manual/configuration.html [Accessed 4 November 2026].
+
 ## Declaration of AI Usage:
 
 Throughout this project, members of our team utilised ChatGPT 5.0 LLM to assist with planning, brainstorming, architecture structuring, feature implementation, debugging and code review. All work involving AI usage has, to the best of our abilities, been credited where due or reworked to be made our own. 
@@ -208,4 +237,3 @@ https://chatgpt.com/share/6ab25b54-4b38-83ea-a847-3833c2b818a5
 Ktor Setup and miscellaneous: <br>
 REST API structure, Android Studio, GitHub, README <br>
 https://chatgpt.com/share/6ab2832b-ffe8-83ea-acc4-661d38f2964a
-

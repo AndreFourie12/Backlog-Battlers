@@ -46,7 +46,7 @@ fun Application.configureErrors() {
 
         // Other authentication failures
         exception<IllegalArgumentException> { call, cause ->
-            call.application.log.warn("Authentication failed: ${cause.message}")
+            call.application.log.warn("Authentication failed: ${cause::class.simpleName}")
             call.respond(HttpStatusCode.Unauthorized, ApiError(cause.message ?: "Invalid authentication request"))
         }
 

@@ -22,6 +22,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import kotlin.uuid.Uuid
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger("com.backlogbattlers.api.routes.FriendRoutes")
 
 //------------------------------
 // defines ktor route handlers for friend management ops
@@ -65,6 +68,7 @@ fun Route.friendRoutes(notifier: Notifier = Notifier.Disabled, currentUser: Curr
 
                 when (val result = sendRequest(owner, targetId)) {
                     is SendRequestResult.Sent -> {
+                        log.info("User {} sent a friend request to user {}", owner, targetId)
                         notifier.friendRequestReceived(receiver = targetId, sender = owner)
                         call.respond(HttpStatusCode.Created, result.request)
                     }
@@ -81,6 +85,7 @@ fun Route.friendRoutes(notifier: Notifier = Notifier.Disabled, currentUser: Curr
                 val requestId = call.requestId() ?: return@post
                 when (val result = acceptRequest(owner, requestId)) {
                     is RespondToRequestResult.Accepted -> {
+                        log.info("User {} accepted friend request {}", owner, requestId)
                         notifier.friendRequestAccepted(requestSender = Uuid.parse(result.friend.userId), accepter = owner)
                         call.respond(result.friend)
                     }
@@ -94,7 +99,10 @@ fun Route.friendRoutes(notifier: Notifier = Notifier.Disabled, currentUser: Curr
                 val owner = call.signedInUser(currentUser) ?: return@post
                 val requestId = call.requestId() ?: return@post
                 when (rejectRequest(owner, requestId)) {
-                    RespondToRequestResult.Rejected -> call.respond(HttpStatusCode.NoContent)
+                    RespondToRequestResult.Rejected -> {
+                        log.info("User {} rejected friend request {}", owner, requestId)
+                        call.respond(HttpStatusCode.NoContent)
+                    }
                     RespondToRequestResult.NotFound -> call.respond(HttpStatusCode.NotFound, ApiError("friend request was not found"))
                     is RespondToRequestResult.Accepted -> Unit // rejectRequest never returns Accepted, branch kept for exhaustiveness
                 }
