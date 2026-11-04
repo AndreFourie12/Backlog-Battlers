@@ -170,7 +170,7 @@ class FakeSearchHistoryRepository : SearchHistoryRepository {
         searches.value = searches.value.filterNot { it.equals(query, ignoreCase = true) }
     }
 
-    override suspend fun clear() {
+    override suspend fun clear(userId: String) {
         searches.value = emptyList()
     }
 }

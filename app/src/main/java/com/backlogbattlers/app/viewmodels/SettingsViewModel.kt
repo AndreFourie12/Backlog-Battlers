@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
@@ -90,6 +91,7 @@ class SettingsViewModel : ViewModel() {
     private fun saveAndSync(write: suspend () -> Unit) {
         ServiceLocator.applicationScope.launch {
             write()
+            Log.d(TAG, "Setting saved on this phone, uploading the settings")
             ServiceLocator.settingsSync.push()
         }
     }
@@ -110,9 +112,11 @@ class SettingsViewModel : ViewModel() {
         ServiceLocator.applicationScope.launch {
             val userId = ServiceLocator.tokenStorage.getUserId()
             val result = authRepository.deleteAccount()
+            Log.i(TAG, "Account deletion answered $result")
             if (result == DeleteAccountResult.DELETED) {
+                Log.i(TAG, "Clearing what the deleted account left on this phone")
                 if (userId != null) ServiceLocator.libraryRepository.clear(userId)
-                ServiceLocator.searchHistoryRepository.clear()
+                if (userId != null) ServiceLocator.searchHistoryRepository.clear(userId)
                 settingsRepository.setBiometricLoginEnabled(false)
                 settingsRepository.setSyncPending(false)
             }
@@ -126,9 +130,14 @@ class SettingsViewModel : ViewModel() {
     fun logOut(onDone: () -> Unit) {
         viewModelScope.launch {
             authRepository.signOut()
+            Log.i(TAG, "Signed out")
             settingsRepository.setSyncPending(false)
             onDone()
         }
+    }
+
+    private companion object {
+        const val TAG = "SettingsViewModel"
     }
 }
 //------------------------------EOF------------------------------\\
