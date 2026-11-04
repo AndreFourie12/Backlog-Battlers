@@ -45,7 +45,7 @@ class GameApiTest {
                 json(Json { ignoreUnknownKeys = true; isLenient = true }, contentType = ContentType.Any)
             }
         }
-        return GameApi(client, baseUrl = "http://10.0.2.2:8080")
+        return GameApi(client, baseUrl = "https://api.example.test")
     }
 
     @Test

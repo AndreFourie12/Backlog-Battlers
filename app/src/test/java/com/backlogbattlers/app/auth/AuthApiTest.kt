@@ -31,7 +31,7 @@ class AuthApiTest {
             // the refresh call sends a JSON body
             install(ContentNegotiation) { json() }
         }
-        return AuthApi(client, baseUrl = "http://10.0.2.2:8080")
+        return AuthApi(client, baseUrl = "https://api.example.test")
     }
 
     @Test

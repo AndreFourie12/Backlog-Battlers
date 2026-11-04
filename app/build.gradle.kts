@@ -19,7 +19,10 @@ val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
     localPropertiesFile.inputStream().use { localProperties.load(it) }
 }
-val apiBaseUrl = localProperties.getProperty("apiBaseUrl") ?: "http://10.0.2.2:8080"
+// every build talks to the azure-hosted api by default
+// a developer can point their own build at a laptop with apiBaseUrl=http://<laptop IPv4>:8080 in their git-ignored local.properties
+// release builds use https only
+val apiBaseUrl = localProperties.getProperty("apiBaseUrl") ?: "https://backlog-battlers-api-7314-gyancxcndrh0akgn.uaenorth-01.azurewebsites.net"
 
 android {
     namespace = "com.backlogbattlers.app"

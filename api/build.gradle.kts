@@ -13,6 +13,24 @@ application {
     mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
+// Azure Web App startup runs `java -jar /home/site/wwwroot/app.jar`.
+// `buildFatJar` writes the runnable jar to `build/libs/app.jar`.
+ktor {
+    fatJar {
+        archiveFileName.set("app.jar")
+    }
+}
+
+// Version stamping: CI passes `-PbuildVersion=<short commit>` while local builds show "dev".
+val buildVersion = providers.gradleProperty("buildVersion").getOrElse("dev")
+
+tasks.processResources {
+    inputs.property("buildVersion", buildVersion)
+    filesMatching("version.properties") {
+        expand("buildVersion" to buildVersion)
+    }
+}
+
 kotlin {
     jvmToolchain(21)
 }
@@ -44,7 +62,7 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.java.time)
     implementation(libs.hikari)
-    runtimeOnly(libs.postgresql) // production database (Neon)
+    runtimeOnly(libs.postgresql) // production database (Azure Database for PostgreSQL)
     implementation(libs.h2) // in-memory database for local runs and unit tests
 
     // Sends push notifications through Firebase Cloud Messaging (see notifications/PushSender.kt)

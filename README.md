@@ -57,6 +57,7 @@
   <li><a href="#core-purpose-and-scope">Core Purpose and Scope</a></li>
   <li><a href="#design-consideration-and-architectural-choices">Design Consideration and Architectural Choices</a></li>
   <li><a href="#logging-and-request-tracing">Logging and Request Tracing</a></li>
+  <li><a href="#hosting-and-deployment">Hosting and Deployment</a></li>
   <li>
     <a href="#comprehensive-summary">Comprehensive Summary</a>
     <ul>
@@ -79,6 +80,8 @@ To see full commit history, pipeline, and tests go to -> https://github.com/Andr
 - [IGDB API](https://api-docs.igdb.com/) - provided the game catalogue and average time to complete a game
 - [Steam Web API](https://partner.steamgames.com/doc/webapi/ISteamUserStats) - provided the achievements and their rarity
 - Google Sign-In, which is verified server-side with JWT
+- Azure App Service - runs the API
+- Azure Database for PostgreSQL - production database
 - Github Actions - CI was used for both the API and the App
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -119,6 +122,37 @@ D/Http: [3f9a1c7e2b40] POST /users/me/library -> 201 in 97ms
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## Hosting and Deployment
+**Where its run/hosted.** The API runs on an Azure Web App (Linux, Java 21, Basic B1, Always On, doesn't deactivate) in UAE North, at [https://backlog-battlers-api-7314-gyancxcndrh0akgn.uaenorth-01.azurewebsites.net](https://backlog-battlers-api-7314-gyancxcndrh0akgn.uaenorth-01.azurewebsites.net).
+
+<!-- 1 -->
+
+**The database.** Azure Database for PostgreSQL flexible server (Burstable B1ms) in the same region, over TLS. The API creates its tables on first start. With `APP_ENV=production` it refuses to start without a database.
+
+<!-- 2 -->
+
+**How a change reaches the server.** On every push to `main`, `api-ci.yml` runs the tests. If they pass, its `deploy` job builds `app.jar` stamped with the commit hash, uploads it with `azure/webapps-deploy`, and checks `/health` until that commit reports `database: ok`. Pull requests and feature branches never deploy.
+
+<!-- 3 -->
+
+**Configuration and secrets.** Every setting is an Azure App Setting (encrypted), read by the same `Config` class as locally. Setting names: `APP_ENV`, `LOG_LEVEL`, `PORT`, `WEBSITES_PORT`, `JWT_ISSUER`, `JWT_SECRET`, `GOOGLE_OAUTH_CLIENT_ID`, `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`, `STEAM_API_KEY`, `DB_URL`, `DB_USER`, `DB_PASSWORD`, `FIREBASE_SERVICE_ACCOUNT_JSON`. GitHub holds only the publish profile as a secret (`AZURE_WEBAPP_PUBLISH_PROFILE`), with `AZURE_WEBAPP_NAME` and `AZURE_WEBAPP_URL` stored as repository variables.
+
+**Checking it is live.** `/health` returns status, database and version. Example response:
+
+```json
+{
+  "status": "ok",
+  "database": "ok",
+  "version": "xxxxx"
+}
+```
+
+<!-- 4 -->
+<!-- 5 -->
+
+**Running against a laptop.** Developers can point a local build at a laptop by setting `apiBaseUrl=http://<laptop IPv4>:8080` in `local.properties`. Details are documented in [docs/api.md](docs/api.md).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Comprehensive Summary
 
@@ -209,15 +243,15 @@ Gradle, 2026. Gradle User Manual. [Online] Available at: https://docs.gradle.org
 
 ---
 
-Ktor, 2026. Call logging. https://ktor.io/docs/server-call-logging.html [Accessed 4 November 2026].
+Ktor, 2026. Call logging. [Online] Available at: https://ktor.io/docs/server-call-logging.html [Accessed 4 November 2026].
 
 ---
 
-Ktor, 2026. Call ID. https://ktor.io/docs/server-call-id.html [Accessed 4 November 2026].
+Ktor, 2026. Call ID. [Online] Available at: https://ktor.io/docs/server-call-id.html [Accessed 4 November 2026].
 
 ---
 
-QOS.ch, 2026. Logback configuration. https://logback.qos.ch/manual/configuration.html [Accessed 4 November 2026].
+QOS.ch, 2026. Logback configuration. [Online] Available at: https://logback.qos.ch/manual/configuration.html [Accessed 4 November 2026].
 
 ## Declaration of AI Usage:
 

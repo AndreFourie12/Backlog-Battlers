@@ -72,7 +72,7 @@ class SettingsSyncTest {
         }
         return SettingsSync(
             settingsRepository = settings,
-            settingsApi = SettingsApi(client, baseUrl = "http://10.0.2.2:8080"),
+            settingsApi = SettingsApi(client, baseUrl = "https://api.example.test"),
             accessToken = { if (signedIn) "token-123" else null },
             applyToApp = { before, after -> applied = before to after },
         )

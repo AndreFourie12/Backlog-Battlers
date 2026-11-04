@@ -3,6 +3,7 @@ package com.backlogbattlers.api.routes
 import com.backlogbattlers.api.auth.GoogleIdTokenVerifier
 import com.backlogbattlers.api.auth.JwtService
 import com.backlogbattlers.api.db.Users
+import com.backlogbattlers.api.logging.SignedInUserKey
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -15,6 +16,7 @@ import org.jetbrains.exposed.v1.jdbc.update
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.time.LocalDate
 import org.slf4j.LoggerFactory
+import kotlin.uuid.Uuid
 
 //------------------------------
 // request body for google sso endpoint
@@ -133,6 +135,8 @@ fun Route.authRoutes(
                 isNewUser = isNewUser,
             ),
         )
+        // so this request's log line shows who signed in (UUID only, never the token)
+        call.attributes.put(SignedInUserKey, Uuid.parse(userDbData.id))
         log.info("User {} signed in with Google (new account: {})", userDbData.id, isNewUser)
         call.respond(response)
     }
@@ -141,6 +145,8 @@ fun Route.authRoutes(
     post("/auth/refresh") {
         val request = call.receive<RefreshTokenRequest>()
         val userId = jwtService.verifyRefreshToken(request.refreshToken)
+        // so this request's log line shows who signed in (UUID only, never the token)
+        call.attributes.put(SignedInUserKey, Uuid.parse(userId))
         val newAccessToken = jwtService.generateAccessToken(userId)
         log.info("Issued a new access token for user {}", userId)
         call.respond(RefreshTokenResponse(accessToken = newAccessToken, expiresIn = 3600))

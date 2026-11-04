@@ -107,7 +107,7 @@ class SteamAccountTest {
             ) {
                 install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
             },
-            baseUrl = "http://10.0.2.2:8080",
+            baseUrl = "https://api.example.test",
         ),
         accessToken = { if (signedIn) "token-123" else null },
     )

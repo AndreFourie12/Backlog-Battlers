@@ -5,8 +5,8 @@
 | | |
 |---|---|
 | Format | JSON, UTF-8 |
-| Base URL (phone on the same Wi-Fi) | `http://<laptop IPv4 address>:8080` |
-| Base URL (Android emulator) | `http://10.0.2.2:8080` |
+| Base URL | `https://backlog-battlers-api-7314-gyancxcndrh0akgn.uaenorth-01.azurewebsites.net` (Azure Web App, UAE North) |
+| Local development | set `apiBaseUrl` in `local.properties`, see "Connecting from the Android app during development" |
 | Authentication | Nothing so far, though once login is built, every route except `/health` is expected to need an `Authorization: Bearer <token>` header. |
 | Errors | Always `{"error": "message"}` |
 | Request IDs | Optional `X-Request-Id` header (8–64 letters, digits or `-`). Sent back on every response; generated when missing or invalid. The app sends one with every call so its Logcat line and the API's log line can be matched. |
@@ -25,11 +25,27 @@
 
 ### `GET /health`
 
-Reports that the API is running.
+Reports that the API and its database connection are running. Azure App Service health checks poll this endpoint; a `503 Service Unavailable` response marks the instance unhealthy.
 
+`200 OK` when the database answers:
 ```json
-{"status":"ok"}
+{
+  "status": "ok",
+  "database": "ok",
+  "version": "abc1234"
+}
 ```
+
+`503 Service Unavailable` when the database check fails:
+```json
+{
+  "status": "degraded",
+  "database": "down",
+  "version": "abc1234"
+}
+```
+
+- `version`: The git commit short hash stamped during CI deployment, or `dev` during local runs.
 
 ### `GET /games/search`
 
@@ -252,13 +268,15 @@ Run the tests and the build with `.\gradlew.bat build`. Needless to say, never c
 
 | Variable | Purpose |
 |---|---|
+| `APP_ENV` | Application environment. When set to `production`, `DB_URL` is required and the server refuses to start on an in-memory database. |
 | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` | IGDB access, from a free application at [dev.twitch.tv/console](https://dev.twitch.tv/console). Without them the API still starts, but `/games` routes return 502. |
-| `DB_URL`, `DB_USER`, `DB_PASSWORD` | The database, for example `jdbc:postgresql://host/dbname?sslmode=require`. Without `DB_URL` the API uses an in-memory database and loses its data on restart. |
+| `DB_URL`, `DB_USER`, `DB_PASSWORD` | The database, for example `jdbc:postgresql://host/dbname?sslmode=require`. Production uses Azure Database for PostgreSQL (flexible server) over TLS. Without `DB_URL` in development the API uses an in-memory database and loses its data on restart. |
 | `PORT` | Port to listen on. Defaults to 8080. |
 
 ## Connecting from the Android app during development
 
-- The phone and laptop must be on the same Wi-Fi. Use the laptop's IPv4 address (`ipconfig`) with port 8080.
+The Android app points to the Azure-hosted API by default. This section is only needed when pointing a local build at a developer's laptop:
+
+- The phone and laptop must be on the same Wi-Fi. Set `apiBaseUrl=http://<laptop IPv4 address>:8080` in `local.properties` (find your address with `ipconfig`).
 - The server listens on all network interfaces. If Windows Firewall asks about Java, allow it on private networks.
-- The API speaks plain HTTP, so the debug build of the app must allow cleartext traffic, for example `android:usesCleartextTraffic="true"` in the debug manifest. This is for development only.
-- The Android emulator reaches the laptop at `10.0.2.2`, not `localhost`.
+- The API speaks plain HTTP locally, so the debug build of the app allows cleartext traffic (`android:usesCleartextTraffic="true"` in the debug manifest). This is for development only; release builds connect over HTTPS to Azure.
