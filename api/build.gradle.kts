@@ -27,6 +27,8 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.status.pages) // turns exceptions into JSON error responses
+    implementation(libs.ktor.server.call.logging) // one log line per request
+    implementation(libs.ktor.server.call.id) // request IDs shared with the app
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.server.auth.jwt)
     implementation(libs.ktor.serialization.kotlinx.json)
