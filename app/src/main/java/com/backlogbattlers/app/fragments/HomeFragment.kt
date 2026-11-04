@@ -2,6 +2,7 @@ package com.backlogbattlers.app.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -69,6 +70,7 @@ class HomeFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.btn_invite_friends).setOnClickListener {
+            Log.d(TAG, "Sharing a friend invite from home")
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, getString(R.string.invite_share_text))
@@ -96,6 +98,7 @@ class HomeFragment : Fragment() {
         list.addRowDividers()
 
         view.findViewById<View>(R.id.btn_retry_recommendations).setOnClickListener {
+            Log.d(TAG, "Retrying the suggestions")
             viewModel.loadStarterGames()
         }
 
@@ -126,10 +129,15 @@ class HomeFragment : Fragment() {
 
     // opens the game detail screen for a suggestion
     private fun openGame(gameId: Int) {
+        Log.d(TAG, "Opening game $gameId from the suggestions")
         findNavController().navigate(
             R.id.action_homeFragment_to_gameDetailFragment,
             Bundle().apply { putString("gameId", gameId.toString()) },
         )
+    }
+
+    private companion object {
+        const val TAG = "HomeFragment"
     }
 }
 //------------------------------EOF------------------------------\\
