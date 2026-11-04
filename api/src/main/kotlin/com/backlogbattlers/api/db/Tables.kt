@@ -210,6 +210,24 @@ object UserSettings : Table("user_settings")
     override val primaryKey = PrimaryKey(userId)
 }
 
+// devices table: the phones a user is signed in on, so pushes can reach them.
+// keyed by the firebase cloud messaging token, because one token belongs to one app install: when
+// someone else signs in on the same phone, POST /devices moves the token to them
+object Devices : Table("devices")
+{
+    val token = varchar("token", 512)
+    val userId = reference("user_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val updatedAt = timestamp("updated_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(token)
+
+    init
+    {
+        // "every phone this user is on", read for each push
+        index(false, userId)
+    }
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -222,5 +240,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     CompletionRecords,
     MonthlyLeaderboardEntries,
     UserSettings,
+    Devices,
 )
 //------------------------------EOF------------------------------\\

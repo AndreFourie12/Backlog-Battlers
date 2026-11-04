@@ -13,6 +13,7 @@ import com.backlogbattlers.api.routes.authRoutes
 import com.backlogbattlers.api.routes.friendRoutes
 import com.backlogbattlers.api.routes.gameRoutes
 import com.backlogbattlers.api.routes.completionRoutes
+import com.backlogbattlers.api.routes.deviceRoutes
 import com.backlogbattlers.api.routes.healthRoutes
 import com.backlogbattlers.api.routes.leaderboardRoutes
 import com.backlogbattlers.api.routes.libraryRoutes
@@ -63,6 +64,7 @@ fun Application.module() {
         leaderboardRoutes(currentUser = bearerCurrentUser(jwtService))
         accountRoutes(currentUser = bearerCurrentUser(jwtService))
         settingsRoutes(currentUser = bearerCurrentUser(jwtService))
+        deviceRoutes(currentUser = bearerCurrentUser(jwtService))
     }
 }
 //------------------------------EOF------------------------------\\
