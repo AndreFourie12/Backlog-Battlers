@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.data.remote
 
+import android.util.Log
 import com.backlogbattlers.app.data.local.TokenStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -113,6 +114,7 @@ class FriendsApi(
         }
         // this if statement checks the reject actually succeeded, since this call has no body to decode
         if (!response.status.isSuccess()) {
+            Log.e(TAG, "Rejecting a friend request failed [${response.status.value}]")
             throw IllegalStateException("server returned HTTP ${response.status.value}")
         }
     }
@@ -134,9 +136,14 @@ class FriendsApi(
     private suspend inline fun <reified T> HttpResponse.checkedBody(): T {
         if (!status.isSuccess()) {
             val errorText = runCatching { body<String>() }.getOrDefault("HTTP ${status.value}")
+            Log.e(TAG, "${call.request.url.encodedPath} failed [${status.value}]: $errorText")
             throw IllegalStateException("server returned HTTP ${status.value}: $errorText")
         }
         return body()
+    }
+
+    private companion object {
+        const val TAG = "FriendsApi"
     }
 }
 //------------------------------EOF------------------------------\\
