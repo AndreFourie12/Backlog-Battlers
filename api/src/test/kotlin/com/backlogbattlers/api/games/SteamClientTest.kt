@@ -115,6 +115,62 @@ class SteamClientTest {
     }
 
     @Test
+    fun `a player's unlocked achievements are the ones Steam marks achieved, nothing else`() = runBlocking {
+        val seen = mutableListOf<HttpRequestData>()
+        val body = """{"playerstats":{"steamID":"76561198000000001","gameName":"Hades","success":true,"achievements":[
+            {"apiname":"AchA","achieved":1,"unlocktime":1700000000},
+            {"apiname":"AchB","achieved":0,"unlocktime":0},
+            {"apiname":"AchC","achieved":1,"unlocktime":1700000100}]}}"""
+        val steam = steamWith(seen = seen) { HttpStatusCode.OK to body }
+
+        val result = steam.unlockedAchievements("76561198000000001", 1145360)
+
+        assertEquals(PlayerAchievements.Unlocked(setOf("AchA", "AchC")), result)
+        val url = seen.single().url
+        assertTrue(url.encodedPath.contains("GetPlayerAchievements"))
+        assertEquals("76561198000000001", url.parameters["steamid"])
+        assertEquals("1145360", url.parameters["appid"])
+        assertEquals("test-key", url.parameters["key"])
+    }
+
+    @Test
+    fun `a private profile is reported as private, whether Steam says 403 or says so in the body`() = runBlocking {
+        val forbidden = steamWith { HttpStatusCode.Forbidden to """{"playerstats":{"error":"Profile is not public","success":false}}""" }
+        assertEquals(PlayerAchievements.PrivateProfile, forbidden.unlockedAchievements("76561198000000001", 1))
+
+        val okButPrivate = steamWith { HttpStatusCode.OK to """{"playerstats":{"error":"Profile is not public","success":false}}""" }
+        assertEquals(PlayerAchievements.PrivateProfile, okButPrivate.unlockedAchievements("76561198000000001", 1))
+    }
+
+    @Test
+    fun `a game the player has no stats for confirms nothing, rather than failing`() = runBlocking {
+        val noStats = steamWith { HttpStatusCode.BadRequest to """{"playerstats":{"error":"Requested app has no stats","success":false}}""" }
+
+        assertEquals(PlayerAchievements.Unlocked(emptySet()), noStats.unlockedAchievements("76561198000000001", 1))
+    }
+
+    @Test
+    fun `a Steam outage is an error and never looks like nothing unlocked`() {
+        val down = steamWith { HttpStatusCode.InternalServerError to "" }
+        assertFailsWith<SteamException> { runBlocking { down.unlockedAchievements("76561198000000001", 1) } }
+
+        val garbled = steamWith { HttpStatusCode.OK to "<html>maintenance</html>" }
+        assertFailsWith<SteamException> { runBlocking { garbled.unlockedAchievements("76561198000000001", 1) } }
+    }
+
+    @Test
+    fun `verifying needs the key, without one Steam is not asked, and a failure never leaks the key`() {
+        val seen = mutableListOf<HttpRequestData>()
+        val noKey = steamWith(apiKey = "", seen = seen) { HttpStatusCode.OK to "{}" }
+        assertFailsWith<SteamException> { runBlocking { noKey.unlockedAchievements("76561198000000001", 1) } }
+        assertTrue(seen.isEmpty())
+
+        val failing = steamWith(apiKey = "super-secret-key") { HttpStatusCode.ServiceUnavailable to "" }
+        val error = assertFailsWith<SteamException> { runBlocking { failing.unlockedAchievements("76561198000000001", 1) } }
+        assertFalse(error.message.orEmpty().contains("super-secret-key"))
+    }
+
+    @Test
     fun `a failed most played request is an error`() {
         val steam = steamWith { HttpStatusCode.ServiceUnavailable to "" }
 
