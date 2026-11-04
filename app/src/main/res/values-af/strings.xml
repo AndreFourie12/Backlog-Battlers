@@ -108,7 +108,6 @@
     <string name="cd_search">Soek</string>
     <string name="cd_notifications">Kennisgewings</string>
     <string name="cd_settings">Instellings</string>
-    <string name="cd_appearance">Voorkoms</string>
     <string name="cd_add_friend">Voeg vriend by</string>
     <string name="cd_favourite">Voeg by gunstelinge</string>
     <string name="cd_sort">Sorteer biblioteek</string>
@@ -194,15 +193,30 @@
     <string name="title_edit_profile">Wysig profiel</string>
     <string name="edit_profile_display_name">Vertoonnaam</string>
     <string name="edit_profile_display_name_hint">Hoe vriende jou sien</string>
-    <string name="edit_profile_email">E-pos</string>
-    <string name="edit_profile_email_locked">Jou e-pos kom van die Google-rekening waarmee jy aangeteken het.</string>
-    <string name="edit_profile_avatar_note">Jou foto kom van jou Google-rekening.</string>
-    <string name="edit_profile_save">Stoor veranderinge</string>
+    <string name="edit_profile_save">Stoor</string>
     <string name="edit_profile_saved">Profiel opgedateer</string>
     <string name="edit_profile_name_empty">Voer \'n vertoonnaam in</string>
-    <string name="edit_profile_name_too_long">Vertoonname is 24 karakters of minder</string>
+    <string name="edit_profile_name_too_long">Vertoonname is 20 karakters of minder</string>
     <string name="edit_profile_signed_out">Teken aan om jou profiel te wysig</string>
     <string name="cd_avatar">Profielfoto</string>
+    <string name="edit_profile_change_photo">Verander foto</string>
+    <string name="edit_profile_remove_photo">Verwyder</string>
+    <string name="edit_profile_name_count">%1$d / %2$d</string>
+    <string name="edit_profile_name_helper">Hoe vriende jou op ranglyste en in die aktiwiteitsvoer sien.</string>
+    <string name="edit_profile_section_shown">Gewys op jou profiel</string>
+    <string name="profile_show_badges">Kentekens</string>
+    <string name="profile_show_badges_body">Die kentekens wat jy verdien het</string>
+    <string name="profile_show_showcase">Skaarsste prestasies</string>
+    <string name="profile_show_showcase_body">Jou skaarsste prestasies en totale</string>
+    <string name="edit_profile_visibility_note">Vriende sien net die afdelings wat jy aanskakel. Jou vlak, punte, ligaposisie en onlangse aktiwiteit bly altyd sigbaar.</string>
+    <string name="edit_profile_picker_title">Kies \'n profielfoto</string>
+    <string name="edit_profile_picker_empty">Daar is nog geen foto\'s om van te kies nie.</string>
+    <string name="edit_profile_discard_title">Gooi veranderinge weg?</string>
+    <string name="edit_profile_discard_body">Jou profielveranderinge is nog nie gestoor nie.</string>
+    <string name="edit_profile_keep_editing">Hou aan wysig</string>
+    <string name="edit_profile_discard">Gooi weg</string>
+    <string name="cd_change_photo">Verander profielfoto</string>
+    <string name="cd_profile_picture_option">Profielfoto %1$d</string>
 
     <!-- notification settings -->
     <string name="title_notifications">Kennisgewings</string>

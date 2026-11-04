@@ -92,6 +92,11 @@
     <dimen name="settings_header_top">22dp</dimen>
     <dimen name="settings_header_bottom">8dp</dimen>
     <dimen name="settings_avatar">88dp</dimen>
+    <dimen name="edit_profile_avatar">100dp</dimen>
+    <dimen name="avatar_halo">7dp</dimen>
+    <dimen name="avatar_badge">34dp</dimen>
+    <dimen name="profile_picture_option">68dp</dimen>
+    <dimen name="profile_picture_ring">3dp</dimen>
     <dimen name="settings_backdrop_thumb">92dp</dimen>
     <dimen name="settings_check">22dp</dimen>
 </resources>
