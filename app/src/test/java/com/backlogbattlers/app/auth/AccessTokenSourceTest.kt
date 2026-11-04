@@ -152,7 +152,7 @@ class AccessTokenSourceTest {
 
     @Test
     fun `friends load after the token expired, with one renewal and one retry`() = runBlocking {
-        val friends = FriendsApi(client(), "http://10.0.2.2:8080", tokens).getFriends()
+        val friends = FriendsApi(client(), "https://api.example.test", tokens).getFriends()
 
         assertEquals(emptyList<Any>(), friends)
         assertEquals(listOf("Bearer old", "Bearer new"), bearers())
@@ -161,7 +161,7 @@ class AccessTokenSourceTest {
 
     @Test
     fun `the standings load after the token expired, with one renewal and one retry`() = runBlocking {
-        val board = LeaderboardApi(client(), "http://10.0.2.2:8080", tokens).getMonthlyLeaderboard()
+        val board = LeaderboardApi(client(), "https://api.example.test", tokens).getMonthlyLeaderboard()
 
         assertEquals("2026-11", board.monthPeriod)
         assertEquals(listOf("Bearer old", "Bearer new"), bearers())
@@ -169,7 +169,7 @@ class AccessTokenSourceTest {
 
     @Test
     fun `rejecting a request, which has no body to read, is retried too`() = runBlocking {
-        FriendsApi(client(), "http://10.0.2.2:8080", tokens).rejectRequest("r1")
+        FriendsApi(client(), "https://api.example.test", tokens).rejectRequest("r1")
 
         assertEquals(listOf("Bearer old", "Bearer new"), bearers())
     }
@@ -179,7 +179,7 @@ class AccessTokenSourceTest {
         renewal = "also-bad" // the backend refuses this one as well
 
         assertThrows(SessionExpiredException::class.java) {
-            runBlocking { FriendsApi(client(), "http://10.0.2.2:8080", tokens).getFriends() }
+            runBlocking { FriendsApi(client(), "https://api.example.test", tokens).getFriends() }
         }
 
         assertEquals(listOf("Bearer old", "Bearer also-bad"), bearers())
@@ -191,7 +191,7 @@ class AccessTokenSourceTest {
         serverStatusForOld = HttpStatusCode.InternalServerError
 
         assertThrows(IllegalStateException::class.java) {
-            runBlocking { LeaderboardApi(client(), "http://10.0.2.2:8080", tokens).getMonthlyLeaderboard() }
+            runBlocking { LeaderboardApi(client(), "https://api.example.test", tokens).getMonthlyLeaderboard() }
         }
 
         assertEquals(1, seen.size)

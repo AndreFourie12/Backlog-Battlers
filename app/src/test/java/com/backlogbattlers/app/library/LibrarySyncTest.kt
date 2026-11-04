@@ -66,7 +66,7 @@ class LibrarySyncTest {
             ) {
                 install(ContentNegotiation) { json(json) }
             },
-            baseUrl = "http://10.0.2.2:8080",
+            baseUrl = "https://api.example.test",
         ),
         accessToken = { if (signedInAs != null) "token-123" else null },
         currentUserId = { signedInAs },
