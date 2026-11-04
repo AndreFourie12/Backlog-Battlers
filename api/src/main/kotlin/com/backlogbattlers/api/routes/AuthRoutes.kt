@@ -14,6 +14,7 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.time.LocalDate
+import org.slf4j.LoggerFactory
 
 //------------------------------
 // request body for google sso endpoint
@@ -67,6 +68,8 @@ private data class UserDbData(
     val avatarUrl: String?,
 )
 
+
+private val log = LoggerFactory.getLogger("com.backlogbattlers.api.routes.AuthRoutes")
 
 //------------------------------||------------------------------\\
 // Registers the authentication routes for Google SSO and token refresh
@@ -130,6 +133,7 @@ fun Route.authRoutes(
                 isNewUser = isNewUser,
             ),
         )
+        log.info("User {} signed in with Google (new account: {})", userDbData.id, isNewUser)
         call.respond(response)
     }
 
@@ -138,6 +142,7 @@ fun Route.authRoutes(
         val request = call.receive<RefreshTokenRequest>()
         val userId = jwtService.verifyRefreshToken(request.refreshToken)
         val newAccessToken = jwtService.generateAccessToken(userId)
+        log.info("Issued a new access token for user {}", userId)
         call.respond(RefreshTokenResponse(accessToken = newAccessToken, expiresIn = 3600))
     }
 }

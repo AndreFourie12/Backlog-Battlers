@@ -12,6 +12,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlin.uuid.Uuid
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger("com.backlogbattlers.api.routes.CompletionRoutes")
 
 /** Marking a library entry complete and awarding its points. */
 fun Route.completionRoutes(currentUser: CurrentUser) {
@@ -23,12 +26,28 @@ fun Route.completionRoutes(currentUser: CurrentUser) {
         val request = call.receive<CompleteRequest>()
 
         when (val result = completeLibraryEntry(owner, entryId, request.completionType)) {
-            is CompletionResult.Completed -> call.respond(HttpStatusCode.OK, result.response)
+            is CompletionResult.Completed -> {
+                log.info(
+                    "User {} completed library entry {} as {}: {} points (achievements {}, completion time {}, speed bonus {}), {} points this month",
+                    owner,
+                    result.response.libraryEntryId,
+                    result.response.completionType,
+                    result.response.pointsAwarded,
+                    result.response.achievementPoints,
+                    result.response.completionTimePoints,
+                    result.response.speedBonusPoints,
+                    result.response.monthlyPoints,
+                )
+                call.respond(HttpStatusCode.OK, result.response)
+            }
             CompletionResult.NotFound -> call.respond(HttpStatusCode.NotFound, ApiError("Library entry was not found"))
-            CompletionResult.AlreadyCompleted -> call.respond(
-                HttpStatusCode.Conflict,
-                ApiError("This entry was already completed as ${request.completionType}"),
-            )
+            CompletionResult.AlreadyCompleted -> {
+                log.info("User {} tried to complete library entry {} as {} again", owner, entryId, request.completionType)
+                call.respond(
+                    HttpStatusCode.Conflict,
+                    ApiError("This entry was already completed as ${request.completionType}"),
+                )
+            }
         }
     }
 }
