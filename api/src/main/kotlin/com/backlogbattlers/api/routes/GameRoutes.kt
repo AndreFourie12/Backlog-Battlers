@@ -8,7 +8,6 @@ import com.backlogbattlers.api.games.IgdbGame
 import com.backlogbattlers.api.games.StarterGames
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.saveGame
-import com.backlogbattlers.api.games.steamArtUrl
 import com.backlogbattlers.api.games.toDto
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -76,7 +75,8 @@ fun Route.gameRoutes(igdb: IgdbClient, steam: SteamClient? = null) {
         val game = igdb.game(id)
             ?: return@get call.respond(HttpStatusCode.NotFound, ApiError("Game $id was not found"))
 
-        val dto = game.toDto(igdb.timeToBeat(id))
+        // with its Steam listing too, so the detail screen's backdrop gets the same landscape pictures as search
+        val dto = game.toDto(igdb.timeToBeat(id), steamAppId = igdb.steamAppId(id))
         saveGame(dto)
         call.respond(dto)
     }
@@ -84,5 +84,5 @@ fun Route.gameRoutes(igdb: IgdbClient, steam: SteamClient? = null) {
 
 private suspend fun withSteamArt(igdb: IgdbClient, games: List<IgdbGame>): List<GameDto> {
     val steamAppIds = igdb.steamAppIds(games.map { it.id })
-    return games.map { it.toDto(artworkUrl = steamArtUrl(steamAppIds[it.id])) }
+    return games.map { it.toDto(steamAppId = steamAppIds[it.id]) }
 }
