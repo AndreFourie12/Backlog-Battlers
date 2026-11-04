@@ -67,6 +67,8 @@ class LoginViewModel(
                     // brings down the settings saved to this account, e.g. from another phone.
                     // runs past this screen, which closes as the user is taken home
                     ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
+                    // and tells the API pushes for this account can come to this phone
+                    ServiceLocator.applicationScope.launch { ServiceLocator.pushTokens.register() }
                 }
                 is AuthResult.Failure -> {
                     Log.e("LoginViewModel", "Sign-In failure, showing message ${result.messageRes}")

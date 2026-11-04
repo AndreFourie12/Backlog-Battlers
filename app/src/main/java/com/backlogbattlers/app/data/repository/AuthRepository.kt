@@ -19,6 +19,7 @@ import com.backlogbattlers.app.data.remote.SessionExpiredException
 import com.backlogbattlers.app.domain.model.User
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -84,6 +85,8 @@ class AuthRepositoryImpl(
     private val authApi: AuthApi,
     private val tokenStorage: TokenStorage,
     private val serverClientId: String,
+    // runs first on sign-out, given the session's access token (null if it can't be renewed)
+    private val beforeSignOut: suspend (accessToken: String?) -> Unit = {},
 ) : AuthRepository {
 
     //------------------------------
@@ -189,6 +192,14 @@ class AuthRepositoryImpl(
     //------------------------------
     // clears encrypted token storage, local user database table, and credential state.
     override suspend fun signOut() {
+        val accessToken = try {
+            freshAccessToken()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null // offline: sign out anyway
+        }
+        beforeSignOut(accessToken)
         try {
             tokenStorage.clear()
             userDao.clear()

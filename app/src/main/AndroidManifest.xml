@@ -28,6 +28,15 @@
             </intent-filter>
         </activity>
 
+        <!-- receives pushes from Firebase Cloud Messaging and shows them -->
+        <service
+            android:name=".notifications.PushMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <!-- lets appcompat remember the in-app language on phones older than android 13,
              which have no system per-app language setting of their own -->
         <service
