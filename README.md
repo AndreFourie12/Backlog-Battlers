@@ -103,7 +103,7 @@ The scope for this part was the Google sign in, settings, the REST API and datab
 ## Logging and Request Tracing
 **What the API logs.** We log one line per request (status, method, path, time, user UUID), plus one line whenever data changes (sign in, completion and points, friend requests, settings, account deletion). `/health` is skipped.
 
-**Request IDs.** Every response carries an `X-Request-Id`, and every API log line shows it. The app side is coming.
+**Request IDs.** Every response carries an `X-Request-Id`, and every API log line shows it. The app sends an ID with every call and prints it in its Logcat line, so one tap can be followed from the phone to the API log and then to the database row.
 
 **We dont't log.** Tokens, the Authorization header, emails, names, query strings and request bodies, and a unit test checks this.
 
@@ -114,6 +114,7 @@ The scope for this part was the Google sign in, settings, the REST API and datab
 ```
 14:02:11.532 INFO  [3f9a1c7e2b40] RequestLogging - 201 POST /users/me/library in 84ms user=7f3c2a1e-5b9d-4c11-9a0e-2d6f8b7e1c34
 14:02:11.530 INFO  [3f9a1c7e2b40] LibraryRoutes - User 7f3c2a1e-… added game 113112 on PC as library entry 0c5e…
+D/Http: [3f9a1c7e2b40] POST /users/me/library -> 201 in 97ms
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
