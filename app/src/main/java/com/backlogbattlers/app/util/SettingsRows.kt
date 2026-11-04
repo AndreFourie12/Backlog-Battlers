@@ -56,15 +56,17 @@ fun View.bindSettingsAction(
 
 
 // a row carrying a switch. the whole row toggles, the switch is decorative so
-// there is only ever one listener firing
+// there is only ever one listener firing. pass icon = null for a row without one
 fun View.bindSettingsToggle(
-    @DrawableRes icon: Int,
+    @DrawableRes icon: Int?,
     @StringRes title: Int,
     @StringRes body: Int,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    findViewById<ImageView>(R.id.ivSettingsToggleIcon).setImageResource(icon)
+    val iconView = findViewById<ImageView>(R.id.ivSettingsToggleIcon)
+    if (icon != null) iconView.setImageResource(icon)
+    iconView.setVisible(icon != null)
     findViewById<TextView>(R.id.tvSettingsToggleTitle).setText(title)
     findViewById<TextView>(R.id.tvSettingsToggleBody).setText(body)
 
