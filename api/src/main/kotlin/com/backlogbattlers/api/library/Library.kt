@@ -43,7 +43,22 @@ data class CreateEntryRequest(
     val gameId: Int,
     val platform: Platform,
     val status: LibraryStatus = LibraryStatus.BACKLOG,
+    /**
+     * The id the app already gave this entry on the phone. Optional: when sent, the server uses it
+     * instead of making one up, so both sides share an id and a retried request is harmless.
+     */
+    val libraryEntryId: String? = null,
 )
+
+sealed interface CreateResult {
+    data class Created(val entry: LibraryEntryDto) : CreateResult
+
+    /** This owner already created an entry with this id (a retry), so it is returned unchanged. */
+    data class AlreadyExists(val entry: LibraryEntryDto) : CreateResult
+
+    /** The game is already in the library on that platform under another id, or the id is someone else's. */
+    data object Conflict : CreateResult
+}
 
 /** Body of `PATCH /users/me/library/{id}`. A field that is left out is left unchanged. */
 @Serializable
@@ -72,8 +87,24 @@ fun listEntries(owner: Uuid): List<LibraryEntryDto> = transaction {
     toDtos(rows)
 }
 
-/** Adds a game to a user's library, or returns null when they already have it on that platform. */
-fun createEntry(owner: Uuid, request: CreateEntryRequest): LibraryEntryDto? = transaction {
+/**
+ * Adds a game to a user's library. [entryId] is the id the app chose for it, if it sent one.
+ * Sending the same [entryId] again returns the existing entry rather than failing, so the app can
+ * safely retry a request whose answer it never received.
+ */
+fun createEntry(owner: Uuid, request: CreateEntryRequest, entryId: Uuid? = null): CreateResult = transaction {
+    if (entryId != null) {
+        val existing = LibraryEntries.selectAll().where { LibraryEntries.id eq entryId }.singleOrNull()
+        if (existing != null) {
+            // someone else's id is reported the same way as a duplicate, so it never reveals that it exists
+            return@transaction if (existing[LibraryEntries.userId] == owner) {
+                CreateResult.AlreadyExists(toDtos(listOf(existing)).single())
+            } else {
+                CreateResult.Conflict
+            }
+        }
+    }
+
     val alreadyThere = LibraryEntries.selectAll().where {
         (LibraryEntries.userId eq owner) and
             (LibraryEntries.gameId eq request.gameId) and
@@ -81,16 +112,17 @@ fun createEntry(owner: Uuid, request: CreateEntryRequest): LibraryEntryDto? = tr
     }.any()
     // ponytail: check-then-insert can race if two identical requests arrive together; the unique
     // index still rejects the second one, but as a 500. Catch the SQL error if that ever matters.
-    if (alreadyThere) return@transaction null
+    if (alreadyThere) return@transaction CreateResult.Conflict
 
     val newId = LibraryEntries.insert {
+        if (entryId != null) it[LibraryEntries.id] = entryId
         it[LibraryEntries.userId] = owner
         it[LibraryEntries.gameId] = request.gameId
         it[LibraryEntries.platform] = request.platform
         it[LibraryEntries.status] = request.status
     }[LibraryEntries.id]
 
-    toDtos(LibraryEntries.selectAll().where { LibraryEntries.id eq newId }.toList()).single()
+    CreateResult.Created(toDtos(LibraryEntries.selectAll().where { LibraryEntries.id eq newId }.toList()).single())
 }
 
 /** Applies the fields present in [request] to one of the user's entries. */
