@@ -56,7 +56,7 @@ class LoginViewModel(
         }
     }
 
-    //------------------------------
+        //------------------------------
     // initiates google sign in flow via AuthRepository and updates ui state with result
     fun onSignInClicked(activity: Activity) {
         _uiState.value = LoginUiState.Loading
@@ -67,6 +67,8 @@ class LoginViewModel(
                     // brings down the settings saved to this account, e.g. from another phone.
                     // runs past this screen, which closes as the user is taken home
                     ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
+                    // and the game library, so a sign-in on a new phone gets back what was saved
+                    ServiceLocator.applicationScope.launch { ServiceLocator.librarySync.sync() }
                     // and tells the API pushes for this account can come to this phone
                     ServiceLocator.applicationScope.launch { ServiceLocator.pushTokens.register() }
                 }

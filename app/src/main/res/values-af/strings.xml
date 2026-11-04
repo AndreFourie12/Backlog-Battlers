@@ -159,7 +159,6 @@
     <!-- settings, rows -->
     <string name="settings_edit_profile">Wysig profiel</string>
     <string name="settings_connected_accounts">Gekoppelde rekeninge</string>
-    <string name="settings_connected_accounts_pending">Kom binnekort</string>
     <string name="settings_notifications">Kennisgewings</string>
     <string name="settings_appearance">Voorkoms</string>
     <string name="settings_language">Taal</string>
@@ -380,4 +379,26 @@
     <string name="notification_permission_body">Hoor wanneer iemand vir jou \'n vriendversoek stuur, \'n vriend \'n speletjie klaarspeel, of iemand jou op die ranglys verbysteek. Kies watter in Instellings → Kennisgewings.</string>
     <string name="notification_permission_allow">Laat toe</string>
     <string name="notification_permission_decline">Nie nou nie</string>
+    <!-- Steam account (Settings > Connected Accounts) -->
+    <string name="settings_connected_accounts_value">Steam</string>
+    <string name="title_steam_account">Steam-rekening</string>
+    <string name="steam_account_intro">Koppel jou Steam-rekening sodat Backlog Battlers jou prestasies teen Steam kan nagaan. Net prestasies wat Steam bevestig, verdien punte.</string>
+    <string name="steam_account_not_linked">Geen Steam-rekening gekoppel nie</string>
+    <string name="steam_account_linked_label">Gekoppelde Steam-ID</string>
+    <string name="steam_account_id_hint">Steam-ID (17 syfers)</string>
+    <string name="steam_account_link">Koppel rekening</string>
+    <string name="steam_account_unlink">Ontkoppel</string>
+    <string name="steam_account_help">Jy kry jou Steam-ID onder Account Details in Steam. Jou Steam-profiel en speletjiebesonderhede moet openbaar wees sodat Steam jou prestasies kan bevestig.</string>
+    <string name="steam_account_invalid">\'n Steam-ID is 17 syfers en begin met 7656</string>
+    <string name="steam_account_linked">Steam-rekening gekoppel</string>
+    <string name="steam_account_unlinked">Steam-rekening ontkoppel</string>
+    <string name="steam_account_taken">Daardie Steam-rekening is reeds aan \'n ander gebruiker gekoppel</string>
+    <string name="steam_account_sign_in_again">Jou sessie het verval. Meld asseblief weer aan</string>
+    <string name="steam_account_no_connection">Geen verbinding nie. Kontroleer jou internet en probeer weer</string>
+    <string name="steam_account_failed">Iets het skeefgeloop. Probeer asseblief weer</string>
+    <string name="steam_account_load_failed">Kon nie jou Steam-rekening laai nie</string>
+    <string name="steam_account_retry">Probeer weer</string>
+
+    <!-- shown when the backend stops accepting the session and the user is sent back to login -->
+    <string name="session_expired">Jou sessie het verval. Meld asseblief weer aan.</string>
 </resources>

@@ -183,6 +183,48 @@ class LibraryRoutesTest {
     }
 
     @Test
+    fun `an entry id sent by the app is kept, and sending it again is a harmless 200`() = testApplication {
+        installApi()
+        caller = newUser()
+        val appId = Uuid.random().toString()
+        val body = """{"libraryEntryId":"$appId","gameId":113112,"platform":"PC"}"""
+
+        val first = client.postJson("/users/me/library", body)
+        assertEquals(HttpStatusCode.Created, first.status)
+        assertEquals(appId, Json.decodeFromString<LibraryEntryDto>(first.bodyAsText()).libraryEntryId)
+
+        // the app never saw the first answer and retries
+        val retry = client.postJson("/users/me/library", body)
+        assertEquals(HttpStatusCode.OK, retry.status)
+        assertEquals(appId, Json.decodeFromString<LibraryEntryDto>(retry.bodyAsText()).libraryEntryId)
+        assertEquals(1, client.library().size)
+    }
+
+    @Test
+    fun `an entry id that belongs to someone else is a 409 and creates nothing`() = testApplication {
+        installApi()
+        val appId = Uuid.random().toString()
+        caller = newUser()
+        client.postJson("/users/me/library", """{"libraryEntryId":"$appId","gameId":113112,"platform":"PC"}""")
+
+        caller = newUser()
+        val clash = client.postJson("/users/me/library", """{"libraryEntryId":"$appId","gameId":113112,"platform":"PC"}""")
+
+        assertEquals(HttpStatusCode.Conflict, clash.status)
+        assertEquals(0, client.library().size)
+    }
+
+    @Test
+    fun `adding with a libraryEntryId that is not a valid id is a 400`() = testApplication {
+        installApi()
+        caller = newUser()
+
+        val response = client.postJson("/users/me/library", """{"libraryEntryId":"nope","gameId":113112,"platform":"PC"}""")
+
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
     fun `adding a game IGDB does not know is a 404`() = testApplication {
         installApi(fakeIgdb(games = "[]"))
         caller = newUser()

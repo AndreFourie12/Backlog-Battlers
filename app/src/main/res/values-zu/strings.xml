@@ -159,7 +159,6 @@
     <!-- settings, rows -->
     <string name="settings_edit_profile">Hlela iphrofayela</string>
     <string name="settings_connected_accounts">Ama-akhawunti axhunyiwe</string>
-    <string name="settings_connected_accounts_pending">Kuyeza maduze</string>
     <string name="settings_notifications">Izaziso</string>
     <string name="settings_appearance">Ukubukeka</string>
     <string name="settings_language">Ulimi</string>
@@ -380,4 +379,26 @@
     <string name="notification_permission_body">Yazi uma othile ekuthumelela isicelo sobungane, umngane eqeda umdlalo, noma othile ekudlula ohlwini lwamaphuzu. Khetha ukuthi yiziphi ku-Izilungiselelo → Izaziso.</string>
     <string name="notification_permission_allow">Vumela</string>
     <string name="notification_permission_decline">Hhayi manje</string>
+    <!-- Steam account (Settings > Connected Accounts) -->
+    <string name="settings_connected_accounts_value">Steam</string>
+    <string name="title_steam_account">I-akhawunti ye-Steam</string>
+    <string name="steam_account_intro">Xhuma i-akhawunti yakho ye-Steam ukuze i-Backlog Battlers ikwazi ukuhlola impumelelo yakho ngokuyiqhathanisa ne-Steam. Kuphela impumelelo eqinisekiswa yi-Steam etholela amaphuzu.</string>
+    <string name="steam_account_not_linked">Ayikho i-akhawunti ye-Steam exhunyiwe</string>
+    <string name="steam_account_linked_label">I-Steam ID exhunyiwe</string>
+    <string name="steam_account_id_hint">I-Steam ID (izinombolo eziyi-17)</string>
+    <string name="steam_account_link">Xhuma i-akhawunti</string>
+    <string name="steam_account_unlink">Nqamula</string>
+    <string name="steam_account_help">Ungayithola i-Steam ID yakho ku-Account Details ku-Steam. Iphrofayela yakho ye-Steam nemininingwane yemidlalo kumele kube sesidlangalaleni ukuze i-Steam iqinisekise impumelelo yakho.</string>
+    <string name="steam_account_invalid">I-Steam ID inezinombolo eziyi-17 futhi iqala ngo-7656</string>
+    <string name="steam_account_linked">I-akhawunti ye-Steam ixhunyiwe</string>
+    <string name="steam_account_unlinked">I-akhawunti ye-Steam inqanyuliwe</string>
+    <string name="steam_account_taken">Leyo akhawunti ye-Steam isixhunywe komunye umsebenzisi</string>
+    <string name="steam_account_sign_in_again">Isikhathi sakho sesiphelile. Sicela ungene futhi</string>
+    <string name="steam_account_no_connection">Akukho uxhumano. Hlola i-inthanethi yakho bese uzama futhi</string>
+    <string name="steam_account_failed">Kukhona okungahambanga kahle. Sicela uzame futhi</string>
+    <string name="steam_account_load_failed">Ayikwazanga ukulayisha i-akhawunti yakho ye-Steam</string>
+    <string name="steam_account_retry">Zama futhi</string>
+
+    <!-- shown when the backend stops accepting the session and the user is sent back to login -->
+    <string name="session_expired">Isikhathi sakho sesiphelile. Sicela ungene futhi.</string>
 </resources>

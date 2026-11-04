@@ -54,6 +54,28 @@ private data class SchemaAchievement(
 )
 
 @Serializable
+private data class PlayerStatsResponse(val playerstats: PlayerStats = PlayerStats())
+
+@Serializable
+private data class PlayerStats(
+    val error: String? = null,
+    val achievements: List<PlayerAchievementRow> = emptyList(),
+)
+
+// `achieved` is 1 once the player has unlocked it, 0 otherwise
+@Serializable
+private data class PlayerAchievementRow(val apiname: String, val achieved: Int = 0)
+
+/** What Steam says one player has unlocked in one game. */
+sealed interface PlayerAchievements {
+    /** The codes of the achievements the player has unlocked. Empty when they have none, or do not own the game. */
+    data class Unlocked(val codes: Set<String>) : PlayerAchievements
+
+    /** The player's Steam profile (or its game details) is private, so Steam will not say. */
+    data object PrivateProfile : PlayerAchievements
+}
+
+@Serializable
 private data class MostPlayedResponse(val response: MostPlayedList = MostPlayedList())
 
 @Serializable
@@ -119,6 +141,33 @@ class SteamClient(
                     iconGrayUrl = it.icongray,
                 )
             }
+    }
+
+    /**
+     * The achievements [steamId] (a 17 digit Steam ID) has really unlocked in [appId]. Needs the Steam key.
+     * Steam answers 403 for a private profile; any other refusal (not owned, no stats) means nothing
+     * is confirmed. A Steam outage is a [SteamException], never an empty answer, so it is not mistaken
+     * for "nothing unlocked".
+     */
+    suspend fun unlockedAchievements(steamId: String, appId: Int): PlayerAchievements {
+        if (apiKey.isBlank()) throw SteamException("STEAM_API_KEY is not set, so achievements cannot be verified")
+
+        val response = http.get("$BASE_URL/GetPlayerAchievements/v1/") {
+            parameter("key", apiKey)
+            parameter("steamid", steamId)
+            parameter("appid", appId)
+        }
+        val body = response.bodyAsText()
+        val stats = runCatching { json.decodeFromString<PlayerStatsResponse>(body).playerstats }.getOrNull()
+
+        if (response.status == HttpStatusCode.Forbidden || stats?.error?.contains("not public", ignoreCase = true) == true) {
+            return PlayerAchievements.PrivateProfile
+        }
+        if (response.status == HttpStatusCode.BadRequest) return PlayerAchievements.Unlocked(emptySet())
+        // The message never includes the request address, because that contains the key
+        if (!response.status.isSuccess() || stats == null) throw SteamException("Steam player achievements request failed: ${response.status}")
+
+        return PlayerAchievements.Unlocked(stats.achievements.filter { it.achieved == 1 }.map { it.apiname }.toSet())
     }
 
     /** Steam app ids of the most played games on Steam right now, most played first (Steam's top 100). */

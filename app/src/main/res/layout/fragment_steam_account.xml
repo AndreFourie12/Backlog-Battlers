@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    steam account: link the Steam ID that achievements are checked against, or unlink it.
+    the account is held by the server; this screen only shows and changes it.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:scrollbars="none"
+    tools:context=".fragments.SteamAccountFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/bottom_content_inset">
+
+        <include
+            android:id="@+id/barSteam"
+            layout="@layout/partial_settings_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:layout_marginBottom="14dp"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/steam_account_intro" />
+
+        <ProgressBar
+            android:id="@+id/progressSteam"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp"
+            android:visibility="gone" />
+
+        <!-- the account could not be read: offer a retry rather than a form that might overwrite it -->
+        <LinearLayout
+            android:id="@+id/groupSteamError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/card_padding"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/steam_account_load_failed" />
+
+            <Button
+                android:id="@+id/btnSteamRetry"
+                style="@style/Text.CaptionStrong"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_button_accent"
+                android:minWidth="0dp"
+                android:paddingHorizontal="18dp"
+                android:text="@string/steam_account_retry"
+                android:textColor="@color/page_background" />
+        </LinearLayout>
+
+        <!-- an account is linked -->
+        <LinearLayout
+            android:id="@+id/groupSteamLinked"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/card_padding"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/Text.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="@string/steam_account_linked_label"
+                android:textColor="@color/text_tertiary" />
+
+            <TextView
+                android:id="@+id/tvSteamLinkedId"
+                style="@style/Text.CardTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:includeFontPadding="false"
+                android:textIsSelectable="true"
+                tools:text="76561198000000001" />
+
+            <Button
+                android:id="@+id/btnSteamUnlink"
+                style="@style/Text.CaptionStrong"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_button_accent"
+                android:minWidth="0dp"
+                android:paddingHorizontal="18dp"
+                android:text="@string/steam_account_unlink"
+                android:textColor="@color/page_background" />
+        </LinearLayout>
+
+        <!-- nothing is linked yet -->
+        <LinearLayout
+            android:id="@+id/groupSteamUnlinked"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:text="@string/steam_account_not_linked" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:addStatesFromChildren="true"
+                android:background="@drawable/bg_field_focusable"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp">
+
+                <EditText
+                    android:id="@+id/etSteamId"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:digits="0123456789"
+                    android:hint="@string/steam_account_id_hint"
+                    android:imeOptions="actionDone"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:maxLength="17"
+                    android:maxLines="1"
+                    android:minHeight="50dp"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_tertiary"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnSteamLink"
+                style="@style/Text.CaptionStrong"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_button_accent"
+                android:minWidth="0dp"
+                android:paddingHorizontal="18dp"
+                android:text="@string/steam_account_link"
+                android:textColor="@color/page_background" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_padding"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="@dimen/page_padding"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/steam_account_help"
+            android:textColor="@color/text_tertiary" />
+    </LinearLayout>
+</ScrollView>

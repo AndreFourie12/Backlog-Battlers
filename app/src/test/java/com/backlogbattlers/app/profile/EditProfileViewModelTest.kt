@@ -176,6 +176,8 @@ class EditProfileViewModelTest {
         }
         override suspend fun signOut() = Unit
         override suspend fun freshAccessToken(): String? = null
+        override suspend fun renewAccessToken(): String? = null
+        override suspend fun endSession() = Unit
         override suspend fun deleteAccount(): DeleteAccountResult = DeleteAccountResult.FAILED
     }
 

@@ -5,6 +5,13 @@
     android:id="@+id/nav_graph"
     app:startDestination="@+id/splashFragment">
 
+    <!-- from anywhere back to login when the session has ended, clearing everything behind it -->
+    <action
+        android:id="@+id/action_global_loginFragment"
+        app:destination="@id/loginFragment"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.backlogbattlers.app.fragments.SplashFragment"
@@ -158,6 +165,9 @@
             android:id="@+id/action_settingsFragment_to_appearanceFragment"
             app:destination="@id/appearanceFragment" />
         <action
+            android:id="@+id/action_settingsFragment_to_steamAccountFragment"
+            app:destination="@id/steamAccountFragment" />
+        <action
             android:id="@+id/action_settingsFragment_to_privacyDataFragment"
             app:destination="@id/privacyDataFragment" />
         <action
@@ -192,6 +202,12 @@
         android:name="com.backlogbattlers.app.fragments.AppearanceFragment"
         android:label="Appearance"
         tools:layout="@layout/fragment_appearance" />
+
+    <fragment
+        android:id="@+id/steamAccountFragment"
+        android:name="com.backlogbattlers.app.fragments.SteamAccountFragment"
+        android:label="Steam account"
+        tools:layout="@layout/fragment_steam_account" />
 
     <fragment
         android:id="@+id/privacyDataFragment"

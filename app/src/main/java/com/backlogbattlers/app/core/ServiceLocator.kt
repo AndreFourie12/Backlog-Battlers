@@ -10,7 +10,10 @@ import com.backlogbattlers.app.data.remote.DevicesApi
 import com.backlogbattlers.app.data.remote.FriendsApi
 import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.remote.LeaderboardApi
+import com.backlogbattlers.app.data.remote.LibraryApi
 import com.backlogbattlers.app.data.remote.SettingsApi
+import com.backlogbattlers.app.data.remote.SteamApi
+import com.backlogbattlers.app.data.repository.AccessTokenSource
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthRepositoryImpl
 import com.backlogbattlers.app.data.repository.FriendsRepository
@@ -21,11 +24,14 @@ import com.backlogbattlers.app.data.repository.LeaderboardRepository
 import com.backlogbattlers.app.data.repository.LeaderboardRepositoryImpl
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.LibraryRepositoryImpl
+import com.backlogbattlers.app.data.repository.LibrarySync
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepository
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepositoryImpl
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsRepository
+import com.backlogbattlers.app.data.repository.SteamAccountRepository
+import com.backlogbattlers.app.data.repository.SteamAccountRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsSync
 import com.backlogbattlers.app.notifications.PushTokenRegistrar
@@ -46,6 +52,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
@@ -90,7 +100,12 @@ object ServiceLocator {
         GameApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
     }
 
-    val authRepository: AuthRepository by lazy {
+    // fires when the backend will no longer accept the signed in session (its refresh token was
+    // rejected). MainActivity answers it by going back to login with a message
+    private val _sessionEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val sessionEnded: SharedFlow<Unit> = _sessionEnded.asSharedFlow()
+
+   val authRepository: AuthRepository by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing authRepository")
         AuthRepositoryImpl(
             context = context,
@@ -100,11 +115,12 @@ object ServiceLocator {
             serverClientId = BuildConfig.GOOGLE_SERVER_CLIENT_ID,
             // stops pushes for this account reaching the phone, while its access token still works
             beforeSignOut = { accessToken -> pushTokens.unregister(accessToken) },
+            onSessionEnded = { _sessionEnded.tryEmit(Unit) },
         )
     }
 
     val friendsApi: FriendsApi by lazy {
-        FriendsApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokenStorage = tokenStorage)
+        FriendsApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokens = accessTokenSource)
     }
 
     val friendsRepository: FriendsRepository by lazy {
@@ -112,7 +128,7 @@ object ServiceLocator {
     }
 
     val leaderboardApi: LeaderboardApi by lazy {
-        LeaderboardApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokenStorage = tokenStorage)
+        LeaderboardApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokens = accessTokenSource)
     }
 
     val leaderboardRepository: LeaderboardRepository by lazy {
@@ -124,7 +140,25 @@ object ServiceLocator {
     }
 
     val libraryRepository: LibraryRepository by lazy {
-        LibraryRepositoryImpl(database.libraryEntryDao(), currentUserId = { tokenStorage.getUserId() })
+        LibraryRepositoryImpl(
+            database.libraryEntryDao(),
+            currentUserId = { tokenStorage.getUserId() },
+            // uploads each change as it is made; if that fails it stays pending until the next sync
+            onChanged = { applicationScope.launch { librarySync.sync() } },
+        )
+    }
+
+    val libraryApi: LibraryApi by lazy {
+        LibraryApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
+    }
+
+    val librarySync: LibrarySync by lazy {
+        LibrarySync(
+            dao = database.libraryEntryDao(),
+            libraryApi = libraryApi,
+            accessToken = { authRepository.freshAccessToken() },
+            currentUserId = { tokenStorage.getUserId() },
+        )
     }
 
     val searchHistoryRepository: SearchHistoryRepository by lazy {
@@ -162,13 +196,21 @@ object ServiceLocator {
         )
     }
 
-    val devicesApi: DevicesApi by lazy {
+val devicesApi: DevicesApi by lazy {
         DevicesApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
     }
 
     val pushTokens: PushTokenRegistrar by lazy {
         val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing pushTokens")
         PushTokenRegistrar(context, devicesApi, accessToken = { authRepository.freshAccessToken() })
+    }
+
+    val steamApi: SteamApi by lazy {
+        SteamApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL)
+    }
+
+    val steamAccountRepository: SteamAccountRepository by lazy {
+        SteamAccountRepositoryImpl(steamApi, accessToken = { authRepository.freshAccessToken() })
     }
 
     val biometricAvailabilityChecker: BiometricAvailabilityChecker by lazy {

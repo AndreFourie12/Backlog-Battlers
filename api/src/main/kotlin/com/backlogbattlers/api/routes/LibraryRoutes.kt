@@ -6,6 +6,7 @@ import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.ensureGameSaved
 import com.backlogbattlers.api.library.CreateEntryRequest
+import com.backlogbattlers.api.library.CreateResult
 import com.backlogbattlers.api.library.UpdateEntryRequest
 import com.backlogbattlers.api.library.UpdateResult
 import com.backlogbattlers.api.library.createEntry
@@ -49,14 +50,23 @@ fun Route.libraryRoutes(igdb: IgdbClient, currentUser: CurrentUser) {
             if (request.status == LibraryStatus.COMPLETED) {
                 return@post call.respond(HttpStatusCode.BadRequest, ApiError("A game can only be completed through the complete endpoint"))
             }
+            val entryId = request.libraryEntryId?.let {
+                runCatching { Uuid.parse(it) }.getOrNull()
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, ApiError("libraryEntryId is not a valid id"))
+            }
             // The library refers to our own copy of the game, so fetch it from IGDB the first time
             if (!ensureGameSaved(igdb, request.gameId)) {
                 return@post call.respond(HttpStatusCode.NotFound, ApiError("Game ${request.gameId} was not found"))
             }
 
-            val entry = createEntry(owner, request)
-                ?: return@post call.respond(HttpStatusCode.Conflict, ApiError("This game is already in your library on that platform"))
-            call.respond(HttpStatusCode.Created, entry)
+            when (val result = createEntry(owner, request, entryId)) {
+                is CreateResult.Created -> call.respond(HttpStatusCode.Created, result.entry)
+                is CreateResult.AlreadyExists -> call.respond(HttpStatusCode.OK, result.entry)
+                CreateResult.Conflict -> call.respond(
+                    HttpStatusCode.Conflict,
+                    ApiError("This game is already in your library on that platform, or that entry id is already in use"),
+                )
+            }
         }
 
         // PATCH /users/me/library/{id}   {"status": "PLAYING", "hoursPlayed": 12.5}

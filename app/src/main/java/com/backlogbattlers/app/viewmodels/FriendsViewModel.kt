@@ -6,6 +6,7 @@ import com.backlogbattlers.app.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
+import com.backlogbattlers.app.data.remote.SessionExpiredException
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.FriendsRepository
 import com.backlogbattlers.app.domain.model.Friend
@@ -74,6 +75,10 @@ class FriendsViewModel(
                         hasNoFriends = sorted.size <= 1,
                     )
                 }
+            } catch (e: SessionExpiredException) {
+                // the app is already on its way back to login (MainActivity), so no error message on top of that
+                Log.w(TAG, "The session ended while loading friends", e)
+                _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 Log.e(TAG, "Loading friends failed", e)
                 _uiState.update { it.copy(isLoading = false, errorMessage = R.string.friends_error_load) }
@@ -102,6 +107,8 @@ class FriendsViewModel(
                 friendsRepository.acceptRequest(requestId)
                 Log.i(TAG, "Friend request accepted")
                 refresh()
+            } catch (e: SessionExpiredException) {
+                Log.w(TAG, "The session ended while accepting a friend request", e)
             } catch (e: Exception) {
                 Log.e(TAG, "Accepting a friend request failed", e)
                 _uiState.update { it.copy(errorMessage = R.string.friends_error_accept) }
@@ -117,6 +124,8 @@ class FriendsViewModel(
                 friendsRepository.rejectRequest(requestId)
                 Log.i(TAG, "Friend request rejected")
                 refresh()
+            } catch (e: SessionExpiredException) {
+                Log.w(TAG, "The session ended while rejecting a friend request", e)
             } catch (e: Exception) {
                 Log.e(TAG, "Rejecting a friend request failed", e)
                 _uiState.update { it.copy(errorMessage = R.string.friends_error_reject) }

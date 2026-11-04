@@ -1,14 +1,9 @@
 package com.backlogbattlers.app.library
 
-import com.backlogbattlers.app.data.local.dao.LibraryEntryDao
-import com.backlogbattlers.app.data.local.entity.LibraryEntryEntity
 import com.backlogbattlers.app.data.repository.LibraryRepositoryImpl
 import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -21,7 +16,8 @@ class LibraryRepositoryTest {
 
     private val dao = FakeLibraryEntryDao()
     private var signedIn: String? = ALICE
-    private val repository = LibraryRepositoryImpl(dao, currentUserId = { signedIn })
+    private var changes = 0
+    private val repository = LibraryRepositoryImpl(dao, currentUserId = { signedIn }, onChanged = { changes++ })
 
     @Test
     fun `a second account signing in on the same phone sees an empty library`() = runBlocking {
@@ -91,6 +87,35 @@ class LibraryRepositoryTest {
     }
 
     @Test
+    fun `removing hides the entry but keeps a pending delete until the account is told`() = runBlocking {
+        repository.addToLibrary(HADES, Platform.PC, LibraryStatus.PLAYING)
+        val entryId = repository.observeLibrary().first().single().libraryEntryId
+
+        repository.remove(entryId)
+
+        assertTrue(repository.observeLibrary().first().isEmpty())
+        assertNull(repository.observeByGameId(HADES).first())
+        val tombstone = dao.rows.value.single()
+        assertTrue(tombstone.pendingDelete)
+        assertTrue(tombstone.pendingSync)
+    }
+
+    @Test
+    fun `every change tells the sync, a change that did nothing does not`() = runBlocking {
+        repository.addToLibrary(HADES, Platform.PC, LibraryStatus.PLAYING)
+        val entryId = repository.observeLibrary().first().single().libraryEntryId
+        repository.updateStatus(entryId, LibraryStatus.ABANDONED)
+        repository.updateHoursPlayed(entryId, 3f)
+        repository.setAchievementUnlocked(entryId, "ESCAPE", unlocked = true)
+        repository.remove(entryId)
+        assertEquals(5, changes)
+
+        repository.remove(entryId) // already hidden
+        repository.updateStatus("not-an-entry", LibraryStatus.PLAYING)
+        assertEquals(5, changes)
+    }
+
+    @Test
     fun `nobody signed in sees nothing and adds nothing`() = runBlocking {
         repository.addToLibrary(HADES, Platform.PC, LibraryStatus.PLAYING)
 
@@ -126,39 +151,6 @@ class LibraryRepositoryTest {
         const val BOB = "user-bob"
         const val HADES = 1113
         const val CELESTE = 26226
-    }
-}
-
-// an in-memory LibraryEntryDao that filters exactly like the real queries in Daos.kt
-private class FakeLibraryEntryDao : LibraryEntryDao {
-
-    val rows = MutableStateFlow<List<LibraryEntryEntity>>(emptyList())
-
-    override fun observeAll(userId: String): Flow<List<LibraryEntryEntity>> =
-        rows.map { list -> list.filter { it.userId == userId }.sortedByDescending { it.updatedAt } }
-
-    override fun observeByStatus(userId: String, status: String): Flow<List<LibraryEntryEntity>> =
-        observeAll(userId).map { list -> list.filter { it.status == status } }
-
-    override suspend fun getById(userId: String, id: String): LibraryEntryEntity? =
-        rows.value.firstOrNull { it.userId == userId && it.libraryEntryId == id }
-
-    override fun observeByGameId(userId: String, gameId: Int): Flow<LibraryEntryEntity?> =
-        rows.map { list -> list.firstOrNull { it.userId == userId && it.gameId == gameId } }
-
-    override suspend fun getPendingSync(userId: String): List<LibraryEntryEntity> =
-        rows.value.filter { it.userId == userId && it.pendingSync }
-
-    override suspend fun upsert(entry: LibraryEntryEntity) {
-        rows.value = rows.value.filterNot { it.libraryEntryId == entry.libraryEntryId } + entry
-    }
-
-    override suspend fun delete(entry: LibraryEntryEntity) {
-        rows.value = rows.value.filterNot { it.libraryEntryId == entry.libraryEntryId }
-    }
-
-    override suspend fun clear(userId: String) {
-        rows.value = rows.value.filterNot { it.userId == userId }
     }
 }
 //------------------------------EOF------------------------------\\

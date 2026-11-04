@@ -228,6 +228,20 @@ object Devices : Table("devices")
     }
 }
 
+// usersteamaccounts table: the Steam account a user says is theirs, used to check their achievements
+// against Steam. a table of its own rather than a column on Users, because SchemaUtils.create adds
+// missing tables to a live database but never adds columns to an existing one.
+// one Steam account can belong to one user only
+object UserSteamAccounts : Table("user_steam_accounts")
+{
+    val userId = reference("user_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    // the 17 digit SteamID64
+    val steamId = varchar("steam_id", 17).uniqueIndex()
+    val linkedAt = timestamp("linked_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(userId)
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -241,5 +255,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     MonthlyLeaderboardEntries,
     UserSettings,
     Devices,
+    UserSteamAccounts,
 )
 //------------------------------EOF------------------------------\\

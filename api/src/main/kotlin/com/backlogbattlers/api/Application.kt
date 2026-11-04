@@ -20,6 +20,7 @@ import com.backlogbattlers.api.routes.healthRoutes
 import com.backlogbattlers.api.routes.leaderboardRoutes
 import com.backlogbattlers.api.routes.libraryRoutes
 import com.backlogbattlers.api.routes.settingsRoutes
+import com.backlogbattlers.api.routes.steamRoutes
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -63,7 +64,8 @@ fun Application.module() {
         authRoutes(googleVerifier, jwtService)
         libraryRoutes(igdb, currentUser = bearerCurrentUser(jwtService))
         friendRoutes(notifier, currentUser = bearerCurrentUser(jwtService))
-        completionRoutes(notifier, currentUser = bearerCurrentUser(jwtService))
+        completionRoutes(igdb, steam, currentUser = bearerCurrentUser(jwtService), notifier = notifier)
+        steamRoutes(currentUser = bearerCurrentUser(jwtService))
         leaderboardRoutes(currentUser = bearerCurrentUser(jwtService))
         accountRoutes(currentUser = bearerCurrentUser(jwtService))
         settingsRoutes(currentUser = bearerCurrentUser(jwtService))

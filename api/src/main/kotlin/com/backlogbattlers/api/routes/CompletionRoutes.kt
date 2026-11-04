@@ -2,6 +2,9 @@ package com.backlogbattlers.api.routes
 
 import com.backlogbattlers.api.ApiError
 import com.backlogbattlers.api.CurrentUser
+import com.backlogbattlers.api.games.IgdbClient
+import com.backlogbattlers.api.games.SteamClient
+import com.backlogbattlers.api.steam.checkUnlocks
 import com.backlogbattlers.api.scoring.CompleteRequest
 import com.backlogbattlers.api.scoring.CompletionResult
 import com.backlogbattlers.api.scoring.completeLibraryEntry
@@ -16,15 +19,25 @@ import io.ktor.server.routing.post
 import kotlin.uuid.Uuid
 
 /** Marking a library entry complete and awarding its points. */
-fun Route.completionRoutes(notifier: Notifier = Notifier.Disabled, currentUser: CurrentUser) {
+/** Marking a library entry complete and awarding its points. */
+fun Route.completionRoutes(
+    igdb: IgdbClient,
+    steam: SteamClient,
+    currentUser: CurrentUser,
+    notifier: Notifier = Notifier.Disabled,
+) {
 
     // POST /users/me/library/{id}/complete   {"completionType": "MAIN_STORY"}
+    // Achievement points are paid only for achievements Steam confirms the user unlocked. If Steam
+    // (or IGDB, which maps the game to its Steam app) is down this answers 502 and completes nothing,
+    // so an outage never costs the user points; they just try again.
     post("/users/me/library/{id}/complete") {
         val owner = call.signedInUser(currentUser) ?: return@post
         val entryId = call.entryId() ?: return@post
         val request = call.receive<CompleteRequest>()
 
-        when (val result = completeLibraryEntry(owner, entryId, request.completionType)) {
+        val steamCheck = checkUnlocks(owner, entryId, igdb, steam)
+        when (val result = completeLibraryEntry(owner, entryId, request.completionType, steamCheck)) {
             is CompletionResult.Completed -> {
                 val response = result.response
                 notifier.gameCompleted(

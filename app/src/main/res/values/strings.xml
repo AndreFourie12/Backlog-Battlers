@@ -172,7 +172,6 @@
     <!-- settings, rows -->
     <string name="settings_edit_profile">Edit Profile</string>
     <string name="settings_connected_accounts">Connected Accounts</string>
-    <string name="settings_connected_accounts_pending">Coming soon</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_language">Language</string>
@@ -418,4 +417,26 @@
     <string name="notification_permission_body">Find out when someone sends you a friend request, a friend finishes a game, or someone passes you on the leaderboard. Choose which ones in Settings → Notifications.</string>
     <string name="notification_permission_allow">Allow</string>
     <string name="notification_permission_decline">Not now</string>
+    <!-- Steam account (Settings > Connected Accounts) -->
+    <string name="settings_connected_accounts_value">Steam</string>
+    <string name="title_steam_account">Steam account</string>
+    <string name="steam_account_intro">Link your Steam account so Backlog Battlers can check your achievements against Steam. Only achievements Steam confirms earn points.</string>
+    <string name="steam_account_not_linked">No Steam account linked</string>
+    <string name="steam_account_linked_label">Linked Steam ID</string>
+    <string name="steam_account_id_hint">Steam ID (17 digits)</string>
+    <string name="steam_account_link">Link account</string>
+    <string name="steam_account_unlink">Unlink</string>
+    <string name="steam_account_help">You can find your Steam ID under Account Details in Steam. Your Steam profile and game details must be public so Steam can confirm your achievements.</string>
+    <string name="steam_account_invalid">A Steam ID is 17 digits and starts with 7656</string>
+    <string name="steam_account_linked">Steam account linked</string>
+    <string name="steam_account_unlinked">Steam account unlinked</string>
+    <string name="steam_account_taken">That Steam account is already linked to another user</string>
+    <string name="steam_account_sign_in_again">Your session has expired. Please sign in again</string>
+    <string name="steam_account_no_connection">No connection. Check your internet and try again</string>
+    <string name="steam_account_failed">Something went wrong. Please try again</string>
+    <string name="steam_account_load_failed">Couldn\'t load your Steam account</string>
+    <string name="steam_account_retry">Retry</string>
+
+    <!-- shown when the backend stops accepting the session and the user is sent back to login -->
+    <string name="session_expired">Your session has expired. Please sign in again.</string>
 </resources>

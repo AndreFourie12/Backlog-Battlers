@@ -1,7 +1,7 @@
 package com.backlogbattlers.app.data.remote
 
 import android.util.Log
-import com.backlogbattlers.app.data.local.TokenStorage
+import com.backlogbattlers.app.data.repository.AccessTokenSource
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -13,6 +13,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
@@ -63,7 +64,7 @@ data class SendRequestResponseDto(val requestId: String, val targetUserId: Strin
 class FriendsApi(
     private val httpClient: HttpClient,
     private val baseUrl: String,
-    private val tokenStorage: TokenStorage,
+    private val tokens: AccessTokenSource,
 ) {
     //------------------------------
     // fetches the signed in user's friend list
@@ -75,65 +76,68 @@ class FriendsApi(
 
     //------------------------------
     // searches for people to add by display name
-    suspend fun searchUsers(query: String): List<FriendSearchResultDto> {
+    suspend fun searchUsers(query: String): List<FriendSearchResultDto> = tokens.call { token ->
         val response = httpClient.get("$baseUrl/users/me/friends/search") {
             accept(ContentType.Application.Json)
-            header(HttpHeaders.Authorization, bearerHeader())
+            header(HttpHeaders.Authorization, "Bearer $token")
             parameter("q", query)
         }
-        return response.checkedBody()
+        response.checkedBody()
     }
 
     //------------------------------
     // sends a friend request to another user
-    suspend fun sendRequest(targetUserId: String): SendRequestResponseDto {
+    suspend fun sendRequest(targetUserId: String): SendRequestResponseDto = tokens.call { token ->
         val response = httpClient.post("$baseUrl/users/me/friends/requests") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
-            header(HttpHeaders.Authorization, bearerHeader())
+            header(HttpHeaders.Authorization, "Bearer $token")
             setBody(CreateFriendRequestBody(targetUserId))
         }
-        return response.checkedBody()
+        response.checkedBody()
     }
 
     //------------------------------
     // accepts a pending friend request, returning the new friend
-    suspend fun acceptRequest(requestId: String): FriendDto {
+    suspend fun acceptRequest(requestId: String): FriendDto = tokens.call { token ->
         val response = httpClient.post("$baseUrl/users/me/friends/requests/$requestId/accept") {
             accept(ContentType.Application.Json)
-            header(HttpHeaders.Authorization, bearerHeader())
+            header(HttpHeaders.Authorization, "Bearer $token")
         }
-        return response.checkedBody()
+        response.checkedBody()
     }
 
     //------------------------------
     // rejects a pending friend request
     suspend fun rejectRequest(requestId: String) {
-        val response = httpClient.post("$baseUrl/users/me/friends/requests/$requestId/reject") {
-            header(HttpHeaders.Authorization, bearerHeader())
-        }
-        // this if statement checks the reject actually succeeded, since this call has no body to decode
-        if (!response.status.isSuccess()) {
-            Log.e(TAG, "Rejecting a friend request failed [${response.status.value}]")
-            throw IllegalStateException("server returned HTTP ${response.status.value}")
+        tokens.call { token ->
+            val response = httpClient.post("$baseUrl/users/me/friends/requests/$requestId/reject") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+            // a 401 is thrown for a retry, and this checks the reject actually succeeded, since this call has no body to decode
+            if (response.status == HttpStatusCode.Unauthorized) throw SessionExpiredException()
+            if (!response.status.isSuccess()) {
+                Log.e(TAG, "Rejecting a friend request failed [${response.status.value}]")
+                throw IllegalStateException("server returned HTTP ${response.status.value}")
+            }
         }
     }
 
     //------------------------------
-    // performs a GET with the bearer header attached/ decodes json list response
-    private suspend inline fun <reified T> authedGet(url: String): T {
+    // performs a GET with a valid bearer token attached/ decodes json list response
+    private suspend inline fun <reified T> authedGet(url: String): T = tokens.call { token ->
         val response = httpClient.get(url) {
             accept(ContentType.Application.Json)
-            header(HttpHeaders.Authorization, bearerHeader())
+            header(HttpHeaders.Authorization, "Bearer $token")
         }
-        return response.checkedBody()
+        response.checkedBody<T>()
     }
 
-    private fun bearerHeader(): String = "Bearer ${tokenStorage.getAccessToken().orEmpty()}"
-
     //------------------------------
-    // decodes a successful response body, or throws with the servers error text
+    // decodes a successful response body, or throws with the servers error text.
+    // a 401 is SessionExpiredException, which is what makes AccessTokenSource renew the token and retry
     private suspend inline fun <reified T> HttpResponse.checkedBody(): T {
+        if (status == HttpStatusCode.Unauthorized) throw SessionExpiredException()
         if (!status.isSuccess()) {
             val errorText = runCatching { body<String>() }.getOrDefault("HTTP ${status.value}")
             Log.e(TAG, "${call.request.url.encodedPath} failed [${status.value}]: $errorText")

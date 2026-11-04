@@ -50,12 +50,13 @@ class SplashFragment : Fragment() {
                 if (shouldRequireBiometricUnlock(settings.biometricLoginEnabled, availability)) {
                     Log.i(TAG, "Signed in with the fingerprint lock on, asking to unlock")
                     findNavController().navigate(R.id.action_splashFragment_to_biometricLockFragment)
-                } else {
+                }  else {
                     // uploads a settings change that didn't make it last time, or else picks up
                     // changes made on another phone. in the background: launch never waits on the
                     // network. behind the fingerprint gate this waits for the unlock instead, so a
                     // pulled theme or language can't recreate the screen under the prompt
                     ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
+                    ServiceLocator.applicationScope.launch { ServiceLocator.librarySync.sync() }
                     // and tells the API pushes for this account can come to this phone
                     ServiceLocator.applicationScope.launch { ServiceLocator.pushTokens.register() }
                     Log.i(TAG, "Signed in, going to home")
@@ -65,6 +66,8 @@ class SplashFragment : Fragment() {
                 Log.i(TAG, "Nobody is signed in, going to login")
                 findNavController().navigate(R.id.action_splashFragment_to_loginFragment)
             }
+        }
+    }
         }
     }
 

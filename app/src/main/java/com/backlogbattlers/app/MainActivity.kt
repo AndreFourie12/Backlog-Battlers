@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,9 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
@@ -25,6 +29,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.backlogbattlers.app.core.ServiceLocator
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.launch
 
 // main activity of the application hosting fragment navigation and bottom navigation bar
 class MainActivity : AppCompatActivity() {
@@ -168,6 +175,34 @@ class MainActivity : AppCompatActivity() {
                 }
                 .show()
         }
+
+        // the backend stopped accepting the session (its refresh token was rejected): back to login
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { ServiceLocator.sessionEnded.collect { backToLogin(navController) } }
+
+                // a session can also end while the app is in the background, when nothing is listening.
+                // login and splash are the only screens a signed out user belongs on; the storage is
+                // only touched once past them, because it is slow to build and splash avoids that
+                val destination = navController.currentDestination?.id
+                if (destination != R.id.loginFragment && destination != R.id.splashFragment &&
+                    ServiceLocator.tokenStorage.getUserId() == null
+                ) {
+                    backToLogin(navController)
+                }
+            }
+        }
+    }
+
+    //------------------------------
+    // clears the back stack down to the login screen and says why the user is there
+    private fun backToLogin(navController: NavController) {
+        val destination = navController.currentDestination?.id
+        if (destination == R.id.loginFragment || destination == R.id.splashFragment) return
+
+        Log.i(TAG, "The session has ended, going back to login")
+        Toast.makeText(this, R.string.session_expired, Toast.LENGTH_LONG).show()
+        navController.navigate(R.id.action_global_loginFragment)
     }
 
     private companion object {
