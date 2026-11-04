@@ -57,6 +57,8 @@ class SplashFragment : Fragment() {
                     // pulled theme or language can't recreate the screen under the prompt
                     ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
                     ServiceLocator.applicationScope.launch { ServiceLocator.librarySync.sync() }
+                    // and tells the API pushes for this account can come to this phone
+                    ServiceLocator.applicationScope.launch { ServiceLocator.pushTokens.register() }
                     Log.i(TAG, "Signed in, going to home")
                     findNavController().navigate(R.id.action_splashFragment_to_homeFragment)
                 }

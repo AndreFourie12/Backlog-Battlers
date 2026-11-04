@@ -11,6 +11,7 @@ import com.backlogbattlers.api.friends.listIncomingRequests
 import com.backlogbattlers.api.friends.rejectRequest
 import com.backlogbattlers.api.friends.searchUsers
 import com.backlogbattlers.api.friends.sendRequest
+import com.backlogbattlers.api.notifications.Notifier
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -27,7 +28,7 @@ private val log = LoggerFactory.getLogger("com.backlogbattlers.api.routes.Friend
 
 //------------------------------
 // defines ktor route handlers for friend management ops
-fun Route.friendRoutes(currentUser: CurrentUser) {
+fun Route.friendRoutes(notifier: Notifier = Notifier.Disabled, currentUser: CurrentUser) {
     route("/users/me/friends") {
 
         // GET /users/me/friends
@@ -68,6 +69,7 @@ fun Route.friendRoutes(currentUser: CurrentUser) {
                 when (val result = sendRequest(owner, targetId)) {
                     is SendRequestResult.Sent -> {
                         log.info("User {} sent a friend request to user {}", owner, targetId)
+                        notifier.friendRequestReceived(receiver = targetId, sender = owner)
                         call.respond(HttpStatusCode.Created, result.request)
                     }
                     SendRequestResult.CannotAddSelf -> call.respond(HttpStatusCode.BadRequest, ApiError("you cannot send a friend request to yourself"))
@@ -84,6 +86,7 @@ fun Route.friendRoutes(currentUser: CurrentUser) {
                 when (val result = acceptRequest(owner, requestId)) {
                     is RespondToRequestResult.Accepted -> {
                         log.info("User {} accepted friend request {}", owner, requestId)
+                        notifier.friendRequestAccepted(requestSender = Uuid.parse(result.friend.userId), accepter = owner)
                         call.respond(result.friend)
                     }
                     RespondToRequestResult.NotFound -> call.respond(HttpStatusCode.NotFound, ApiError("friend request was not found"))

@@ -13,3 +13,6 @@ apikey.properties
 
 # Local file database (DB_URL=jdbc:h2:file:./data/backlog...). It holds real user data; never commit it.
 data/
+
+# Firebase service account keys (the console names them <project>-firebase-adminsdk-<id>.json)
+*firebase-adminsdk*.json

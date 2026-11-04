@@ -47,6 +47,9 @@ dependencies {
     runtimeOnly(libs.postgresql) // production database (Neon)
     implementation(libs.h2) // in-memory database for local runs and unit tests
 
+    // Sends push notifications through Firebase Cloud Messaging (see notifications/PushSender.kt)
+    implementation(libs.firebase.admin)
+
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.ktor.client.mock) // fake IGDB responses in tests
     testImplementation(kotlin("test"))

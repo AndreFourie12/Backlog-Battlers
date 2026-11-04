@@ -71,6 +71,8 @@ class BiometricLockFragment : Fragment() {
                             // the settings sync SplashFragment holds back until the user is in
                             Log.i(TAG, "Unlocked, going to home")
                             ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
+                            // and tells the API pushes for this account can come to this phone
+                            ServiceLocator.applicationScope.launch { ServiceLocator.pushTokens.register() }
                             ServiceLocator.applicationScope.launch { ServiceLocator.librarySync.sync() }
                             findNavController().navigate(R.id.action_biometricLockFragment_to_homeFragment)
                         }

@@ -35,6 +35,10 @@ class LogCapture : AutoCloseable {
     fun capturedMdc(key: String): List<String?> =
         events.map { it.mdcPropertyMap[key] }
 
+    fun clear() {
+        appender.list.clear()
+    }
+
     /** Detaches the appender and stops recording log events. */
     fun detach() {
         rootLogger.detachAppender(appender)

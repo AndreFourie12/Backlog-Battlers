@@ -8,6 +8,8 @@ import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.MonthlyLeaderboardEntries
 import com.backlogbattlers.api.db.UnlockedAchievements
+import com.backlogbattlers.api.steam.SteamCheck
+import com.backlogbattlers.api.steam.SteamCheckStatus
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -33,6 +35,10 @@ data class CompleteResponseDto(
     val speedBonusPoints: Int,
     val pointsAwarded: Int,
     val monthlyPoints: Int,
+    /** Whether Steam could confirm the unlocked achievements, and if not, why (see [SteamCheckStatus]). */
+    val steamStatus: SteamCheckStatus = SteamCheckStatus.NOT_NEEDED,
+    /** Unlocked achievements that earned nothing because Steam did not confirm them. */
+    val unverifiedAchievementIds: List<String> = emptyList(),
 )
 
 sealed interface CompletionResult {
@@ -45,8 +51,10 @@ sealed interface CompletionResult {
  * Marks one of [owner]'s library entries complete for [completionType], and awards points for it.
  *
  * Achievement points are paid only for unlocks that have never been counted before (see
- * [UnlockedAchievements.countedForPoints]), so completing an entry twice - once for its story,
- * later for 100% - never pays out the same unlock a second time. Completion-time points use the
+ * [UnlockedAchievements.countedForPoints]) AND that Steam confirmed ([steamCheck]), so ticking
+ * an achievement you never earned pays nothing. An unconfirmed unlock stays uncounted, so it can
+ * still be paid by a later completion once Steam confirms it. Completing an entry twice - once for
+ * its story, later for 100% - never pays out the same unlock a second time. Completion-time points use the
  * game's average hours for that milestone, with a flat fallback when IGDB has no figure. A speed
  * bonus tops that up when the player's own logged hours beat that average (see [speedBonusPoints]).
  *
@@ -57,6 +65,8 @@ fun completeLibraryEntry(
     owner: Uuid,
     entryId: Uuid,
     completionType: CompletionType,
+    // required, with no default, so no caller can skip the Steam check by accident
+    steamCheck: SteamCheck,
     monthPeriod: String = currentMonthPeriod(),
 ): CompletionResult = transaction {
     val entry = LibraryEntries.selectAll()
@@ -75,9 +85,12 @@ fun completeLibraryEntry(
     // ponytail: a client that unlocks an achievement, has it counted, then removes and re-adds
     // it via PATCH would be paid for it twice, since the re-added row starts uncounted again.
     // Fine for a prototype; a real version would track this on the achievement itself.
-    val uncounted = UnlockedAchievements.selectAll()
+    val unlockedNotPaid = UnlockedAchievements.selectAll()
         .where { (UnlockedAchievements.libraryEntryId eq entryId) and (UnlockedAchievements.countedForPoints eq false) }
         .map { it[UnlockedAchievements.achievementId] }
+    // only what Steam confirmed is paid; the rest stays uncounted and is reported back
+    val uncounted = unlockedNotPaid.filter { it in steamCheck.confirmed }
+    val unverified = unlockedNotPaid - uncounted.toSet()
 
     val achievementPointsTotal = uncounted.sumOf { achievementId ->
         val rarity = Achievements.selectAll()
@@ -136,6 +149,8 @@ fun completeLibraryEntry(
             speedBonusPoints = speedPoints,
             pointsAwarded = totalPoints,
             monthlyPoints = newMonthlyTotal,
+            steamStatus = steamCheck.status,
+            unverifiedAchievementIds = unverified.sorted(),
         ),
     )
 }

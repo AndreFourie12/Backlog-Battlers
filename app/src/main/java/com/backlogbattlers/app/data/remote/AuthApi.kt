@@ -85,6 +85,8 @@ class AuthApi(
             accept(ContentType.Application.Json)
             setBody(RefreshRequest(refreshToken))
         }
+        // the backend answers 401 for a refresh token it will not accept, so the session is over
+        if (response.status == HttpStatusCode.Unauthorized) throw SessionExpiredException()
         if (!response.status.isSuccess()) {
             val errorText = runCatching { response.body<String>() }.getOrDefault("HTTP ${response.status.value}")
             Log.e("AuthApi", "Refresh token request failed [${response.status.value}]: $errorText")

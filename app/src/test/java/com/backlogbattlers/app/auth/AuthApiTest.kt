@@ -5,10 +5,12 @@ import com.backlogbattlers.app.data.remote.SessionExpiredException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -25,7 +27,10 @@ class AuthApiTest {
                 seen += request
                 respond(body, status)
             },
-        )
+        ) {
+            // the refresh call sends a JSON body
+            install(ContentNegotiation) { json() }
+        }
         return AuthApi(client, baseUrl = "http://10.0.2.2:8080")
     }
 
@@ -57,6 +62,19 @@ class AuthApiTest {
         assertThrows(IllegalStateException::class.java) {
             runBlocking { api(HttpStatusCode.InternalServerError).deleteAccount("token-123") }
         }
+    }
+
+    @Test
+    fun `a refresh token the backend rejects ends the session, a server error does not`() {
+        // 401 is the backend saying this refresh token is no good: the user has to sign in again
+        assertThrows(SessionExpiredException::class.java) {
+            runBlocking { api(HttpStatusCode.Unauthorized).refresh("old-refresh-token") }
+        }
+        // anything else may pass, so it must not look like a dead session
+        val failure = assertThrows(IllegalStateException::class.java) {
+            runBlocking { api(HttpStatusCode.InternalServerError).refresh("old-refresh-token") }
+        }
+        assertEquals(false, failure is SessionExpiredException)
     }
 }
 //------------------------------EOF------------------------------\\

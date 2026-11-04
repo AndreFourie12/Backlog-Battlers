@@ -26,6 +26,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.adapters.FriendAdapter
 import com.backlogbattlers.app.adapters.RequestAdapter
+import com.backlogbattlers.app.notifications.OPEN_TAB_REQUESTS
+import com.backlogbattlers.app.notifications.PushNotifications
 import com.backlogbattlers.app.viewmodels.FriendsTab
 import com.backlogbattlers.app.viewmodels.FriendsViewModel
 import kotlinx.coroutines.launch
@@ -125,6 +127,13 @@ class FriendsFragment : Fragment() {
         btnTabAllFriends.setOnClickListener { viewModel.selectTab(FriendsTab.ALL_FRIENDS) }
         btnTabFollowing.setOnClickListener { viewModel.selectTab(FriendsTab.FOLLOWING) }
         btnTabRequests.setOnClickListener { viewModel.selectTab(FriendsTab.REQUESTS) }
+
+        // a tapped friend request notification opens straight on the requests. the argument is
+        // removed once used, so coming back to this screen later starts on the usual tab
+        if (arguments?.getString(PushNotifications.ARG_OPEN_TAB) == OPEN_TAB_REQUESTS) {
+            arguments?.remove(PushNotifications.ARG_OPEN_TAB)
+            viewModel.selectTab(FriendsTab.REQUESTS)
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
