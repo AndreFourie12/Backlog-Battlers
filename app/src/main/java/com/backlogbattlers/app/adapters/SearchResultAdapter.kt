@@ -14,7 +14,7 @@ import com.backlogbattlers.app.R
 import com.backlogbattlers.app.util.gameSubtitle
 import com.backlogbattlers.app.util.platformLabel
 import com.backlogbattlers.app.util.inflateChild
-import com.backlogbattlers.app.util.loadArtwork
+import com.backlogbattlers.app.util.loadLandscapeArt
 import com.backlogbattlers.app.util.setVisible
 
 data class SearchResult(
@@ -57,7 +57,7 @@ class SearchResultAdapter(
         fun bind(result: SearchResult) {
             val game = result.game
 
-            art.loadArtwork(game.artworkUrl ?: game.coverImageUrl)
+            art.loadLandscapeArt(game.landscapeArtUrls)
             title.text = game.title
 
             val line = gameSubtitle(result.platform?.let { itemView.context.platformLabel(it.name) }, game.genres)

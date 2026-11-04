@@ -101,7 +101,7 @@ class StarterGames(
                 val game = gameIdByApp[appId]?.let { playableById[it] } ?: return@mapNotNull null
                 val rank = index + 1
                 RecommendationDto(
-                    game = game.toDto(artworkUrl = steamArtUrl(appId)),
+                    game = game.toDto(steamAppId = appId),
                     reason = "#$rank most played on Steam right now",
                     steamRank = rank,
                 )
@@ -117,8 +117,7 @@ class StarterGames(
 
         val fresh = STARTER_PICKS.mapNotNull { pick ->
             val game = igdb.game(pick.gameId) ?: return@mapNotNull null
-            val artwork = steamArtUrl(igdb.steamAppId(pick.gameId))
-            RecommendationDto(game.toDto(artworkUrl = artwork), pick.reason)
+            RecommendationDto(game.toDto(steamAppId = igdb.steamAppId(pick.gameId)), pick.reason)
         }
         handPicked = fresh
         handPickedAt = clock()

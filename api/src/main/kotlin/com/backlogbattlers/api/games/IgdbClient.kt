@@ -194,7 +194,8 @@ class IgdbClient(
     companion object {
         private const val API_URL = "https://api.igdb.com/v4"
         private const val TOKEN_URL = "https://id.twitch.tv/oauth2/token"
-        private const val GAME_FIELDS = "fields name,cover.image_id,platforms.name,genres.name;"
+        private const val GAME_FIELDS =
+            "fields name,cover.image_id,platforms.name,genres.name,artworks.image_id,screenshots.image_id;"
         private const val MAX_PAGE_SIZE = 50
         private const val MAX_ROWS = 500
         private const val MIN_RATING_COUNT = 5
