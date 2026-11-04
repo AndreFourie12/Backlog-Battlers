@@ -275,5 +275,20 @@ class RequestLoggingTest {
             it.contains("User $user added game 113112 on PC as library entry")
         })
     }
+
+    @Test
+    fun `a token refresh request line shows the user`() = testApplication {
+        installApi()
+        val user = newUser()
+        val refreshToken = jwt.generateRefreshToken(user.toString())
+        val response = client.post("/auth/refresh") {
+            contentType(ContentType.Application.Json)
+            setBody("""{"refreshToken":"$refreshToken"}""")
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(logCapture.messages.any {
+            it.contains("200 POST /auth/refresh") && it.contains("user=$user")
+        })
+    }
 }
 //------------------------------EOF------------------------------\\
