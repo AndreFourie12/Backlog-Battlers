@@ -122,6 +122,7 @@ class GameRepositoryImpl(
         val existing = cachedGameDao.getGame(game.gameId)
         val merged = game.copy(
             artworkUrl = game.artworkUrl ?: existing?.artworkUrl,
+            artworkUrls = game.artworkUrls.ifEmpty { existing?.artworkUrls.orEmpty() },
             totalAchievements = game.totalAchievements ?: existing?.totalAchievements,
         )
         cachedGameDao.upsert(merged.toEntity())
@@ -145,6 +146,7 @@ class GameRepositoryImpl(
             avg100PercentHours = avg100PercentHours,
             cachedAt = System.currentTimeMillis(),
             totalAchievements = totalAchievements,
+            artworkUrls = artworkUrls,
         )
     }
 
@@ -162,6 +164,7 @@ class GameRepositoryImpl(
             avg100PercentHours = avg100PercentHours,
             cachedAt = cachedAt,
             totalAchievements = totalAchievements,
+            artworkUrls = artworkUrls,
         )
     }
 
@@ -191,6 +194,7 @@ class GameRepositoryImpl(
             avgCompletionHours = avgCompletionHours?.toFloat(),
             avg100PercentHours = avg100PercentHours?.toFloat(),
             cachedAt = cachedAt,
+            artworkUrls = artworkUrls,
         )
     }
 }

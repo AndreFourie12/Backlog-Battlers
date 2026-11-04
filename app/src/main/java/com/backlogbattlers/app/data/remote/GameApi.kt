@@ -27,6 +27,8 @@ data class GameDto(
     val genres: List<String> = emptyList(),
     val avgCompletionHours: Double? = null,
     val avg100PercentHours: Double? = null,
+    // landscape pictures to try in order (Steam's, then IGDB's), see Game.landscapeArtUrls
+    val artworkUrls: List<String> = emptyList(),
 )
 
 @Serializable
