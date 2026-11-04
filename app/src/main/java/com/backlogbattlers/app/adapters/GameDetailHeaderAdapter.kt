@@ -14,6 +14,7 @@ import com.backlogbattlers.app.util.formatHours
 import com.backlogbattlers.app.util.formatPoints
 import com.backlogbattlers.app.util.inflateChild
 import com.backlogbattlers.app.util.loadArtwork
+import com.backlogbattlers.app.util.loadLandscapeArt
 import com.backlogbattlers.app.util.platformLabel
 import com.backlogbattlers.app.util.setVisible
 import com.backlogbattlers.app.viewmodels.GameDetailUiState
@@ -98,7 +99,7 @@ class GameDetailHeaderAdapter(
 
         private fun renderGame(game: Game?, platform: Platform?) {
             game ?: return
-            backdrop.loadArtwork(game.artworkUrl ?: game.coverImageUrl)
+            backdrop.loadLandscapeArt(game.landscapeArtUrls)
             cover.loadArtwork(game.coverImageUrl ?: game.artworkUrl)
             title.text = game.title
 

@@ -44,6 +44,8 @@ data class CachedGameEntity(
     val avg100PercentHours: Float?,
     val cachedAt: Long,
     val totalAchievements: Int? = null,
+    // landscape pictures to try in order, stored "|" separated by Converters. the default matches MIGRATION_5_6
+    @ColumnInfo(defaultValue = "") val artworkUrls: List<String> = emptyList(),
 )
 
 //------------------------------

@@ -11,7 +11,7 @@ import com.backlogbattlers.app.R
 import com.backlogbattlers.app.domain.model.Game
 import com.backlogbattlers.app.domain.model.Recommendation
 import com.backlogbattlers.app.util.inflateChild
-import com.backlogbattlers.app.util.loadArtwork
+import com.backlogbattlers.app.util.loadLandscapeArt
 
 // one home screen suggestion, and whether the game is already in the user's library
 data class RecommendationRow(
@@ -54,7 +54,7 @@ class RecommendationAdapter(
         // or a tick that does nothing when the game is already owned
         fun bind(row: RecommendationRow) {
             val game = row.recommendation.game
-            art.loadArtwork(game.artworkUrl)
+            art.loadLandscapeArt(game.landscapeArtUrls)
             title.text = game.title
             // a Steam chart pick is worded here, in the user's language; a hand pick shows the API's line
             reason.text = row.recommendation.steamRank
