@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -88,6 +89,12 @@ class NotificationSettingsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.settings.collect { settings ->
+                    Log.d(
+                        TAG,
+                        "Notifications: achievements=${settings.achievementNotificationsEnabled}, " +
+                            "season=${settings.seasonResetNotificationsEnabled}, rank=${settings.rankChangeNotificationsEnabled}, " +
+                            "friends=${settings.friendActivityNotificationsEnabled}",
+                    )
                     achievements.setSettingsToggleChecked(settings.achievementNotificationsEnabled)
                     season.setSettingsToggleChecked(settings.seasonResetNotificationsEnabled)
                     rank.setSettingsToggleChecked(settings.rankChangeNotificationsEnabled)
@@ -95,6 +102,10 @@ class NotificationSettingsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "NotificationSettingsFragment"
     }
 }
 //------------------------------EOF------------------------------\\

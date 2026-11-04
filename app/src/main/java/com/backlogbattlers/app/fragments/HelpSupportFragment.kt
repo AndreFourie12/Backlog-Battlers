@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,6 +65,7 @@ class HelpSupportFragment : Fragment() {
                 val opening = answerLabel.visibility != View.VISIBLE
                 answerLabel.setVisible(opening)
                 chevron.rotation = if (opening) 180f else 0f
+                Log.d(TAG, "FAQ ${index + 1} ${if (opening) "opened" else "closed"}")
             }
 
             container.addView(item)
@@ -72,6 +74,10 @@ class HelpSupportFragment : Fragment() {
                 container.addView(container.inflateChild(R.layout.partial_settings_divider))
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "HelpSupportFragment"
     }
 }
 //------------------------------EOF------------------------------\\

@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -101,6 +102,7 @@ class AppearanceFragment : Fragment() {
         option.findViewById<TextView>(R.id.tvThemeOptionTitle).setText(title)
         option.findViewById<TextView>(R.id.tvThemeOptionBody).setText(body)
         option.setOnClickListener {
+            Log.i(TAG, "Theme set to $mode")
             viewModel.setThemeMode(mode)
             applyThemeMode(mode)
         }
@@ -127,6 +129,7 @@ class AppearanceFragment : Fragment() {
             tile.findViewById<TextView>(R.id.tvBackdropLabel)
                 .setText(backdropLabel(backdrop))
             tile.findViewById<View>(R.id.viewBackdropOutline).setOnClickListener {
+                Log.i(TAG, "Home backdrop set to $backdrop")
                 viewModel.setHomeBackdrop(backdrop)
             }
 
@@ -140,6 +143,10 @@ class AppearanceFragment : Fragment() {
             if (selected) R.drawable.bg_thumb_selected else R.drawable.bg_thumb_outline
         )
         tile.findViewById<View>(R.id.ivBackdropCheck).setVisible(selected)
+    }
+
+    private companion object {
+        const val TAG = "AppearanceFragment"
     }
 }
 //------------------------------EOF------------------------------\\
