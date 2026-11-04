@@ -28,3 +28,10 @@ STEAM_API_KEY=
 # DB_URL=jdbc:postgresql://host/dbname?sslmode=require
 # DB_USER=
 # DB_PASSWORD=
+
+# Optional: push notifications through Firebase Cloud Messaging. In the Firebase console open
+# Project settings > Service accounts > Generate new private key, and point this at the JSON file
+# (keep it outside the repo). Or paste the whole JSON into FIREBASE_SERVICE_ACCOUNT_JSON, which is
+# easier on a host. Without either, the API still runs and only logs the pushes it would send.
+# FIREBASE_SERVICE_ACCOUNT_FILE=C:/keys/backlog-battlers-firebase.json
+# FIREBASE_SERVICE_ACCOUNT_JSON=
