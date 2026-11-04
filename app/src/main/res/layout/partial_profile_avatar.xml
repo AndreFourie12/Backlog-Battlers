@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    the user's avatar: the picture they picked, cut to a circle inside the accent halo, or the
+    first letter of their name on the accent disc when they have not picked one.
+    filled by bindProfileAvatar; the include sets the size.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/settings_avatar"
+    android:layout_height="@dimen/settings_avatar"
+    android:background="@drawable/bg_avatar_glow"
+    android:contentDescription="@string/cd_avatar"
+    android:importantForAccessibility="yes">
+
+    <TextView
+        android:id="@+id/tvAvatarInitial"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:includeFontPadding="false"
+        android:textColor="@color/on_accent"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        tools:text="A" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivAvatarPicture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/avatar_halo"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
+</FrameLayout>
