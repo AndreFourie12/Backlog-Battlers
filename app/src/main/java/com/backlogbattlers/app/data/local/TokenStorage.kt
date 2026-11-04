@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.data.local
 
 import android.content.Context
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 
@@ -30,6 +31,7 @@ class TokenStorage(context: Context) {
         if (userId != null) {
             editor.putString(KEY_USER_ID, userId)
         }
+        Log.d(TAG, "Saved a new session, expiring in ${expiresInSeconds}s")
         editor.apply()
     }
 
@@ -61,6 +63,7 @@ class TokenStorage(context: Context) {
     //------------------------------
     // removes all stored access, refresh tokens, and user ID from encrypted storage
     fun clear() {
+        Log.d(TAG, "Cleared the stored session")
         preferences.edit()
             .remove(KEY_ACCESS_TOKEN)
             .remove(KEY_REFRESH_TOKEN)
@@ -70,6 +73,7 @@ class TokenStorage(context: Context) {
     }
 
     companion object {
+        private const val TAG = "TokenStorage"
         private const val PREFS_FILENAME = "secure_token_prefs"
         private const val KEY_ACCESS_TOKEN = "access_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
