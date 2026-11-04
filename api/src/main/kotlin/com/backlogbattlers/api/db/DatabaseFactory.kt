@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory
  * Configuration comes from environment variables or apikey.properties (see [Config]), so no
  * secret is ever committed:
  *   DB_URL, DB_USER, DB_PASSWORD  (e.g. jdbc:postgresql://host/dbname?sslmode=require)
+ *
+ * In production (`APP_ENV=production`), [DB_URL] is mandatory and the server refuses to
+ * start on an in-memory database.
  */
 object DatabaseFactory {
     private val log = LoggerFactory.getLogger(DatabaseFactory::class.java)
@@ -25,13 +28,20 @@ object DatabaseFactory {
     /**
      * Connects to [jdbcUrl] (or a throw-away in-memory database when it is null) and creates the tables.
      * Tests pass their own [memoryName] so each test class gets an isolated database.
+     *
+     * In production ([appEnv] equals "production"), a missing [jdbcUrl] throws [IllegalStateException].
      */
     fun init(
         jdbcUrl: String? = Config.default.get("DB_URL"),
         user: String? = Config.default.get("DB_USER"),
         password: String? = Config.default.get("DB_PASSWORD"),
         memoryName: String = "backlog",
+        appEnv: String? = Config.default.get("APP_ENV"),
     ): Database {
+        if (appEnv.equals("production", ignoreCase = true) && jdbcUrl == null) {
+            throw IllegalStateException("DB_URL is not set and APP_ENV is production. The server won't start on a throw-away in-memory database.")
+        }
+
         if (jdbcUrl == null) {
             log.warn("DB_URL is not set - using an in-memory database. Data is lost on restart.")
         }
