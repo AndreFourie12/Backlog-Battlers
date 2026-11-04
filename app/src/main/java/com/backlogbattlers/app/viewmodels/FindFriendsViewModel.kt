@@ -6,6 +6,7 @@ import com.backlogbattlers.app.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
+import com.backlogbattlers.app.data.remote.SessionExpiredException
 import com.backlogbattlers.app.data.repository.FriendsRepository
 import com.backlogbattlers.app.domain.model.FriendSearchResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +53,10 @@ class FindFriendsViewModel(
                 val results = friendsRepository.searchUsers(query)
                 Log.d(TAG, "Friend search found ${results.size} people")
                 _uiState.update { it.copy(isLoading = false, results = results, hasSearched = true) }
+            } catch (e: SessionExpiredException) {
+                // the app is already on its way back to login (MainActivity), so no error message on top of that
+                Log.w(TAG, "The session ended while searching for friends", e)
+                _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 Log.e(TAG, "Searching for friends failed", e)
                 _uiState.update { it.copy(isLoading = false, errorMessage = R.string.friends_error_search, hasSearched = true) }
@@ -67,6 +72,8 @@ class FindFriendsViewModel(
                 friendsRepository.sendRequest(targetUserId)
                 Log.i(TAG, "Friend request sent")
                 _uiState.update { it.copy(sentRequestUserIds = it.sentRequestUserIds + targetUserId) }
+            } catch (e: SessionExpiredException) {
+                Log.w(TAG, "The session ended while sending a friend request", e)
             } catch (e: Exception) {
                 Log.e(TAG, "Sending a friend request failed", e)
                 _uiState.update { it.copy(errorMessage = R.string.friends_error_send) }

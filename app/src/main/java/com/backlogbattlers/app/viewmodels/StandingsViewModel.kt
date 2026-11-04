@@ -6,6 +6,7 @@ import com.backlogbattlers.app.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
+import com.backlogbattlers.app.data.remote.SessionExpiredException
 import com.backlogbattlers.app.data.repository.LeaderboardRepository
 import com.backlogbattlers.app.domain.model.LeaderboardEntry
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,6 +57,10 @@ class StandingsViewModel(
                 _uiState.update {
                     it.copy(isLoading = false, entries = entries, selfUserId = board.me?.userId)
                 }
+            } catch (e: SessionExpiredException) {
+                // the app is already on its way back to login (MainActivity), so no error message on top of that
+                Log.w(TAG, "The session ended while loading the standings", e)
+                _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 Log.e(TAG, "Loading the standings failed", e)
                 _uiState.update { it.copy(isLoading = false, errorMessage = R.string.standings_error_load) }

@@ -419,4 +419,7 @@
     <string name="steam_account_failed">Something went wrong. Please try again</string>
     <string name="steam_account_load_failed">Couldn\'t load your Steam account</string>
     <string name="steam_account_retry">Retry</string>
+
+    <!-- shown when the backend stops accepting the session and the user is sent back to login -->
+    <string name="session_expired">Your session has expired. Please sign in again.</string>
 </resources>
