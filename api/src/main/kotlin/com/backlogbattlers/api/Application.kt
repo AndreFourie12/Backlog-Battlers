@@ -7,6 +7,8 @@ import com.backlogbattlers.api.db.DatabaseFactory
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.igdbHttpClient
+import com.backlogbattlers.api.notifications.Notifier
+import com.backlogbattlers.api.notifications.PushSender
 import com.backlogbattlers.api.routes.accountRoutes
 import com.backlogbattlers.api.routes.achievementRoutes
 import com.backlogbattlers.api.routes.authRoutes
@@ -49,6 +51,7 @@ fun Application.module() {
     val jwtService = JwtService(jwtSecret, jwtIssuer)
     val igdb = IgdbClient.fromConfig()
     val steam = SteamClient.fromConfig()
+    val notifier = Notifier(PushSender.fromConfig())
 
     // @Dylan, @Andre
     // To add a feature, create : routes/YourFeatureRoutes.kt with `fun Route.yourFeatureRoutes()`,
@@ -59,8 +62,8 @@ fun Application.module() {
         achievementRoutes(igdb, steam)
         authRoutes(googleVerifier, jwtService)
         libraryRoutes(igdb, currentUser = bearerCurrentUser(jwtService))
-        friendRoutes(currentUser = bearerCurrentUser(jwtService))
-        completionRoutes(currentUser = bearerCurrentUser(jwtService))
+        friendRoutes(notifier, currentUser = bearerCurrentUser(jwtService))
+        completionRoutes(notifier, currentUser = bearerCurrentUser(jwtService))
         leaderboardRoutes(currentUser = bearerCurrentUser(jwtService))
         accountRoutes(currentUser = bearerCurrentUser(jwtService))
         settingsRoutes(currentUser = bearerCurrentUser(jwtService))

@@ -5,6 +5,8 @@ import com.backlogbattlers.api.CurrentUser
 import com.backlogbattlers.api.scoring.CompleteRequest
 import com.backlogbattlers.api.scoring.CompletionResult
 import com.backlogbattlers.api.scoring.completeLibraryEntry
+import com.backlogbattlers.api.scoring.currentMonthPeriod
+import com.backlogbattlers.api.notifications.Notifier
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
@@ -14,7 +16,7 @@ import io.ktor.server.routing.post
 import kotlin.uuid.Uuid
 
 /** Marking a library entry complete and awarding its points. */
-fun Route.completionRoutes(currentUser: CurrentUser) {
+fun Route.completionRoutes(notifier: Notifier = Notifier.Disabled, currentUser: CurrentUser) {
 
     // POST /users/me/library/{id}/complete   {"completionType": "MAIN_STORY"}
     post("/users/me/library/{id}/complete") {
@@ -23,7 +25,17 @@ fun Route.completionRoutes(currentUser: CurrentUser) {
         val request = call.receive<CompleteRequest>()
 
         when (val result = completeLibraryEntry(owner, entryId, request.completionType)) {
-            is CompletionResult.Completed -> call.respond(HttpStatusCode.OK, result.response)
+            is CompletionResult.Completed -> {
+                val response = result.response
+                notifier.gameCompleted(
+                    completer = owner,
+                    entryId = entryId,
+                    pointsBefore = response.monthlyPoints - response.pointsAwarded,
+                    pointsAfter = response.monthlyPoints,
+                    monthPeriod = currentMonthPeriod(),
+                )
+                call.respond(HttpStatusCode.OK, response)
+            }
             CompletionResult.NotFound -> call.respond(HttpStatusCode.NotFound, ApiError("Library entry was not found"))
             CompletionResult.AlreadyCompleted -> call.respond(
                 HttpStatusCode.Conflict,
