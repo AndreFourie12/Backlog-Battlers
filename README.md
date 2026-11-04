@@ -125,15 +125,15 @@ D/Http: [3f9a1c7e2b40] POST /users/me/library -> 201 in 97ms
 ## Hosting and Deployment
 **Where its run/hosted.** The API runs on an Azure Web App (Linux, Java 21, Basic B1, Always On, doesn't deactivate) in UAE North, at [https://backlog-battlers-api-7314-gyancxcndrh0akgn.uaenorth-01.azurewebsites.net](https://backlog-battlers-api-7314-gyancxcndrh0akgn.uaenorth-01.azurewebsites.net).
 
-<!-- 1 -->
+![Azure Web App overview showing Running, URL and UAE North](images/hosting/01-azure-webapp-overview.png)
 
 **The database.** Azure Database for PostgreSQL flexible server (Burstable B1ms) in the same region, over TLS. The API creates its tables on first start. With `APP_ENV=production` it refuses to start without a database.
 
-<!-- 2 -->
+![Azure PostgreSQL tables with live rows](images/hosting/02-azure-postgres-tables.png)
 
 **How a change reaches the server.** On every push to `main`, `api-ci.yml` runs the tests. If they pass, its `deploy` job builds `app.jar` stamped with the commit hash, uploads it with `azure/webapps-deploy`, and checks `/health` until that commit reports `database: ok`. Pull requests and feature branches never deploy.
 
-<!-- 3 -->
+![GitHub Actions deploy job with the health check passing](images/hosting/03-github-actions-deploy.png)
 
 **Configuration and secrets.** Every setting is an Azure App Setting (encrypted), read by the same `Config` class as locally. Setting names: `APP_ENV`, `LOG_LEVEL`, `PORT`, `WEBSITES_PORT`, `JWT_ISSUER`, `JWT_SECRET`, `GOOGLE_OAUTH_CLIENT_ID`, `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`, `STEAM_API_KEY`, `DB_URL`, `DB_USER`, `DB_PASSWORD`, `FIREBASE_SERVICE_ACCOUNT_JSON`. GitHub holds only the publish profile as a secret (`AZURE_WEBAPP_PUBLISH_PROFILE`), with `AZURE_WEBAPP_NAME` and `AZURE_WEBAPP_URL` stored as repository variables.
 
@@ -147,8 +147,8 @@ D/Http: [3f9a1c7e2b40] POST /users/me/library -> 201 in 97ms
 }
 ```
 
-<!-- 4 -->
-<!-- 5 -->
+![/health response from the hosted API](images/hosting/04-health-endpoint.png)
+![Azure Log stream showing request-ID lines](images/hosting/05-log-stream-request-ids.png)
 
 **Running against a laptop.** Developers can point a local build at a laptop by setting `apiBaseUrl=http://<laptop IPv4>:8080` in `local.properties`. Details are documented in [docs/api.md](docs/api.md).
 
