@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,6 +45,7 @@ class LoginFragment : Fragment() {
         val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_loading)
 
         btnSignIn.setOnClickListener {
+            Log.i(TAG, "Google sign-in started")
             viewModel.onSignInClicked(requireActivity())
         }
 
@@ -62,11 +64,13 @@ class LoginFragment : Fragment() {
                         is LoginUiState.Success -> {
                             btnSignIn.isEnabled = true
                             progressBar.visibility = View.GONE
+                            Log.i(TAG, "Signed in")
                             offerBiometricUnlockThenGoHome()
                         }
                         is LoginUiState.Error -> {
                             btnSignIn.isEnabled = true
                             progressBar.visibility = View.GONE
+                            Log.w(TAG, "Sign-in failed, showing ${resources.getResourceEntryName(state.messageRes)}")
                             Toast.makeText(requireContext(), state.messageRes, Toast.LENGTH_LONG).show()
                         }
                     }
@@ -96,6 +100,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun answerOffer(accepted: Boolean) {
+        Log.i(TAG, "Biometric unlock offer ${if (accepted) "accepted" else "declined"}")
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.answerBiometricOffer(accepted)
             if (accepted) Toast.makeText(requireContext(), R.string.biometric_offer_enabled, Toast.LENGTH_SHORT).show()
@@ -107,6 +112,10 @@ class LoginFragment : Fragment() {
         if (findNavController().currentDestination?.id == R.id.loginFragment) {
             findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
         }
+    }
+
+    private companion object {
+        const val TAG = "LoginFragment"
     }
 }
 //------------------------------EOF------------------------------\\
