@@ -362,4 +362,22 @@
     <string name="sign_in_no_account">Ayitholakalanga i-akhawunti ye-Google kule foni. Yengeze kuzilungiselelo zefoni yakho bese uzama futhi.</string>
     <string name="sign_in_no_connection">Akukwazekanga ukufinyelela ku-Backlog Battlers. Hlola uxhumano lwakho bese uzama futhi.</string>
     <string name="sign_in_failed">Ukungena akusebenzanga. Sicela uzame futhi.</string>
+
+    <!-- push notifications -->
+    <string name="channel_friend_activity">Okwenziwa abangane</string>
+    <string name="channel_friend_activity_body">Izicelo zobungane, nabangane abaqeda imidlalo</string>
+    <string name="channel_competition">Umncintiswano</string>
+    <string name="channel_competition_body">Uma othile ekudlula ohlwini lwamaphuzu lwenyanga</string>
+    <string name="push_friend_request_title">Isicelo esisha sobungane</string>
+    <string name="push_friend_request_body">U-%1$s ufuna ukuba umngane wakho</string>
+    <string name="push_friend_accepted_title">Isicelo sobungane samukelwe</string>
+    <string name="push_friend_accepted_body">Wena no-%1$s senibangane manje</string>
+    <string name="push_friend_completed_title">U-%1$s uqede umdlalo</string>
+    <string name="push_friend_completed_body">U-%1$s usanda kuqeda i-%2$s</string>
+    <string name="push_overtaken_title">Kukhona okudlulile</string>
+    <string name="push_overtaken_body">U-%1$s ukudlulile ohlwini lwamaphuzu lwale nyanga</string>
+    <string name="notification_permission_title">Vula izaziso?</string>
+    <string name="notification_permission_body">Yazi uma othile ekuthumelela isicelo sobungane, umngane eqeda umdlalo, noma othile ekudlula ohlwini lwamaphuzu. Khetha ukuthi yiziphi ku-Izilungiselelo → Izaziso.</string>
+    <string name="notification_permission_allow">Vumela</string>
+    <string name="notification_permission_decline">Hhayi manje</string>
 </resources>
