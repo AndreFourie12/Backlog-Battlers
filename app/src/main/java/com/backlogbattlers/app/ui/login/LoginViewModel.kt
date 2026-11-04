@@ -67,6 +67,8 @@ class LoginViewModel(
                     // brings down the settings saved to this account, e.g. from another phone.
                     // runs past this screen, which closes as the user is taken home
                     ServiceLocator.applicationScope.launch { ServiceLocator.settingsSync.sync() }
+                    // and the game library, so a sign-in on a new phone gets back what was saved
+                    ServiceLocator.applicationScope.launch { ServiceLocator.librarySync.sync() }
                 }
                 is AuthResult.Failure -> {
                     Log.e("LoginViewModel", "Sign-In failure, showing message ${result.messageRes}")
