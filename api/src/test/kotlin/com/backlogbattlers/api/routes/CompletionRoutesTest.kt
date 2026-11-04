@@ -9,18 +9,28 @@ import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.Platform
 import com.backlogbattlers.api.db.UnlockedAchievements
+import com.backlogbattlers.api.db.UserSteamAccounts
 import com.backlogbattlers.api.db.Users
+import com.backlogbattlers.api.games.IgdbClient
+import com.backlogbattlers.api.games.SteamClient
+import com.backlogbattlers.api.games.igdbHttpClient
 import com.backlogbattlers.api.scoring.CompleteResponseDto
 import com.backlogbattlers.api.scoring.currentMonthPeriod
 import com.backlogbattlers.api.scoring.monthlyPointsFor
+import com.backlogbattlers.api.steam.SteamCheckStatus
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -38,11 +48,12 @@ import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
 /**
- * Marking games complete, end to end. No IGDB or Steam calls happen here: completion only ever
- * reads Games/Achievements rows the catalogue and achievement features already stored.
+ * Marking games complete, end to end, against a fake IGDB and a fake Steam. Achievement points are
+ * only paid for achievements the fake Steam says the player has unlocked.
  */
 class CompletionRoutesTest {
 
@@ -50,12 +61,62 @@ class CompletionRoutesTest {
     private var caller: Uuid? = null
     private val month = currentMonthPeriod() // the routes award points to the real current month
 
+    private val jsonHeaders = headersOf(HttpHeaders.ContentType, "application/json")
+    private val tokenJson = """{"access_token":"tok","expires_in":3600,"token_type":"bearer"}"""
+    private val playerSteamId = "76561198000000001"
+
+    // The fake IGDB: Hades' Steam listing (empty = the game is not on Steam)
+    private var steamListing = """[{"id":1740294,"game":113112,"uid":"1145360","external_game_source":1}]"""
+
+    // The fake Steam: the achievements the player has really unlocked, and how Steam answers
+    private var steamUnlocked: Set<String> = emptySet()
+    private var steamStatus = HttpStatusCode.OK
+    private var steamBody: String? = null // replaces the generated body, e.g. for a private profile
+    private val steamRequests = mutableListOf<HttpRequestData>()
+
+    private val allCodes = listOf("A_RARE", "A_COMMON", "A_VERY_RARE", "A_UNKNOWN")
+
+    // Steam lists every achievement of the game with achieved 0 or 1
+    private fun playerStatsJson() = steamBody ?: (
+        """{"playerstats":{"steamID":"$playerSteamId","gameName":"Hades","success":true,"achievements":[""" +
+            allCodes.joinToString(",") { """{"apiname":"$it","achieved":${if (it in steamUnlocked) 1 else 0}}""" } + "]}}"
+        )
+
+    private val fakeIgdb = IgdbClient(
+        igdbHttpClient(
+            MockEngine { request ->
+                when (request.url.encodedPath) {
+                    "/oauth2/token" -> respond(tokenJson, HttpStatusCode.OK, jsonHeaders)
+                    "/v4/external_games" -> respond(steamListing, HttpStatusCode.OK, jsonHeaders)
+                    else -> respond("[]", HttpStatusCode.OK, jsonHeaders)
+                }
+            },
+        ),
+        clientId = "id",
+        clientSecret = "secret",
+    )
+
+    private val fakeSteam = SteamClient(
+        HttpClient(
+            MockEngine { request ->
+                steamRequests += request
+                respond(playerStatsJson(), steamStatus, jsonHeaders)
+            },
+        ),
+        apiKey = "steam-key",
+    )
+
     private fun ApplicationTestBuilder.installApi() {
         application {
             install(ContentNegotiation) { json() }
             configureErrors()
-            routing { completionRoutes { caller } }
+            routing { completionRoutes(fakeIgdb, fakeSteam) { caller } }
         }
+    }
+
+    /** Links the user to a Steam account, so their achievements can be checked. */
+    private fun linkSteam(user: Uuid, steamId: String = playerSteamId) = transaction(db) {
+        UserSteamAccounts.insert { it[userId] = user; it[UserSteamAccounts.steamId] = steamId }
     }
 
     private fun newUser(): Uuid = transaction(db) {
@@ -113,11 +174,15 @@ class CompletionRoutesTest {
         caller = newUser()
         val entry = addEntry(caller!!)
         unlock(entry, "A_RARE", "A_COMMON") // A_UNKNOWN stays locked
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_RARE", "A_COMMON")
 
         val response = client.complete(entry, CompletionType.MAIN_STORY)
 
         assertEquals(HttpStatusCode.OK, response.status)
         val body = Json.decodeFromString<CompleteResponseDto>(response.bodyAsText())
+        assertEquals(SteamCheckStatus.VERIFIED, body.steamStatus)
+        assertEquals(emptyList(), body.unverifiedAchievementIds)
         assertEquals(20 + 5, body.achievementPoints) // Rare tier (20) + Common tier (5), not the locked/unknown one
         assertEquals(70, body.completionTimePoints) // Hades' avgCompletionHours, rounded
         assertEquals(0, body.speedBonusPoints) // hoursPlayed was never set, so there is nothing to compare
@@ -149,6 +214,8 @@ class CompletionRoutesTest {
         caller = newUser()
         val entry = addEntry(caller!!)
         unlock(entry, "A_COMMON")
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_COMMON")
         val first = client.complete(entry, CompletionType.MAIN_STORY)
         val firstTotal = Json.decodeFromString<CompleteResponseDto>(first.bodyAsText()).monthlyPoints
 
@@ -165,9 +232,12 @@ class CompletionRoutesTest {
         caller = newUser()
         val entry = addEntry(caller!!)
         unlock(entry, "A_RARE") // counted on the first completion
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_RARE")
         client.complete(entry, CompletionType.MAIN_STORY)
 
         unlock(entry, "A_VERY_RARE") // only this one is new for the second completion
+        steamUnlocked = setOf("A_RARE", "A_VERY_RARE")
         val second = client.complete(entry, CompletionType.COMPLETIONIST)
 
         val body = Json.decodeFromString<CompleteResponseDto>(second.bodyAsText())
@@ -184,6 +254,8 @@ class CompletionRoutesTest {
         caller = newUser()
         val entry = addEntry(caller!!)
         unlock(entry, "A_UNKNOWN")
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_UNKNOWN")
 
         val response = client.complete(entry, CompletionType.MAIN_STORY)
 
@@ -221,6 +293,145 @@ class CompletionRoutesTest {
 
         val body = Json.decodeFromString<CompleteResponseDto>(response.bodyAsText())
         assertEquals(0, body.speedBonusPoints)
+    }
+
+    @Test
+    fun `an achievement Steam does not confirm earns nothing, while the ones it confirms still pay`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_RARE", "A_COMMON") // the player ticked both...
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_COMMON") // ...but Steam says only one was really earned
+
+        val body = Json.decodeFromString<CompleteResponseDto>(client.complete(entry, CompletionType.MAIN_STORY).bodyAsText())
+
+        assertEquals(SteamCheckStatus.VERIFIED, body.steamStatus)
+        assertEquals(5, body.achievementPoints) // Common only
+        assertEquals(listOf("A_RARE"), body.unverifiedAchievementIds)
+        assertEquals(5 + 70, body.pointsAwarded)
+    }
+
+    @Test
+    fun `without a linked Steam account no achievement points are paid and Steam is not asked`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_RARE")
+        steamUnlocked = setOf("A_RARE") // would be confirmed, if anyone asked
+
+        val body = Json.decodeFromString<CompleteResponseDto>(client.complete(entry, CompletionType.MAIN_STORY).bodyAsText())
+
+        assertEquals(SteamCheckStatus.NOT_LINKED, body.steamStatus)
+        assertEquals(0, body.achievementPoints)
+        assertEquals(listOf("A_RARE"), body.unverifiedAchievementIds)
+        assertEquals(70, body.pointsAwarded) // completion-time points are unaffected
+        assertTrue(steamRequests.isEmpty())
+    }
+
+    @Test
+    fun `a private Steam profile pays no achievement points and says why`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_RARE")
+        linkSteam(caller!!)
+        steamStatus = HttpStatusCode.Forbidden
+        steamBody = """{"playerstats":{"error":"Profile is not public","success":false}}"""
+
+        val body = Json.decodeFromString<CompleteResponseDto>(client.complete(entry, CompletionType.MAIN_STORY).bodyAsText())
+
+        assertEquals(SteamCheckStatus.PRIVATE_PROFILE, body.steamStatus)
+        assertEquals(0, body.achievementPoints)
+        assertEquals(listOf("A_RARE"), body.unverifiedAchievementIds)
+    }
+
+    @Test
+    fun `a game with no Steam listing cannot have its achievements confirmed`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_RARE")
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_RARE")
+        steamListing = "[]"
+
+        val body = Json.decodeFromString<CompleteResponseDto>(client.complete(entry, CompletionType.MAIN_STORY).bodyAsText())
+
+        assertEquals(SteamCheckStatus.NOT_ON_STEAM, body.steamStatus)
+        assertEquals(0, body.achievementPoints)
+        assertTrue(steamRequests.isEmpty())
+    }
+
+    @Test
+    fun `a Steam outage completes nothing and costs no points, so the player can simply retry`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_RARE")
+        linkSteam(caller!!)
+        steamStatus = HttpStatusCode.InternalServerError
+        steamBody = ""
+
+        val down = client.complete(entry, CompletionType.MAIN_STORY)
+
+        assertEquals(HttpStatusCode.BadGateway, down.status)
+        assertEquals(LibraryStatus.BACKLOG, transaction(db) { LibraryEntries.selectAll().single()[LibraryEntries.status] })
+        assertEquals(0, monthlyPointsFor(caller!!, month))
+
+        steamStatus = HttpStatusCode.OK
+        steamBody = null
+        steamUnlocked = setOf("A_RARE")
+        val retry = Json.decodeFromString<CompleteResponseDto>(client.complete(entry, CompletionType.MAIN_STORY).bodyAsText())
+        assertEquals(20, retry.achievementPoints)
+    }
+
+    @Test
+    fun `an achievement Steam did not confirm yet is still payable by a later completion`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_RARE", "A_COMMON")
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_COMMON") // Steam has one of the two so far
+        val story = Json.decodeFromString<CompleteResponseDto>(client.complete(entry, CompletionType.MAIN_STORY).bodyAsText())
+        assertEquals(5, story.achievementPoints)
+        assertEquals(listOf("A_RARE"), story.unverifiedAchievementIds)
+
+        steamUnlocked = setOf("A_RARE", "A_COMMON")
+        val full = Json.decodeFromString<CompleteResponseDto>(client.complete(entry, CompletionType.COMPLETIONIST).bodyAsText())
+
+        assertEquals(20, full.achievementPoints) // A_RARE now, and A_COMMON is not paid a second time
+        assertEquals(emptyList(), full.unverifiedAchievementIds)
+    }
+
+    @Test
+    fun `Steam is asked about the linked player and the game's Steam app, and only when something is waiting`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        linkSteam(caller!!)
+        client.complete(entry, CompletionType.MAIN_STORY) // nothing unlocked, so nothing to check
+        assertTrue(steamRequests.isEmpty())
+
+        unlock(entry, "A_RARE")
+        steamUnlocked = setOf("A_RARE")
+        client.complete(entry, CompletionType.COMPLETIONIST)
+
+        val asked = steamRequests.single().url
+        assertEquals(playerSteamId, asked.parameters["steamid"])
+        assertEquals("1145360", asked.parameters["appid"])
+
+        // everything is paid for now, so a further completion costs no Steam call
+        client.complete(entry, CompletionType.MAIN_EXTRA)
+        assertEquals(1, steamRequests.size)
     }
 
     @Test
