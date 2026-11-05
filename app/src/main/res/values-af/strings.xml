@@ -397,8 +397,8 @@
     <string name="steam_account_no_connection">Geen verbinding nie. Kontroleer jou internet en probeer weer</string>
     <string name="steam_account_failed">Iets het skeefgeloop. Probeer asseblief weer</string>
     <string name="steam_import">Voer speletjies in</string>
-    <string name="steam_import_body">Voeg die speletjies wat jy op Steam besit by jou biblioteek op PC, met jou ure gespeel. Speletjies wat reeds in jou biblioteek is, bly waar hulle is; hul ure gaan net op.</string>
-    <string name="steam_import_done">Steam-invoer: %1$d speletjies bygevoeg, ure op %2$d bygewerk</string>
+    <string name="steam_import_body">Voeg die speletjies wat jy op Steam besit by jou biblioteek op PC, met jou ure gespeel en die prestasies wat jy ontsluit het. Speletjies wat reeds in jou biblioteek is, bly waar hulle is; hul ure gaan net op.</string>
+    <string name="steam_import_done">Steam-invoer: %1$d speletjies bygevoeg, ure op %2$d bygewerk, %3$d prestasies ontsluit</string>
     <string name="steam_import_up_to_date">Jou biblioteek stem reeds ooreen met Steam</string>
     <string name="steam_import_private">Steam wil nie jou speletjies lys nie. Stel jou Steam-profiel en speletjiebesonderhede op Publiek en probeer dan weer</string>
     <string name="steam_import_too_soon">Jy het netnou ingevoer. Probeer weer oor \'n paar minute</string>

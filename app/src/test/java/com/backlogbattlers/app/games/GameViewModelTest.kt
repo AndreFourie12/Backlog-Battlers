@@ -36,6 +36,12 @@ private class FlakyGameRepository(
 ) : GameRepository by fake {
 
     var failing = false
+    val refreshedGameIds = mutableListOf<Int>()
+
+    override suspend fun refreshGame(gameId: Int): Game {
+        refreshedGameIds += gameId
+        return fake.refreshGame(gameId)
+    }
 
     override suspend fun getPopularGames(): List<Game> {
         if (failing) throw IOException("cache unavailable")
@@ -200,7 +206,7 @@ class GameViewModelTest {
     }
 
     @Test
-    fun `a game the cache has not seen yet is counted but left out of the library list`() = runTest {
+    fun `a game the cache has not seen yet is counted and included in the library list with a fallback`() = runTest {
         val hades = game(1, "Hades") // deliberately not put in games.fake.cachedGames
         val viewModel = viewModel()
         advanceUntilIdle()
@@ -209,7 +215,22 @@ class GameViewModelTest {
         advanceUntilIdle()
 
         assertEquals(1, viewModel.uiState.value.libraryCount)
-        assertEquals(emptyList<Any>(), viewModel.uiState.value.libraryGames)
+        assertEquals(1, viewModel.uiState.value.libraryGames.size)
+        assertEquals(1, viewModel.uiState.value.libraryGames.single().game.gameId)
+        assertEquals(emptyList<Int>(), games.refreshedGameIds)
+    }
+
+    @Test
+    fun `a library with only four cached games still displays all twelve without fetching details`() = runTest {
+        games.fake.cachedGames = (1..4).associateWith { game(it, "Cached $it", totalAchievements = 0) }
+        (1..12).forEach { library.addToLibrary(it, Platform.PC, LibraryStatus.BACKLOG) }
+
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertEquals(12, viewModel.uiState.value.libraryCount)
+        assertEquals((1..12).toSet(), viewModel.uiState.value.visibleLibraryGames.map { it.game.gameId }.toSet())
+        assertEquals(emptyList<Int>(), games.refreshedGameIds)
     }
 
     @Test

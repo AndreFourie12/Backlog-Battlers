@@ -2,10 +2,14 @@ package com.backlogbattlers.api.library
 
 import com.backlogbattlers.api.db.Achievements
 import com.backlogbattlers.api.db.CompletionType
+import com.backlogbattlers.api.db.Games
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.Platform
+import com.backlogbattlers.api.db.SteamApps
 import com.backlogbattlers.api.db.UnlockedAchievements
+import com.backlogbattlers.api.games.GameDto
+import com.backlogbattlers.api.games.steamArtUrl
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
@@ -35,6 +39,8 @@ data class LibraryEntryDto(
     val completionType: CompletionType?,
     val addedAt: Long,
     val updatedAt: Long,
+    /** Saved details for library sync; no Steam or IGDB lookup is needed. */
+    val game: GameDto? = null,
 )
 
 /** Body of `POST /users/me/library`. */
@@ -84,7 +90,28 @@ fun listEntries(owner: Uuid): List<LibraryEntryDto> = transaction {
         .where { LibraryEntries.userId eq owner }
         .orderBy(LibraryEntries.addedAt, SortOrder.DESC)
         .toList()
-    toDtos(rows)
+    val entries = toDtos(rows)
+    val gameIds = rows.map { it[LibraryEntries.gameId] }.distinct()
+    if (gameIds.isEmpty()) return@transaction entries
+
+    val appsByGame = SteamApps.selectAll().where { SteamApps.gameId inList gameIds }
+        .groupBy({ it[SteamApps.gameId] }, { it[SteamApps.appId] })
+        .mapValues { (_, apps) -> apps.min() }
+    val platformsByGame = entries.groupBy { it.gameId }
+        .mapValues { (_, games) -> games.map { it.platform.name }.distinct() }
+    val games = Games.selectAll().where { Games.id inList gameIds }.associate { row ->
+        val id = row[Games.id]
+        id to GameDto(
+            gameId = id,
+            title = row[Games.title],
+            coverImageUrl = null,
+            platforms = platformsByGame[id].orEmpty(),
+            avgCompletionHours = row[Games.avgCompletionHours],
+            avg100PercentHours = row[Games.avg100PercentHours],
+            artworkUrl = steamArtUrl(appsByGame[id]),
+        )
+    }
+    entries.map { it.copy(game = games[it.gameId]) }
 }
 
 /**

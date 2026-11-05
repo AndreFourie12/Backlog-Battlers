@@ -35,6 +35,8 @@ data class LibraryEntryDto(
     val completionType: CompletionType? = null,
     val addedAt: Long,
     val updatedAt: Long,
+    // Saved server details let a synced entry appear even on a fresh phone.
+    val game: GameDto? = null,
 )
 
 /** Body of `POST /users/me/library`. The id is the one the entry already has on this phone. */

@@ -180,8 +180,8 @@ class GameViewModel(
         }
     }
 
-    // pairs each entry with its game from the cache, for the list on this screen. Nothing reaches
-    // the library without having been shown, and cached, somewhere first, so this should never miss
+    // Sync supplies saved game details in its existing response. While waiting for that sync,
+    // keep uncached entries visible with a fallback instead of requesting each game separately.
     private fun loadLibraryGames(entries: List<LibraryEntry>) {
         libraryGamesJob?.cancel()
         if (entries.isEmpty()) {
@@ -189,19 +189,33 @@ class GameViewModel(
             return
         }
         libraryGamesJob = viewModelScope.launch {
-            val games = entries.mapNotNull { entry ->
-                gameRepository.getGame(entry.gameId)?.let { game -> LibraryGame(entry, game) }
+            val missingGameIds = mutableSetOf<Int>()
+            val games = entries.map { entry ->
+                val cached = gameRepository.getGame(entry.gameId)
+                if (cached != null) {
+                    LibraryGame(entry, cached)
+                } else {
+                    missingGameIds += entry.gameId
+                    LibraryGame(
+                        entry,
+                        Game(
+                            gameId = entry.gameId,
+                            title = "Game #${entry.gameId}",
+                            coverImageUrl = null,
+                            platforms = listOf(entry.platform.name),
+                            avgCompletionHours = null,
+                            avg100PercentHours = null,
+                            cachedAt = System.currentTimeMillis(),
+                        ),
+                    )
+                }
             }
             _uiState.update { it.copy(libraryGames = games) }
 
-            // games added before achievement totals were tracked, or whose first fetch never
-            // finished, catch up here rather than sitting at 0% forever. a few per load, one after
-            // another and played games first, so a big Steam import never fires hundreds of
-            // requests at once; the rest fill in on later loads, or when the game is opened
-            val waiting = games.filter { it.game.totalAchievements == null }
+            // Keep the existing bounded achievement catch-up for cached games only. Missing
+            // game details arrive through library sync, without extra Steam or IGDB lookups.
+            val waiting = games.filter { it.game.gameId !in missingGameIds && it.game.totalAchievements == null }
             if (waiting.isEmpty()) return@launch
-            // a sync bringing in many entries changes the library many times in a row, and each change
-            // restarts this job; waiting a moment first means only the last one sends anything
             delay(CATCH_UP_SETTLE_MS)
             waiting
                 .sortedByDescending { it.entry.hoursPlayed > 0f || it.entry.unlockedAchievementIds.isNotEmpty() }

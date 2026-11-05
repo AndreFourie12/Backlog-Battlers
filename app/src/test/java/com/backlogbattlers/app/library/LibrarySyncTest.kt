@@ -2,6 +2,7 @@ package com.backlogbattlers.app.library
 
 import com.backlogbattlers.app.data.local.entity.LibraryEntryEntity
 import com.backlogbattlers.app.data.remote.CreateLibraryEntryRequest
+import com.backlogbattlers.app.data.remote.GameDto
 import com.backlogbattlers.app.data.remote.LibraryApi
 import com.backlogbattlers.app.data.remote.LibraryEntryDto
 import com.backlogbattlers.app.data.remote.UpdateLibraryEntryRequest
@@ -53,6 +54,8 @@ class LibrarySyncTest {
 
     // the user edits the entry on the phone while its upload is in flight
     private var editDuringUpload: (() -> Unit)? = null
+    private val cachedGames = mutableListOf<GameDto>()
+    private var entriesWhenCaching = -1
 
     private val sync = LibrarySync(
         dao = dao,
@@ -70,6 +73,10 @@ class LibrarySyncTest {
         ),
         accessToken = { if (signedInAs != null) "token-123" else null },
         currentUserId = { signedInAs },
+        cacheMissingGames = { games ->
+            entriesWhenCaching = dao.getAll(ALICE).size
+            cachedGames += games
+        },
     )
 
     private fun MockRequestHandleScope.answer(request: HttpRequestData) = when (request.method) {
@@ -154,6 +161,22 @@ class LibrarySyncTest {
     ) = LibraryEntryDto(id, gameId, platform, status, hours, emptyList(), null, addedAt = 500L, updatedAt = 2_000L)
 
     private fun rowsOf(id: String) = dao.rows.value.single { it.libraryEntryId == id }
+
+    @Test
+    fun `all imported games are cached before entries arrive using only the library request`() = runBlocking {
+        (1..12).forEach { gameId ->
+            server["entry-$gameId"] = remote("entry-$gameId", gameId).copy(
+                game = GameDto(gameId = gameId, title = "Imported game $gameId"),
+            )
+        }
+
+        sync.sync()
+
+        assertEquals(0, entriesWhenCaching)
+        assertEquals((1..12).toList(), cachedGames.map { it.gameId })
+        assertEquals(12, dao.getAll(ALICE).size)
+        assertEquals(listOf("GET"), methodsSeen())
+    }
 
     @Test
     fun `a game added on the phone is created on the account under the same id and stops being pending`() = runBlocking {
