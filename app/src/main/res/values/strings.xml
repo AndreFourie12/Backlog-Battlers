@@ -420,7 +420,7 @@
     <!-- Steam account (Settings > Connected Accounts) -->
     <string name="settings_connected_accounts_value">Steam</string>
     <string name="title_steam_account">Steam account</string>
-    <string name="steam_account_intro">Link your Steam account so Backlog Battlers can check your achievements against Steam. Only achievements Steam confirms earn points.</string>
+    <string name="steam_account_intro">Link your Steam account to import the games you own and so Backlog Battlers can check your achievements against Steam. Only achievements Steam confirms earn points.</string>
     <string name="steam_account_not_linked">No Steam account linked</string>
     <string name="steam_account_linked_label">Linked Steam ID</string>
     <string name="steam_account_id_hint">Steam ID (17 digits)</string>
@@ -434,6 +434,14 @@
     <string name="steam_account_sign_in_again">Your session has expired. Please sign in again</string>
     <string name="steam_account_no_connection">No connection. Check your internet and try again</string>
     <string name="steam_account_failed">Something went wrong. Please try again</string>
+    <string name="steam_import">Import games</string>
+    <string name="steam_import_body">Adds the games you own on Steam to your library on PC, with your hours played. Games already in your library stay where they are; their hours only ever go up.</string>
+    <string name="steam_import_done">Steam import: %1$d games added, hours updated on %2$d</string>
+    <string name="steam_import_up_to_date">Your library is already up to date with Steam</string>
+    <string name="steam_import_private">Steam won\'t list your games. Set your Steam profile and Game details to Public, then try again</string>
+    <string name="steam_import_too_soon">You imported a moment ago. Try again in a couple of minutes</string>
+    <string name="steam_import_not_linked">Link your Steam account first</string>
+    <string name="steam_import_unavailable">Steam or the game catalogue is unavailable right now. Try again later</string>
     <string name="steam_account_load_failed">Couldn\'t load your Steam account</string>
     <string name="steam_account_retry">Retry</string>
 

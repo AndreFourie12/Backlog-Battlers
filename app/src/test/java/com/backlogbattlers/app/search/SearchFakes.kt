@@ -1,5 +1,6 @@
 package com.backlogbattlers.app.search
 
+import com.backlogbattlers.app.data.remote.GameDto
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
@@ -104,6 +105,9 @@ class FakeGameRepository : GameRepository {
         cachedGames[gameId]?.let { cachedGames = cachedGames + (gameId to it.copy(totalAchievements = achievements.size)) }
         return achievements
     }
+
+    // not used by these tests: only the Steam import caches games this way
+    override suspend fun cacheFromApi(games: List<GameDto>): List<Game> = emptyList()
 }
 
 class FakeLibraryRepository : LibraryRepository {

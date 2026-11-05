@@ -212,7 +212,12 @@ object ServiceLocator {
     }
 
     val steamAccountRepository: SteamAccountRepository by lazy {
-        SteamAccountRepositoryImpl(steamApi, accessToken = { authRepository.freshAccessToken() })
+        SteamAccountRepositoryImpl(
+            steamApi,
+            accessToken = { authRepository.freshAccessToken() },
+            cacheGames = { games -> gameRepository.cacheFromApi(games) },
+            syncLibrary = { librarySync.sync() },
+        )
     }
 
     val devicesApi: DevicesApi by lazy {

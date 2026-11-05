@@ -2,7 +2,9 @@ package com.backlogbattlers.app.data.repository
 
 import android.util.Log
 import com.backlogbattlers.app.data.remote.SessionExpiredException
+import com.backlogbattlers.app.data.remote.GameDto
 import com.backlogbattlers.app.data.remote.SteamApi
+import com.backlogbattlers.app.data.remote.SteamImportResponse
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
@@ -38,6 +40,32 @@ sealed interface SteamAccountLoad {
 }
 
 //------------------------------
+// what importing the Steam library gave
+sealed interface SteamImportOutcome {
+    // added games are new library entries; hoursUpdated are entries whose hours rose to Steam's
+    data class Imported(val added: Int, val hoursUpdated: Int) : SteamImportOutcome
+
+    data class Failed(val reason: SteamImportFailure) : SteamImportOutcome
+}
+
+enum class SteamImportFailure {
+    NOT_LINKED,
+
+    // the Steam profile, or its game details, is private
+    PRIVATE_PROFILE,
+
+    // imported moments ago; the server waits a couple of minutes before asking Steam again
+    TOO_SOON,
+
+    // Steam or the game catalogue is down
+    UNAVAILABLE,
+
+    SIGN_IN_AGAIN,
+    NO_CONNECTION,
+    FAILED,
+}
+
+//------------------------------
 // the Steam account the signed-in user links, so their achievements can be checked against Steam.
 // the server holds it; nothing is kept on the phone
 interface SteamAccountRepository {
@@ -50,6 +78,9 @@ interface SteamAccountRepository {
 
     // removes the link
     suspend fun unlink(): SteamAccountResult
+
+    // adds the games owned on Steam to the library, caches them, and syncs the library so they show
+    suspend fun importGames(): SteamImportOutcome
 }
 
 //------------------------------
@@ -57,6 +88,10 @@ interface SteamAccountRepository {
 class SteamAccountRepositoryImpl(
     private val steamApi: SteamApi,
     private val accessToken: suspend () -> String?,
+    // caches the games an import added, so the library can show them without a request each
+    private val cacheGames: suspend (List<GameDto>) -> Unit = {},
+    // pulls the account's library, which now holds the imported entries
+    private val syncLibrary: suspend () -> Unit = {},
 ) : SteamAccountRepository {
 
     override suspend fun load(): SteamAccountLoad {
@@ -72,6 +107,34 @@ class SteamAccountRepositoryImpl(
     override suspend fun unlink(): SteamAccountResult = attempt { token ->
         steamApi.deleteLink(token)
         SteamAccountResult.DONE
+    }
+
+    override suspend fun importGames(): SteamImportOutcome {
+        var outcome: SteamImportOutcome = SteamImportOutcome.Failed(SteamImportFailure.FAILED)
+        val result = attempt { token ->
+            outcome = when (val response = steamApi.importGames(token)) {
+                is SteamImportResponse.Imported -> {
+                    val imported = response.result
+                    Log.i(TAG, "Steam import: ${imported.added} added, ${imported.hoursUpdated} hours updated, " +
+                        "${imported.unchanged} unchanged, ${imported.notInCatalogue} not in the catalogue, of ${imported.ownedOnSteam}")
+                    // cached before the sync, so the entries the sync brings in have a game to show
+                    cacheGames(imported.games)
+                    if (imported.added > 0 || imported.hoursUpdated > 0) syncLibrary()
+                    SteamImportOutcome.Imported(imported.added, imported.hoursUpdated)
+                }
+                SteamImportResponse.NotLinked -> SteamImportOutcome.Failed(SteamImportFailure.NOT_LINKED)
+                SteamImportResponse.PrivateProfile -> SteamImportOutcome.Failed(SteamImportFailure.PRIVATE_PROFILE)
+                SteamImportResponse.TooSoon -> SteamImportOutcome.Failed(SteamImportFailure.TOO_SOON)
+                SteamImportResponse.Unavailable -> SteamImportOutcome.Failed(SteamImportFailure.UNAVAILABLE)
+            }
+            SteamAccountResult.DONE
+        }
+        return when (result) {
+            SteamAccountResult.DONE -> outcome
+            SteamAccountResult.SIGN_IN_AGAIN -> SteamImportOutcome.Failed(SteamImportFailure.SIGN_IN_AGAIN)
+            SteamAccountResult.NO_CONNECTION -> SteamImportOutcome.Failed(SteamImportFailure.NO_CONNECTION)
+            SteamAccountResult.TAKEN, SteamAccountResult.FAILED -> SteamImportOutcome.Failed(SteamImportFailure.FAILED)
+        }
     }
 
     //------------------------------

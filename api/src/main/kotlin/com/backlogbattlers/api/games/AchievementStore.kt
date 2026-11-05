@@ -1,6 +1,7 @@
 package com.backlogbattlers.api.games
 
 import com.backlogbattlers.api.db.Achievements
+import com.backlogbattlers.api.steam.steamAppIdFor
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -37,7 +38,8 @@ suspend fun achievementsFor(gameId: Int, igdb: IgdbClient, steam: SteamClient): 
     val stored = storedAchievements(gameId)
     if (stored.isNotEmpty()) return stored
 
-    val appId = igdb.steamAppId(gameId) ?: return emptyList()
+    // from the SteamApps cache when known, so only the first lookup of a game costs an IGDB call
+    val appId = steamAppIdFor(gameId, igdb) ?: return emptyList()
     val rarity = steam.globalRarity(appId)
     if (rarity.isEmpty()) return emptyList()
 

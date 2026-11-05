@@ -242,6 +242,25 @@ object UserSteamAccounts : Table("user_steam_accounts")
     override val primaryKey = PrimaryKey(userId)
 }
 
+// steamapps table: which IGDB game each Steam app is, so importing a Steam library never asks
+// IGDB about the same app twice, whoever imports it. game_id is null when IGDB has no game for the
+// app (a tool, a soundtrack, a demo); those are asked about again after a while, in case IGDB adds
+// them. not a reference to Games: the game is only stored there once someone needs it
+object SteamApps : Table("steam_apps")
+{
+    val appId = integer("app_id")
+    val gameId = integer("game_id").nullable()
+    val checkedAt = timestamp("checked_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(appId)
+
+    init
+    {
+        // "the Steam app of this game", read before every achievement lookup
+        index(false, gameId)
+    }
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -256,5 +275,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     UserSettings,
     Devices,
     UserSteamAccounts,
+    SteamApps,
 )
 //------------------------------EOF------------------------------\\

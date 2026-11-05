@@ -5,6 +5,7 @@ import com.backlogbattlers.app.data.remote.SessionExpiredException
 import com.backlogbattlers.app.data.remote.SteamApi
 import com.backlogbattlers.app.data.repository.SteamAccountLoad
 import com.backlogbattlers.app.data.repository.SteamAccountRepository
+import com.backlogbattlers.app.data.repository.SteamImportOutcome
 import com.backlogbattlers.app.data.repository.SteamAccountRepositoryImpl
 import com.backlogbattlers.app.data.repository.SteamAccountResult
 import com.backlogbattlers.app.data.repository.isValidSteamId
@@ -23,6 +24,7 @@ import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -186,6 +188,15 @@ class SteamAccountTest {
             calls++
             if (actionResult == SteamAccountResult.DONE) linked = null
             return actionResult
+        }
+
+        // null = never answers, like a slow network, so tests about linking see the screen mid-import
+        var importOutcome: SteamImportOutcome? = null
+        var imports = 0
+
+        override suspend fun importGames(): SteamImportOutcome {
+            imports++
+            return importOutcome ?: awaitCancellation()
         }
     }
 

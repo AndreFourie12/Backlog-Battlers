@@ -52,10 +52,13 @@ class SteamAccountFragment : Fragment() {
         val input = view.findViewById<EditText>(R.id.etSteamId)
         val linkButton = view.findViewById<View>(R.id.btnSteamLink)
         val unlinkButton = view.findViewById<View>(R.id.btnSteamUnlink)
+        val importButton = view.findViewById<View>(R.id.btnSteamImport)
+        val importProgress = view.findViewById<View>(R.id.progressSteamImport)
 
         view.findViewById<View>(R.id.btnSteamRetry).setOnClickListener { viewModel.load() }
         linkButton.setOnClickListener { viewModel.link(input.text.toString()) }
         unlinkButton.setOnClickListener { viewModel.unlink() }
+        importButton.setOnClickListener { viewModel.importGames() }
         input.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) viewModel.link(input.text.toString())
             true
@@ -75,11 +78,14 @@ class SteamAccountFragment : Fragment() {
 
                     // a request in flight can't be repeated by a second tap
                     linkButton.isEnabled = !state.isSaving
-                    unlinkButton.isEnabled = !state.isSaving
+                    unlinkButton.isEnabled = !state.isSaving && !state.isImporting
+                    importButton.isEnabled = !state.isImporting && !state.isSaving
+                    importProgress.visibility = if (state.isImporting) View.VISIBLE else View.GONE
 
                     // this if statement shows each message once, then tells the view model it was shown
                     if (state.message != null) {
-                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        val text = getString(state.message, *state.messageArgs.toTypedArray())
+                        Toast.makeText(requireContext(), text, Toast.LENGTH_LONG).show()
                         viewModel.messageShown()
                     }
                 }

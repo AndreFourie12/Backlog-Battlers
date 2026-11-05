@@ -38,6 +38,10 @@ interface GameRepository {
 
     // fetches a game's achievements with their global rarity, rarest first, straight from the API
     suspend fun getAchievements(gameId: Int): List<Achievement>
+
+    // caches games the API already sent in full (e.g. those a Steam import just added), so the
+    // library can show them without asking for each one
+    suspend fun cacheFromApi(games: List<GameDto>): List<Game>
 }
 
 
@@ -137,6 +141,8 @@ class GameRepositoryImpl(
         cachedGameDao.upsert(merged.toEntity())
         return merged
     }
+
+    override suspend fun cacheFromApi(games: List<GameDto>): List<Game> = cacheAll(games)
 
     private suspend fun cacheAll(dtos: List<GameDto>): List<Game> {
         val cachedAt = System.currentTimeMillis()

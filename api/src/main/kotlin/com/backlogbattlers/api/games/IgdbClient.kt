@@ -15,6 +15,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.SerialName
@@ -111,22 +112,48 @@ class IgdbClient(
     /**
      * The other way round from [steamAppIds]: Steam app id to IGDB game id, for the apps IGDB has a
      * Steam listing for. When several IGDB entries share one app (editions), the lowest id wins.
+     * Any number of apps can be asked for: they go in batches of [STEAM_APPS_PER_QUERY].
      */
-    suspend fun gameIdsForSteamApps(appIds: List<Int>): Map<Int, Int> {
-        val ids = appIds.distinct()
-        if (ids.isEmpty()) return emptyMap()
-
-        // uid is text in IGDB, so each app id is quoted. they are Ints, so nothing else can get in
-        val uids = ids.joinToString(",") { "\"$it\"" }
-        val limit = (ids.size * 2).coerceAtMost(MAX_ROWS)
-        val listings = query<List<IgdbExternalGame>>(
-            "external_games",
-            "fields game,uid; where uid = ($uids) & external_game_source = $STEAM_SOURCE_ID; limit $limit;",
-        )
-        return listings
+    suspend fun gameIdsForSteamApps(appIds: List<Int>): Map<Int, Int> =
+        inBatches(appIds, STEAM_APPS_PER_QUERY) { batch ->
+            // uid is text in IGDB, so each app id is quoted. they are Ints, so nothing else can get in
+            val uids = batch.joinToString(",") { "\"$it\"" }
+            // editions can list several IGDB games under one app, so leave room for more rows than apps
+            query<List<IgdbExternalGame>>(
+                "external_games",
+                "fields game,uid; where uid = ($uids) & external_game_source = $STEAM_SOURCE_ID; limit $MAX_ROWS;",
+            )
+        }
             .mapNotNull { listing -> listing.uid.toIntOrNull()?.let { it to listing.game } }
             .groupBy({ it.first }, { it.second })
             .mapValues { (_, gameIds) -> gameIds.min() }
+
+    /** Several games at once, in batches of [MAX_ROWS]: one request for up to 500 games. Unknown ids are left out. */
+    suspend fun games(gameIds: List<Int>): List<IgdbGame> =
+        inBatches(gameIds, MAX_ROWS) { batch ->
+            query("games", "$GAME_FIELDS where id = (${batch.joinToString(",")}); limit ${batch.size};")
+        }
+
+    /** The time-to-beat figures of several games at once, by game id, in batches of [MAX_ROWS]. Games with none are left out. */
+    suspend fun timeToBeats(gameIds: List<Int>): Map<Int, IgdbTimeToBeat> =
+        inBatches(gameIds, MAX_ROWS) { batch ->
+            query<List<IgdbTimeToBeat>>(
+                "game_time_to_beats",
+                "fields game_id,normally,completely,count; where game_id = (${batch.joinToString(",")}); limit ${batch.size};",
+            )
+        }.associateBy { it.gameId }
+
+    /**
+     * Runs [request] for each batch of up to [size] distinct ids and joins the results. Batches go
+     * one after another, [BATCH_SPACING_MS] apart, so a big Steam library stays inside IGDB's limit
+     * of 4 requests a second.
+     */
+    private suspend fun <T> inBatches(ids: List<Int>, size: Int, request: suspend (List<Int>) -> List<T>): List<T> {
+        val batches = ids.distinct().chunked(size)
+        return batches.flatMapIndexed { index, batch ->
+            if (index > 0) delay(BATCH_SPACING_MS)
+            request(batch)
+        }
     }
 
     /**
@@ -198,6 +225,8 @@ class IgdbClient(
             "fields name,cover.image_id,platforms.name,genres.name,artworks.image_id,screenshots.image_id;"
         private const val MAX_PAGE_SIZE = 50
         private const val MAX_ROWS = 500
+        private const val STEAM_APPS_PER_QUERY = 250 // half of MAX_ROWS, leaving room for editions
+        private const val BATCH_SPACING_MS = 260L // just over a quarter second: IGDB allows 4 requests a second
         private const val MIN_RATING_COUNT = 5
         private const val STEAM_SOURCE_ID = 1 // IGDB's id for Steam in its external game sources
         private const val SINGLE_PLAYER_MODE_ID = 1 // IGDB's id for the "Single player" game mode
