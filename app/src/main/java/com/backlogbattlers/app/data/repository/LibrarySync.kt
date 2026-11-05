@@ -4,6 +4,7 @@ import android.util.Log
 import com.backlogbattlers.app.data.local.dao.LibraryEntryDao
 import com.backlogbattlers.app.data.local.entity.LibraryEntryEntity
 import com.backlogbattlers.app.data.remote.CreateLibraryEntryRequest
+import com.backlogbattlers.app.data.remote.GameDto
 import com.backlogbattlers.app.data.remote.LibraryApi
 import com.backlogbattlers.app.data.remote.LibraryEntryDto
 import com.backlogbattlers.app.data.remote.SessionExpiredException
@@ -31,6 +32,8 @@ class LibrarySync(
     // a valid access token, or null when nobody is signed in
     private val accessToken: suspend () -> String?,
     private val currentUserId: () -> String?,
+    // Fill missing cached games from this same response before publishing library entries.
+    private val cacheMissingGames: suspend (List<GameDto>) -> Unit = {},
 ) {
 
     // one sync at a time: a push and a pull running together could undo each other's work
@@ -114,6 +117,8 @@ class LibrarySync(
     // merges the account's library into this phone's
     private suspend fun pull(userId: String, token: String) {
         val remote = libraryApi.list(token)
+        if (currentUserId() != userId) return
+        cacheMissingGames(remote.mapNotNull { it.game }.distinctBy { it.gameId })
         if (currentUserId() != userId) return
         val local = dao.getAll(userId).associateBy { it.libraryEntryId }
 

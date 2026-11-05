@@ -397,8 +397,8 @@
     <string name="steam_account_no_connection">Akukho uxhumano. Hlola i-inthanethi yakho bese uzama futhi</string>
     <string name="steam_account_failed">Kukhona okungahambanga kahle. Sicela uzame futhi</string>
     <string name="steam_import">Ngenisa imidlalo</string>
-    <string name="steam_import_body">Yengeza imidlalo onayo ku-Steam emtatsheni wakho ku-PC, namahora owadlalile. Imidlalo esivele isemtatsheni wakho ihlala lapho ikhona; amahora ayo akhuphuka kuphela.</string>
-    <string name="steam_import_done">Ukungenisa kwe-Steam: kwengezwe imidlalo engu-%1$d, amahora abuyekeziwe ku-%2$d</string>
+    <string name="steam_import_body">Yengeza imidlalo onayo ku-Steam emtatsheni wakho ku-PC, namahora owadlalile nezimpumelelo ozivulile. Imidlalo esivele isemtatsheni wakho ihlala lapho ikhona; amahora ayo akhuphuka kuphela.</string>
+    <string name="steam_import_done">Ukungenisa kwe-Steam: kwengezwe imidlalo engu-%1$d, amahora abuyekeziwe ku-%2$d, kwavulwa izimpumelelo ezingu-%3$d</string>
     <string name="steam_import_up_to_date">Umtapo wakho usuvele uhambisana ne-Steam</string>
     <string name="steam_import_private">I-Steam ayifuni ukubala imidlalo yakho. Setha iphrofayela yakho ye-Steam nemininingwane yemidlalo kube Okusesidlangalaleni, bese uzama futhi</string>
     <string name="steam_import_too_soon">Usanda kungenisa. Zama futhi emizuzwini embalwa</string>

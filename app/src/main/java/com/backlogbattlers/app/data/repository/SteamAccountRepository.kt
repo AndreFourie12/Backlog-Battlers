@@ -42,8 +42,9 @@ sealed interface SteamAccountLoad {
 //------------------------------
 // what importing the Steam library gave
 sealed interface SteamImportOutcome {
-    // added games are new library entries; hoursUpdated are entries whose hours rose to Steam's
-    data class Imported(val added: Int, val hoursUpdated: Int) : SteamImportOutcome
+    // added games are new library entries; hoursUpdated are entries whose hours rose to Steam's;
+    // achievementsUnlocked are achievements unlocked on Steam that the library did not have yet
+    data class Imported(val added: Int, val hoursUpdated: Int, val achievementsUnlocked: Int = 0) : SteamImportOutcome
 
     data class Failed(val reason: SteamImportFailure) : SteamImportOutcome
 }
@@ -116,11 +117,12 @@ class SteamAccountRepositoryImpl(
                 is SteamImportResponse.Imported -> {
                     val imported = response.result
                     Log.i(TAG, "Steam import: ${imported.added} added, ${imported.hoursUpdated} hours updated, " +
-                        "${imported.unchanged} unchanged, ${imported.notInCatalogue} not in the catalogue, of ${imported.ownedOnSteam}")
+                        "${imported.unchanged} unchanged, ${imported.notInCatalogue} not in the catalogue, of ${imported.ownedOnSteam}, " +
+                        "${imported.achievementsUnlocked} achievements unlocked")
                     // cached before the sync, so the entries the sync brings in have a game to show
                     cacheGames(imported.games)
-                    if (imported.added > 0 || imported.hoursUpdated > 0) syncLibrary()
-                    SteamImportOutcome.Imported(imported.added, imported.hoursUpdated)
+                    if (imported.added > 0 || imported.hoursUpdated > 0 || imported.achievementsUnlocked > 0) syncLibrary()
+                    SteamImportOutcome.Imported(imported.added, imported.hoursUpdated, imported.achievementsUnlocked)
                 }
                 SteamImportResponse.NotLinked -> SteamImportOutcome.Failed(SteamImportFailure.NOT_LINKED)
                 SteamImportResponse.PrivateProfile -> SteamImportOutcome.Failed(SteamImportFailure.PRIVATE_PROFILE)

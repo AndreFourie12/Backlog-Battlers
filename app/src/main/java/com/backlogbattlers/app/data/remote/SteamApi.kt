@@ -30,6 +30,8 @@ data class SteamImportDto(
     val hoursUpdated: Int,
     val unchanged: Int,
     val notInCatalogue: Int,
+    // achievements unlocked on Steam that the library did not have yet; the sync brings them in
+    val achievementsUnlocked: Int = 0,
     val games: List<GameDto> = emptyList(),
 )
 

@@ -261,6 +261,18 @@ object SteamApps : Table("steam_apps")
     }
 }
 
+// steam_achievement_checks table: how many minutes Steam said an entry's game had been played when
+// its unlocked achievements were last read from Steam. an import only asks Steam again about a game
+// played since then, so importing an unchanged library costs no achievement calls
+object SteamAchievementChecks : Table("steam_achievement_checks")
+{
+    val libraryEntryId = reference("library_entry_id", LibraryEntries.id, onDelete = ReferenceOption.CASCADE)
+    val minutesPlayed = integer("minutes_played")
+    val checkedAt = timestamp("checked_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(libraryEntryId)
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -276,5 +288,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     Devices,
     UserSteamAccounts,
     SteamApps,
+    SteamAchievementChecks,
 )
 //------------------------------EOF------------------------------\\

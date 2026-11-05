@@ -3,12 +3,21 @@ package com.backlogbattlers.api.steam
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.Platform
+import com.backlogbattlers.api.db.SteamAchievementChecks
+import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.games.GameDto
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.OwnedGames
+import com.backlogbattlers.api.games.PlayerAchievements
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.saveGame
 import com.backlogbattlers.api.games.toDto
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -17,6 +26,8 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import org.jetbrains.exposed.v1.jdbc.upsert
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
@@ -36,6 +47,8 @@ data class SteamImportDto(
     val unchanged: Int,
     /** Steam apps the game catalogue has no game for (tools, soundtracks, demos), so they were skipped. */
     val notInCatalogue: Int,
+    /** Achievements Steam says are unlocked that the library did not have yet. */
+    val achievementsUnlocked: Int = 0,
     /** The games just added, so the app can show them without asking for each one. */
     val games: List<GameDto>,
 )
@@ -61,11 +74,15 @@ sealed interface SteamImportResult {
  *  - IGDB: which game each Steam app is comes from the shared SteamApps cache; only apps nobody has
  *    imported before are looked up, 250 per request. Details and time to beat are fetched only for
  *    games new to this library, 500 per request. Importing again with no new games costs no IGDB call.
+ *  - Steam achievements: one call per game played since its achievements were last read, four at a
+ *    time ([SteamAchievementChecks] keeps the playtime they were read at), so a re-import with no new
+ *    playtime asks Steam nothing more.
  *  - A user can import at most once per [cooldown], so tapping the button repeatedly costs nothing.
  *
  * New games go in as PC entries in the backlog. A game already in the library on PC gets its hours
  * raised to Steam's figure (never lowered, so hours logged by hand are kept); one on another
- * platform is left alone.
+ * platform is left alone. The achievements Steam says a PC entry's game has unlocked are added to it,
+ * never removed, and only earn points once the game is completed (see checkUnlocks).
  */
 class SteamImporter(
     private val igdb: IgdbClient,
@@ -94,7 +111,7 @@ class SteamImporter(
                     lastImport.remove(owner)
                     SteamImportResult.PrivateProfile
                 }
-                is OwnedGames.Owned -> SteamImportResult.Imported(addToLibrary(owner, owned, now))
+                is OwnedGames.Owned -> SteamImportResult.Imported(addToLibrary(owner, steamId, owned, now))
             }
         } catch (e: Exception) {
             lastImport.remove(owner)
@@ -102,7 +119,7 @@ class SteamImporter(
         }
     }
 
-    private suspend fun addToLibrary(owner: Uuid, owned: OwnedGames.Owned, now: Instant): SteamImportDto {
+    private suspend fun addToLibrary(owner: Uuid, steamId: String, owned: OwnedGames.Owned, now: Instant): SteamImportDto {
         val gameByApp = resolveSteamApps(owned.games.map { it.appId }, igdb, now)
 
         // when several Steam apps are the same game (editions, a remaster), the most played one counts
@@ -152,18 +169,122 @@ class SteamImporter(
             }
         }
 
+        // the most played Steam app of each game is the one its achievements are read from
+        val playedAppByGame = owned.games
+            .mapNotNull { game -> gameByApp[game.appId]?.let { it to game } }
+            .groupBy({ it.first }, { it.second })
+            .mapValues { (_, apps) -> apps.maxBy { it.minutesPlayed }.appId }
+        val achievementsUnlocked = importUnlocks(owner, steamId, minutesByGame, playedAppByGame, now)
+
         return SteamImportDto(
             ownedOnSteam = owned.games.size,
             added = newGames.size,
             hoursUpdated = hoursUpdated,
             unchanged = gamesInLibrary.size - hoursUpdated,
             notInCatalogue = notInCatalogue,
+            achievementsUnlocked = achievementsUnlocked,
             games = newGames,
         )
     }
 
+    // one PC entry whose achievements are due a read from Steam
+    private data class DueCheck(val entryId: Uuid, val appId: Int, val minutesPlayed: Int)
+
+    /**
+     * Adds the achievements Steam says [owner] has unlocked to their PC entries, for each game played
+     * since its achievements were last read. A game Steam cannot answer for (it is down, or hides that
+     * game's details) is skipped without being marked read, so the next import tries it again, and the
+     * rest of the import still goes through. Returns how many unlocks were new to the library.
+     */
+    private suspend fun importUnlocks(
+        owner: Uuid,
+        steamId: String,
+        minutesByGame: Map<Int, Int>,
+        appByGame: Map<Int, Int>,
+        now: Instant,
+    ): Int {
+        val due = transaction {
+            if (minutesByGame.isEmpty()) return@transaction emptyList()
+            val entries = LibraryEntries.selectAll()
+                .where {
+                    (LibraryEntries.userId eq owner) and (LibraryEntries.platform eq Platform.PC) and
+                        (LibraryEntries.gameId inList minutesByGame.keys)
+                }
+                .associate { it[LibraryEntries.id] to it[LibraryEntries.gameId] }
+            if (entries.isEmpty()) return@transaction emptyList()
+            val readAt = SteamAchievementChecks.selectAll()
+                .where { SteamAchievementChecks.libraryEntryId inList entries.keys }
+                .associate { it[SteamAchievementChecks.libraryEntryId] to it[SteamAchievementChecks.minutesPlayed] }
+            entries.mapNotNull { (entryId, gameId) ->
+                val minutes = minutesByGame.getValue(gameId)
+                val appId = appByGame[gameId]
+                // never played, or not played since the last read: Steam has nothing new to say
+                if (appId == null || minutes == 0 || (readAt[entryId] ?: -1) >= minutes) null
+                else DueCheck(entryId, appId, minutes)
+            }
+        }
+        if (due.isEmpty()) return 0
+
+        val gate = Semaphore(PARALLEL_ACHIEVEMENT_CALLS)
+        val answers = coroutineScope {
+            due.map { check ->
+                async {
+                    gate.withPermit {
+                        try {
+                            check to steam.unlockedAchievements(steamId, check.appId)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            log.warn("Steam achievements for app {} could not be read, retried on the next import: {}", check.appId, e.javaClass.simpleName)
+                            null
+                        }
+                    }
+                }
+            }.awaitAll().filterNotNull()
+        }
+
+        var added = 0
+        transaction {
+            answers.forEach { (check, answer) ->
+                // this game's details are hidden on Steam: leave it to be read once they are public
+                val unlocked = (answer as? PlayerAchievements.Unlocked)?.codes ?: return@forEach
+                val have = UnlockedAchievements.selectAll()
+                    .where { UnlockedAchievements.libraryEntryId eq check.entryId }
+                    .map { it[UnlockedAchievements.achievementId] }
+                    .toSet()
+                val fresh = unlocked.filter { it !in have && it.length <= MAX_ACHIEVEMENT_ID_LENGTH }
+                fresh.forEach { code ->
+                    UnlockedAchievements.insert {
+                        it[libraryEntryId] = check.entryId
+                        it[achievementId] = code
+                    }
+                }
+                if (fresh.isNotEmpty()) {
+                    LibraryEntries.update({ LibraryEntries.id eq check.entryId }) { it[updatedAt] = now }
+                    added += fresh.size
+                }
+                SteamAchievementChecks.upsert {
+                    it[libraryEntryId] = check.entryId
+                    it[minutesPlayed] = check.minutesPlayed
+                    it[checkedAt] = now
+                }
+            }
+        }
+        log.info("Steam import read achievements for {} games, {} new unlocks", answers.size, added)
+        return added
+    }
+
     companion object {
         val DEFAULT_COOLDOWN: Duration = Duration.ofMinutes(2)
+
+        // Steam achievement reads in flight at once: a big library finishes in seconds, without a
+        // burst Steam might throttle
+        private const val PARALLEL_ACHIEVEMENT_CALLS = 4
+
+        // the size of the achievement_id column
+        private const val MAX_ACHIEVEMENT_ID_LENGTH = 64
+
+        private val log = LoggerFactory.getLogger(SteamImporter::class.java)
 
         /** Steam counts minutes; the library keeps hours to one decimal place. */
         fun hours(minutes: Int): Double = (minutes / 6.0).roundToLong() / 10.0

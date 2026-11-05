@@ -169,6 +169,10 @@ object ServiceLocator {
             libraryApi = libraryApi,
             accessToken = { authRepository.freshAccessToken() },
             currentUserId = { tokenStorage.getUserId() },
+            cacheMissingGames = { games ->
+                // The sync carries saved summaries. Keep any fuller details already on the phone.
+                gameRepository.cacheFromApi(games.filter { gameRepository.getGame(it.gameId) == null })
+            },
         )
     }
 

@@ -7,6 +7,7 @@ import com.backlogbattlers.api.db.Games
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.Platform
+import com.backlogbattlers.api.db.SteamApps
 import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.db.Users
 import com.backlogbattlers.api.games.IgdbClient
@@ -118,6 +119,48 @@ class LibraryRoutesTest {
 
     private suspend fun HttpClient.library(): List<LibraryEntryDto> =
         Json.decodeFromString(get("/users/me/library").bodyAsText())
+
+    @Test
+    fun `listing an imported library includes every saved game without external requests`() = testApplication {
+        val igdb = IgdbClient(
+            igdbHttpClient(MockEngine { error("Library sync must not call IGDB") }),
+            clientId = "id",
+            clientSecret = "secret",
+        )
+        installApi(igdb)
+        val owner = newUser()
+        caller = owner
+        transaction(db) {
+            (1..12).forEach { gameId ->
+                Games.insert {
+                    it[id] = gameId
+                    it[title] = "Imported game $gameId"
+                    it[avgCompletionHours] = 10.0
+                }
+                SteamApps.insert {
+                    it[appId] = 1000 + gameId
+                    it[SteamApps.gameId] = gameId
+                }
+                LibraryEntries.insert {
+                    it[userId] = owner
+                    it[LibraryEntries.gameId] = gameId
+                    it[platform] = Platform.PC
+                }
+            }
+        }
+
+        val entries = client.library()
+
+        assertEquals((1..12).toSet(), entries.map { it.gameId }.toSet())
+        entries.forEach { entry ->
+            val game = requireNotNull(entry.game)
+            assertEquals(entry.gameId, game.gameId)
+            assertEquals("Imported game ${entry.gameId}", game.title)
+            assertEquals(listOf("PC"), game.platforms)
+            assertEquals(10.0, game.avgCompletionHours)
+            assertTrue(game.artworkUrl!!.contains("/${1000 + entry.gameId}/"))
+        }
+    }
 
     @Test
     fun `every library route answers 401 when nobody is signed in`() = testApplication {
@@ -268,7 +311,7 @@ class LibraryRoutesTest {
         assertEquals(HttpStatusCode.BadRequest, unknown.status)
         assertTrue(unknown.bodyAsText().contains("NOPE"))
 
-        assertEquals(added.copy(), client.library().single())
+        assertEquals(added, client.library().single().copy(game = null))
     }
 
     @Test
@@ -307,7 +350,7 @@ class LibraryRoutesTest {
         assertEquals(HttpStatusCode.NotFound, client.delete(path).status)
 
         caller = alice
-        assertEquals(alicesEntry, client.library().single()) // untouched by Bob's attempts
+        assertEquals(alicesEntry, client.library().single().copy(game = null)) // untouched by Bob's attempts
     }
 
     @Test

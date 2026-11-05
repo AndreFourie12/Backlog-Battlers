@@ -121,13 +121,13 @@ class SteamAccountViewModel(
             _uiState.update {
                 when (outcome) {
                     is SteamImportOutcome.Imported ->
-                        if (outcome.added == 0 && outcome.hoursUpdated == 0) {
+                        if (outcome.added == 0 && outcome.hoursUpdated == 0 && outcome.achievementsUnlocked == 0) {
                             it.copy(isImporting = false, message = R.string.steam_import_up_to_date, messageArgs = emptyList())
                         } else {
                             it.copy(
                                 isImporting = false,
                                 message = R.string.steam_import_done,
-                                messageArgs = listOf(outcome.added, outcome.hoursUpdated),
+                                messageArgs = listOf(outcome.added, outcome.hoursUpdated, outcome.achievementsUnlocked),
                             )
                         }
                     is SteamImportOutcome.Failed ->

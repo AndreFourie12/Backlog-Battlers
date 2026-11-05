@@ -435,8 +435,8 @@
     <string name="steam_account_no_connection">No connection. Check your internet and try again</string>
     <string name="steam_account_failed">Something went wrong. Please try again</string>
     <string name="steam_import">Import games</string>
-    <string name="steam_import_body">Adds the games you own on Steam to your library on PC, with your hours played. Games already in your library stay where they are; their hours only ever go up.</string>
-    <string name="steam_import_done">Steam import: %1$d games added, hours updated on %2$d</string>
+    <string name="steam_import_body">Adds the games you own on Steam to your library on PC, with your hours played and the achievements you\'ve unlocked. Games already in your library stay where they are; their hours only ever go up.</string>
+    <string name="steam_import_done">Steam import: %1$d games added, hours updated on %2$d, %3$d achievements unlocked</string>
     <string name="steam_import_up_to_date">Your library is already up to date with Steam</string>
     <string name="steam_import_private">Steam won\'t list your games. Set your Steam profile and Game details to Public, then try again</string>
     <string name="steam_import_too_soon">You imported a moment ago. Try again in a couple of minutes</string>

@@ -111,6 +111,14 @@ class SteamImportTest {
     }
 
     @Test
+    fun `an import that only brought in achievements still syncs, so they show`() = runBlocking {
+        importBody = """{"ownedOnSteam":3,"added":0,"hoursUpdated":0,"unchanged":3,"notInCatalogue":0,"achievementsUnlocked":7,"games":[]}"""
+
+        assertEquals(SteamImportOutcome.Imported(added = 0, hoursUpdated = 0, achievementsUnlocked = 7), repository.importGames())
+        assertEquals(1, syncs)
+    }
+
+    @Test
     fun `each refusal from the server becomes its own reason, and nothing is synced`() = runBlocking {
         mapOf(
             HttpStatusCode.NotFound to SteamImportFailure.UNAVAILABLE, // a bare 404: a server without the import yet
@@ -179,7 +187,7 @@ class SteamImportTest {
 
         assertEquals(1, fake.imports)
         assertEquals(R.string.steam_import_done, vm.uiState.value.message)
-        assertEquals(listOf(12, 3), vm.uiState.value.messageArgs)
+        assertEquals(listOf(12, 3, 0), vm.uiState.value.messageArgs)
         assertFalse(vm.uiState.value.isImporting)
     }
 
@@ -193,6 +201,18 @@ class SteamImportTest {
 
         assertEquals(R.string.steam_import_up_to_date, vm.uiState.value.message)
         assertEquals(emptyList<Int>(), vm.uiState.value.messageArgs)
+    }
+
+    @Test
+    fun `an import that only unlocked achievements reports them rather than up to date`() {
+        fake.linked = steamId
+        fake.importOutcome = SteamImportOutcome.Imported(added = 0, hoursUpdated = 0, achievementsUnlocked = 7)
+        val vm = SteamAccountViewModel(fake)
+
+        vm.importGames()
+
+        assertEquals(R.string.steam_import_done, vm.uiState.value.message)
+        assertEquals(listOf(0, 0, 7), vm.uiState.value.messageArgs)
     }
 
     @Test

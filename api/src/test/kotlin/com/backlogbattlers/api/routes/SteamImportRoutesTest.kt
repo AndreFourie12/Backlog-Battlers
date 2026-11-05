@@ -6,6 +6,7 @@ import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.Platform
 import com.backlogbattlers.api.db.SteamApps
+import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.db.UserSteamAccounts
 import com.backlogbattlers.api.db.Users
 import com.backlogbattlers.api.db.Games
@@ -62,11 +63,28 @@ class SteamImportRoutesTest {
     private var owned = listOf(620 to 300, 730 to 90, 999 to 45) // Portal 2, Counter-Strike 2, a tool IGDB doesn't list
     private var steamPrivate = false
     private var steamStatus = HttpStatusCode.OK
-    private var steamCalls = 0
+    private var steamCalls = 0 // GetOwnedGames, the library listing
+
+    // ---- fake Steam achievements: what the player has unlocked in each app ----
+    private val unlockedOnSteam = mutableMapOf(620 to listOf("ACH_PORTAL_A", "ACH_PORTAL_B"), 730 to emptyList())
+    private val failingAchievementApps = mutableSetOf<Int>()
+    private val achievementCalls = mutableListOf<Int>() // the app id of every achievement read
 
     private val fakeSteam = SteamClient(
         HttpClient(
             MockEngine { request ->
+                if (request.url.encodedPath == "/ISteamUserStats/GetPlayerAchievements/v1/") {
+                    val app = request.url.parameters["appid"]!!.toInt()
+                    synchronized(achievementCalls) { achievementCalls += app }
+                    if (app in failingAchievementApps) return@MockEngine respondError(HttpStatusCode.ServiceUnavailable)
+                    val rows = (unlockedOnSteam[app].orEmpty().map { """{"apiname":"$it","achieved":1}""" } +
+                        """{"apiname":"ACH_LOCKED","achieved":0}""").joinToString(",")
+                    return@MockEngine respond(
+                        """{"playerstats":{"steamID":"$playerSteamId","success":true,"achievements":[$rows]}}""",
+                        HttpStatusCode.OK,
+                        jsonHeaders,
+                    )
+                }
                 steamCalls++
                 assertEquals("/IPlayerService/GetOwnedGames/v1/", request.url.encodedPath)
                 if (steamStatus != HttpStatusCode.OK) return@MockEngine respondError(steamStatus)
@@ -145,6 +163,16 @@ class SteamImportRoutesTest {
         }
     }
 
+    /** gameId to the achievement codes unlocked on that game's entry in [owner]'s library. */
+    private fun unlocks(owner: Uuid) = transaction(db) {
+        val entries = LibraryEntries.selectAll().where { LibraryEntries.userId eq owner }
+            .associate { it[LibraryEntries.id] to it[LibraryEntries.gameId] }
+        UnlockedAchievements.selectAll().toList()
+            .filter { it[UnlockedAchievements.libraryEntryId] in entries }
+            .groupBy({ entries.getValue(it[UnlockedAchievements.libraryEntryId]) }, { it[UnlockedAchievements.achievementId] })
+            .mapValues { (_, codes) -> codes.toSet() }
+    }
+
     private suspend fun HttpClient.import(): HttpResponse = post("/users/me/steam/import")
 
     private fun later(duration: Duration) {
@@ -205,6 +233,8 @@ class SteamImportRoutesTest {
 
         assertEquals(1, steamCalls)
         assertEquals(listOf("external_games", "games", "game_time_to_beats"), igdbRequests)
+        assertEquals(setOf(620, 730), achievementCalls.toSet()) // one read per played game, no more
+        assertEquals(2, achievementCalls.size)
     }
 
     @Test
@@ -221,6 +251,7 @@ class SteamImportRoutesTest {
         assertEquals(2, result.unchanged)
         assertEquals(emptyList(), igdbRequests) // the unmatched tool app 999 is remembered too
         assertEquals(2, steamCalls)
+        assertEquals(2, achievementCalls.size) // nothing played since the first import, so no new reads
     }
 
     @Test
@@ -357,5 +388,66 @@ class SteamImportRoutesTest {
         assertEquals(emptyList(), igdbRequests)
         assertEquals(3, transaction(db) { SteamApps.selectAll().count() })
     }
+
+    @Test
+    fun `an import brings in the achievements unlocked on steam, and says how many`() = testApplication {
+        installApi()
+        caller = newUser()
+
+        val result = Json.decodeFromString<SteamImportDto>(client.import().bodyAsText())
+
+        assertEquals(2, result.achievementsUnlocked)
+        // locked achievements are left out, and a game with nothing unlocked has no unlocks
+        assertEquals(mapOf(72 to setOf("ACH_PORTAL_A", "ACH_PORTAL_B")), unlocks(caller!!))
+    }
+
+    @Test
+    fun `achievements are read again only for a game played since, and unlocks are never removed`() = testApplication {
+        installApi()
+        caller = newUser()
+        client.import()
+        achievementCalls.clear()
+
+        later(Duration.ofMinutes(5))
+        owned = listOf(620 to 360, 730 to 90, 999 to 45) // an hour more of Portal 2, nothing else
+        unlockedOnSteam[620] = listOf("ACH_PORTAL_A", "ACH_PORTAL_C") // B no longer reported
+        val result = Json.decodeFromString<SteamImportDto>(client.import().bodyAsText())
+
+        assertEquals(listOf(620), achievementCalls)
+        assertEquals(1, result.achievementsUnlocked)
+        assertEquals(setOf("ACH_PORTAL_A", "ACH_PORTAL_B", "ACH_PORTAL_C"), unlocks(caller!!).getValue(72))
+    }
+
+    @Test
+    fun `a game steam cannot read achievements for is retried next time, and the import still works`() = testApplication {
+        installApi()
+        caller = newUser()
+        failingAchievementApps += 620
+
+        val first = client.import()
+        assertEquals(HttpStatusCode.OK, first.status)
+        assertEquals(2, library(caller!!).size)
+        assertEquals(emptyMap(), unlocks(caller!!))
+
+        later(Duration.ofMinutes(5))
+        failingAchievementApps.clear()
+        achievementCalls.clear()
+        client.import()
+
+        assertEquals(listOf(620), achievementCalls) // only the game that failed; 730 was read already
+        assertEquals(setOf("ACH_PORTAL_A", "ACH_PORTAL_B"), unlocks(caller!!).getValue(72))
+    }
+
+    @Test
+    fun `a game kept on another platform gets no steam achievements`() = testApplication {
+        installApi()
+        caller = newUser()
+        addEntry(caller!!, gameId = 72, title = "Portal 2", platform = Platform.PLAYSTATION, hours = 0.0)
+
+        client.import()
+
+        assertEquals(listOf(730), achievementCalls)
+        assertEquals(emptyMap(), unlocks(caller!!))
+    }
 }
-//------------------------------EOF------------------------------\\
+//------------------------------EOF------------------------------\
