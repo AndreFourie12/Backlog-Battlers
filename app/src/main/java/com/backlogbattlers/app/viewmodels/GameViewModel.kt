@@ -16,6 +16,7 @@ import com.backlogbattlers.app.domain.model.Platform
 import com.backlogbattlers.app.util.primaryPlatform
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -194,12 +195,45 @@ class GameViewModel(
             _uiState.update { it.copy(libraryGames = games) }
 
             // games added before achievement totals were tracked, or whose first fetch never
-            // finished, catch up here rather than sitting at 0% forever
-            games.filter { it.game.totalAchievements == null }.forEach { ensureAchievementsCached(it.game.gameId) }
+            // finished, catch up here rather than sitting at 0% forever. a few per load, one after
+            // another and played games first, so a big Steam import never fires hundreds of
+            // requests at once; the rest fill in on later loads, or when the game is opened
+            val waiting = games.filter { it.game.totalAchievements == null }
+            if (waiting.isEmpty()) return@launch
+            // a sync bringing in many entries changes the library many times in a row, and each change
+            // restarts this job; waiting a moment first means only the last one sends anything
+            delay(CATCH_UP_SETTLE_MS)
+            waiting
+                .sortedByDescending { it.entry.hoursPlayed > 0f || it.entry.unlockedAchievementIds.isNotEmpty() }
+                .take(MAX_ACHIEVEMENT_CATCH_UP_PER_LOAD)
+                .forEach { catchUpAchievements(it.game.gameId) }
+        }
+    }
+
+
+    // fetches a game's achievements, waiting for the answer (unlike ensureAchievementsCached, which
+    // starts it and returns), so the library's catch-up sends one request at a time
+    private suspend fun catchUpAchievements(gameId: Int) {
+        try {
+            gameRepository.getAchievements(gameId)
+            val refreshed = gameRepository.getGame(gameId) ?: return
+            _uiState.update { state ->
+                state.copy(
+                    libraryGames = state.libraryGames.map { libraryGame ->
+                        if (libraryGame.game.gameId == gameId) libraryGame.copy(game = refreshed) else libraryGame
+                    },
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Catching up achievements for game $gameId failed", e)
         }
     }
 
     private companion object {
         const val TAG = "GameViewModel"
+        const val MAX_ACHIEVEMENT_CATCH_UP_PER_LOAD = 5
+        const val CATCH_UP_SETTLE_MS = 500L
     }
 }

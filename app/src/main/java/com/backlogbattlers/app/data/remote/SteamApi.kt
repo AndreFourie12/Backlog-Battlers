@@ -7,6 +7,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -20,6 +21,34 @@ import kotlinx.serialization.Serializable
 /** The Steam account linked to the user, as `GET`/`PUT /users/me/steam` send it: the 17 digit SteamID64. */
 @Serializable
 data class SteamLinkDto(val steamId: String)
+
+/** The answer to `POST /users/me/steam/import`. [games] are the games just added, to cache straight away. */
+@Serializable
+data class SteamImportDto(
+    val ownedOnSteam: Int,
+    val added: Int,
+    val hoursUpdated: Int,
+    val unchanged: Int,
+    val notInCatalogue: Int,
+    val games: List<GameDto> = emptyList(),
+)
+
+/** How `POST /users/me/steam/import` answered, apart from a lost session (thrown) or no connection. */
+sealed interface SteamImportResponse {
+    data class Imported(val result: SteamImportDto) : SteamImportResponse
+
+    /** 404: no Steam account is linked. */
+    data object NotLinked : SteamImportResponse
+
+    /** 403: the Steam profile or its game details are private. */
+    data object PrivateProfile : SteamImportResponse
+
+    /** 429: imported moments ago. */
+    data object TooSoon : SteamImportResponse
+
+    /** 502: Steam or IGDB is down. */
+    data object Unavailable : SteamImportResponse
+}
 
 /**
  * API client for the Steam account a user links, which the server uses to check their
@@ -64,6 +93,22 @@ class SteamApi(
         }
         if (response.status == HttpStatusCode.NotFound) return
         response.bodyOrThrow<Unit>()
+    }
+
+    //------------------------------
+    // asks the server to add the games owned on Steam to the library (one Steam call on the server)
+    suspend fun importGames(accessToken: String): SteamImportResponse {
+        val response = httpClient.post("$baseUrl/users/me/steam/import") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
+            accept(ContentType.Application.Json)
+        }
+        return when (response.status) {
+            HttpStatusCode.NotFound -> SteamImportResponse.NotLinked
+            HttpStatusCode.Forbidden -> SteamImportResponse.PrivateProfile
+            HttpStatusCode.TooManyRequests -> SteamImportResponse.TooSoon
+            HttpStatusCode.BadGateway -> SteamImportResponse.Unavailable
+            else -> SteamImportResponse.Imported(response.bodyOrThrow())
+        }
     }
 
     //------------------------------

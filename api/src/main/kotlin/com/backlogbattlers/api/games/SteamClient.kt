@@ -8,6 +8,7 @@ import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
@@ -83,6 +84,35 @@ private data class MostPlayedList(val ranks: List<MostPlayedRank> = emptyList())
 
 @Serializable
 private data class MostPlayedRank(val rank: Int, val appid: Int)
+
+
+@Serializable
+private data class OwnedGamesResponse(val response: OwnedGamesList = OwnedGamesList())
+
+// Steam leaves game_count and games out entirely when the profile or its game details are private
+@Serializable
+private data class OwnedGamesList(
+    @SerialName("game_count") val gameCount: Int? = null,
+    val games: List<OwnedGameRow>? = null,
+)
+
+@Serializable
+private data class OwnedGameRow(
+    val appid: Int,
+    /** Minutes played, ever. */
+    @SerialName("playtime_forever") val playtimeForever: Int = 0,
+)
+
+/** One game a player owns on Steam, and how long they have played it. */
+data class OwnedGame(val appId: Int, val minutesPlayed: Int)
+
+/** The answer to [SteamClient.ownedGames]. */
+sealed interface OwnedGames {
+    data class Owned(val games: List<OwnedGame>) : OwnedGames
+
+    /** The profile, or just its game details, is not public, so Steam will not list the games. */
+    data object PrivateProfile : OwnedGames
+}
 
 /**
  * Reads achievement data and the most played games from Steam.
@@ -182,9 +212,38 @@ class SteamClient(
             .distinct()
     }
 
+
+    /**
+     * Every game [steamId] owns, with minutes played, in one call (IPlayerService/GetOwnedGames).
+     * Names and icons are not asked for (include_appinfo off): IGDB supplies those, and leaving
+     * them out keeps the answer small even for a library of thousands. Free games the player has
+     * played are included. Needs the Steam key.
+     * https://partner.steamgames.com/doc/webapi/IPlayerService#GetOwnedGames
+     */
+    suspend fun ownedGames(steamId: String): OwnedGames {
+        if (apiKey.isBlank()) throw SteamException("STEAM_API_KEY is not set, so Steam games cannot be imported")
+
+        val response = http.get(OWNED_GAMES_URL) {
+            parameter("key", apiKey)
+            parameter("steamid", steamId)
+            parameter("include_appinfo", false)
+            parameter("include_played_free_games", true)
+        }
+        if (response.status == HttpStatusCode.Forbidden || response.status == HttpStatusCode.Unauthorized) {
+            return OwnedGames.PrivateProfile
+        }
+        // The message never includes the request address, because that contains the key
+        if (!response.status.isSuccess()) throw SteamException("Steam owned games request failed: ${response.status}")
+
+        val list = json.decodeFromString<OwnedGamesResponse>(response.bodyAsText()).response
+        if (list.gameCount == null && list.games == null) return OwnedGames.PrivateProfile
+        return OwnedGames.Owned(list.games.orEmpty().map { OwnedGame(it.appid, it.playtimeForever.coerceAtLeast(0)) })
+    }
+
     companion object {
         private const val BASE_URL = "https://api.steampowered.com/ISteamUserStats"
         private const val MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/"
+        private const val OWNED_GAMES_URL = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
 
         /** Builds the real client from STEAM_API_KEY (see [Config]). The key is optional. */
         fun fromConfig(): SteamClient = SteamClient(

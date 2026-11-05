@@ -8,6 +8,8 @@ import com.backlogbattlers.app.R
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.repository.SteamAccountLoad
 import com.backlogbattlers.app.data.repository.SteamAccountRepository
+import com.backlogbattlers.app.data.repository.SteamImportFailure
+import com.backlogbattlers.app.data.repository.SteamImportOutcome
 import com.backlogbattlers.app.data.repository.SteamAccountResult
 import com.backlogbattlers.app.data.repository.isValidSteamId
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,8 +27,12 @@ data class SteamAccountUiState(
     val isSaving: Boolean = false,
     // the linked account could not be read, so the screen offers a retry instead of the form
     val loadFailed: Boolean = false,
+    // the Steam games are being imported
+    val isImporting: Boolean = false,
     // a message from strings.xml for the screen to show once, never the raw exception text
     @StringRes val message: Int? = null,
+    // filled into [message] when it has placeholders, e.g. how many games an import added
+    val messageArgs: List<Int> = emptyList(),
 )
 
 // viewmodel for linking the Steam account that achievements are checked against
@@ -78,6 +84,8 @@ class SteamAccountViewModel(
                     it.copy(isSaving = false, message = messageFor(result))
                 }
             }
+            // linking is what users expect to bring their games in, so the first import starts by itself
+            if (result == SteamAccountResult.DONE) importGames()
         }
     }
 
@@ -101,9 +109,38 @@ class SteamAccountViewModel(
     }
 
     //------------------------------
+    // adds the games owned on Steam to the library. one tap at a time; the server also refuses a
+    // second import within a couple of minutes, so a repeat costs no Steam call
+    fun importGames() {
+        if (_uiState.value.isImporting) return
+
+        _uiState.update { it.copy(isImporting = true) }
+        viewModelScope.launch {
+            val outcome = repository.importGames()
+            Log.i(TAG, "Importing Steam games: $outcome")
+            _uiState.update {
+                when (outcome) {
+                    is SteamImportOutcome.Imported ->
+                        if (outcome.added == 0 && outcome.hoursUpdated == 0) {
+                            it.copy(isImporting = false, message = R.string.steam_import_up_to_date, messageArgs = emptyList())
+                        } else {
+                            it.copy(
+                                isImporting = false,
+                                message = R.string.steam_import_done,
+                                messageArgs = listOf(outcome.added, outcome.hoursUpdated),
+                            )
+                        }
+                    is SteamImportOutcome.Failed ->
+                        it.copy(isImporting = false, message = importMessageFor(outcome.reason), messageArgs = emptyList())
+                }
+            }
+        }
+    }
+
+    //------------------------------
     // called once the screen has shown the message, so it isn't shown again on rotation
     fun messageShown() {
-        _uiState.update { it.copy(message = null) }
+        _uiState.update { it.copy(message = null, messageArgs = emptyList()) }
     }
 
     @StringRes
@@ -112,6 +149,18 @@ class SteamAccountViewModel(
         SteamAccountResult.SIGN_IN_AGAIN -> R.string.steam_account_sign_in_again
         SteamAccountResult.NO_CONNECTION -> R.string.steam_account_no_connection
         SteamAccountResult.DONE, SteamAccountResult.FAILED -> R.string.steam_account_failed
+    }
+
+
+    @StringRes
+    private fun importMessageFor(reason: SteamImportFailure): Int = when (reason) {
+        SteamImportFailure.NOT_LINKED -> R.string.steam_import_not_linked
+        SteamImportFailure.PRIVATE_PROFILE -> R.string.steam_import_private
+        SteamImportFailure.TOO_SOON -> R.string.steam_import_too_soon
+        SteamImportFailure.UNAVAILABLE -> R.string.steam_import_unavailable
+        SteamImportFailure.SIGN_IN_AGAIN -> R.string.steam_account_sign_in_again
+        SteamImportFailure.NO_CONNECTION -> R.string.steam_account_no_connection
+        SteamImportFailure.FAILED -> R.string.steam_account_failed
     }
 
     private companion object {

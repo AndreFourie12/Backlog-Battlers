@@ -382,7 +382,7 @@
     <!-- Steam account (Settings > Connected Accounts) -->
     <string name="settings_connected_accounts_value">Steam</string>
     <string name="title_steam_account">Steam-rekening</string>
-    <string name="steam_account_intro">Koppel jou Steam-rekening sodat Backlog Battlers jou prestasies teen Steam kan nagaan. Net prestasies wat Steam bevestig, verdien punte.</string>
+    <string name="steam_account_intro">Koppel jou Steam-rekening om die speletjies wat jy besit in te voer en sodat Backlog Battlers jou prestasies teen Steam kan nagaan. Net prestasies wat Steam bevestig, verdien punte.</string>
     <string name="steam_account_not_linked">Geen Steam-rekening gekoppel nie</string>
     <string name="steam_account_linked_label">Gekoppelde Steam-ID</string>
     <string name="steam_account_id_hint">Steam-ID (17 syfers)</string>
@@ -396,6 +396,14 @@
     <string name="steam_account_sign_in_again">Jou sessie het verval. Meld asseblief weer aan</string>
     <string name="steam_account_no_connection">Geen verbinding nie. Kontroleer jou internet en probeer weer</string>
     <string name="steam_account_failed">Iets het skeefgeloop. Probeer asseblief weer</string>
+    <string name="steam_import">Voer speletjies in</string>
+    <string name="steam_import_body">Voeg die speletjies wat jy op Steam besit by jou biblioteek op PC, met jou ure gespeel. Speletjies wat reeds in jou biblioteek is, bly waar hulle is; hul ure gaan net op.</string>
+    <string name="steam_import_done">Steam-invoer: %1$d speletjies bygevoeg, ure op %2$d bygewerk</string>
+    <string name="steam_import_up_to_date">Jou biblioteek stem reeds ooreen met Steam</string>
+    <string name="steam_import_private">Steam wil nie jou speletjies lys nie. Stel jou Steam-profiel en speletjiebesonderhede op Publiek en probeer dan weer</string>
+    <string name="steam_import_too_soon">Jy het netnou ingevoer. Probeer weer oor \'n paar minute</string>
+    <string name="steam_import_not_linked">Koppel eers jou Steam-rekening</string>
+    <string name="steam_import_unavailable">Steam of die speletjiekatalogus is nou nie beskikbaar nie. Probeer later weer</string>
     <string name="steam_account_load_failed">Kon nie jou Steam-rekening laai nie</string>
     <string name="steam_account_retry">Probeer weer</string>
 

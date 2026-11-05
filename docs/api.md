@@ -217,6 +217,46 @@ The Achievements and Season resets switches are synced and stored, but no push u
 
 Configure the sender with `FIREBASE_SERVICE_ACCOUNT_FILE` (path to the service-account JSON) or `FIREBASE_SERVICE_ACCOUNT_JSON` (the JSON itself). Without either, the API runs normally and only logs the pushes it would have sent.
 
+### `POST /users/me/steam/import`
+
+Adds the games the user owns on Steam to their library. Needs `Authorization: Bearer <access token>`, a linked Steam account (`PUT /users/me/steam`), and `STEAM_API_KEY` on the server. No request body.
+
+- A game not in the library yet is added on **PC**, in the **backlog**, with Steam's hours played (rounded to 0.1 h).
+- A game already in the library on PC has its hours raised to Steam's figure. Hours are never lowered, so hours logged by hand are kept.
+- A game already in the library on another platform is left alone; no second, PC copy is made.
+- Steam apps IGDB has no game for (tools, soundtracks, demos) are skipped and counted in `notInCatalogue`.
+
+```json
+{
+  "ownedOnSteam": 214,
+  "added": 187,
+  "hoursUpdated": 3,
+  "unchanged": 9,
+  "notInCatalogue": 15,
+  "games": [ /* a Game object for each game added, so the app can show them straight away */ ]
+}
+```
+
+| Status | Meaning |
+|---|---|
+| 200 | Imported, as above |
+| 401 | `{"error":"Sign in to import your Steam games"}` |
+| 403 | The Steam profile, or just its "Game details", is private, so Steam won't list the games |
+| 404 | `{"error":"No Steam account is linked"}` |
+| 429 | Imported less than 2 minutes ago. The `Retry-After` header says how many seconds to wait. Steam isn't asked |
+| 502 | Steam or IGDB is down. Nothing was changed, and the user can retry straight away |
+
+**API calls per import.** An import is kept as cheap as possible, because Steam allows 100,000 calls a day per key and IGDB 4 requests a second:
+
+| | First import of a 300-game library | Importing again, nothing new |
+|---|---|---|
+| Steam | 1 (`GetOwnedGames` lists every game at once; names are left out because IGDB supplies them) | 1 |
+| IGDB | about 4: Steam app → game matches in batches of 250, then details and time to beat in batches of 500, spaced 260 ms apart | 0 |
+
+Which IGDB game each Steam app is gets stored in the `steam_apps` table and shared by every user, including the apps IGDB has no game for (asked about again after 30 days). Details are fetched only for games new to that user's library. The achievement lookups (`GET /games/{id}/achievements`, and the Steam check when a game is completed) read a game's Steam app from the same table, so after an import they don't ask IGDB either.
+
+On the phone, the import's games are cached straight from this answer and the library is synced once. The library screen fills in achievement totals a few games at a time (at most 5 per load, played games first, one request at a time), so a large import never sends hundreds of requests at once.
+
 ## Planned endpoints
 
 Routes follow the Part 1 design document, the below routes are yet to be built:

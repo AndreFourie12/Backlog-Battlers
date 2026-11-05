@@ -109,7 +109,7 @@ suspend fun checkUnlocks(owner: Uuid, entryId: Uuid, igdb: IgdbClient, steam: St
     if (waiting.isEmpty()) return SteamCheck(SteamCheckStatus.NOT_NEEDED)
 
     val steamId = linkedSteamId(owner) ?: return SteamCheck(SteamCheckStatus.NOT_LINKED)
-    val appId = igdb.steamAppId(gameId) ?: return SteamCheck(SteamCheckStatus.NOT_ON_STEAM)
+    val appId = steamAppIdFor(gameId, igdb) ?: return SteamCheck(SteamCheckStatus.NOT_ON_STEAM)
 
     return when (val unlocked = steam.unlockedAchievements(steamId, appId)) {
         PlayerAchievements.PrivateProfile -> SteamCheck(SteamCheckStatus.PRIVATE_PROFILE)
