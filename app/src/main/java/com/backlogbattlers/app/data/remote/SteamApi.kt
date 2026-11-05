@@ -103,7 +103,14 @@ class SteamApi(
             accept(ContentType.Application.Json)
         }
         return when (response.status) {
-            HttpStatusCode.NotFound -> SteamImportResponse.NotLinked
+            // a 404 only means "not linked" when the API says so. a bare 404 is a server that
+            // doesn't have the import yet (an older deploy), which is reported as unavailable
+            HttpStatusCode.NotFound ->
+                if (runCatching { response.body<String>() }.getOrDefault("").contains("No Steam account is linked")) {
+                    SteamImportResponse.NotLinked
+                } else {
+                    SteamImportResponse.Unavailable
+                }
             HttpStatusCode.Forbidden -> SteamImportResponse.PrivateProfile
             HttpStatusCode.TooManyRequests -> SteamImportResponse.TooSoon
             HttpStatusCode.BadGateway -> SteamImportResponse.Unavailable

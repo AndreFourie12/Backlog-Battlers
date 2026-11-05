@@ -59,6 +59,7 @@ class SteamImportTest {
 
     private val seen = mutableListOf<HttpRequestData>()
     private var status = HttpStatusCode.OK
+    private var errorBody: String? = null // the body of an error answer, when the test needs one
     private var failure: Throwable? = null
     private var importBody = """
         {"ownedOnSteam":3,"added":2,"hoursUpdated":1,"unchanged":0,"notInCatalogue":0,
@@ -73,7 +74,9 @@ class SteamImportTest {
                 MockEngine { request ->
                     seen += request
                     failure?.let { throw it }
-                    if (status != HttpStatusCode.OK) return@MockEngine respondError(status)
+                    if (status != HttpStatusCode.OK) {
+                        return@MockEngine errorBody?.let { respond(it, status, jsonHeaders) } ?: respondError(status)
+                    }
                     respond(importBody, HttpStatusCode.OK, jsonHeaders)
                 },
             ) {
@@ -110,7 +113,7 @@ class SteamImportTest {
     @Test
     fun `each refusal from the server becomes its own reason, and nothing is synced`() = runBlocking {
         mapOf(
-            HttpStatusCode.NotFound to SteamImportFailure.NOT_LINKED,
+            HttpStatusCode.NotFound to SteamImportFailure.UNAVAILABLE, // a bare 404: a server without the import yet
             HttpStatusCode.Forbidden to SteamImportFailure.PRIVATE_PROFILE,
             HttpStatusCode.TooManyRequests to SteamImportFailure.TOO_SOON,
             HttpStatusCode.BadGateway to SteamImportFailure.UNAVAILABLE,
@@ -129,6 +132,14 @@ class SteamImportTest {
         failure = IOException("offline")
 
         assertEquals(SteamImportOutcome.Failed(SteamImportFailure.NO_CONNECTION), repository.importGames())
+    }
+
+    @Test
+    fun `only the API's own not linked answer means not linked`() = runBlocking {
+        status = HttpStatusCode.NotFound
+        errorBody = """{"error":"No Steam account is linked"}"""
+
+        assertEquals(SteamImportOutcome.Failed(SteamImportFailure.NOT_LINKED), repository.importGames())
     }
 
     //------------------------------
