@@ -42,7 +42,6 @@
     <string name="achievements_error">Kon nie nou prestasies laai nie.</string>
     <string name="badges">Kentekens</string>
     <string name="showcase_title">Skaarsste prestasies</string>
-    <string name="recent_activity">Onlangse aktiwiteit</string>
     <string name="achievement_progress">Prestasievordering</string>
     <string name="your_position">Jou posisie</string>
     <string name="vs_last_month">teenoor verlede maand</string>
@@ -331,17 +330,49 @@
     <string name="activity_empty_body">Wanneer jy of jou vriende \'n speletjie voltooi, prestasies ontsluit, iemand op die ranglys verbygesteek of vriende word, verskyn dit hier.</string>
     <string name="activity_error_load">Kon nie die aktiwiteitstroom laai nie. Kyk na jou verbinding en probeer weer.</string>
     <string name="activity_error_title">Iets het verkeerd gegaan</string>
+    <!-- profile -->
+    <string name="profile_level">Vlak %1$d</string>
+    <string name="profile_xp_progress">%1$s / %2$s XP</string>
+    <string name="profile_stat_games">Speletjies</string>
+    <string name="profile_stat_completed">Voltooi</string>
+    <string name="profile_stat_achievements">Prestasies</string>
+    <string name="profile_stat_rank">Rang</string>
+    <string name="profile_badges_earned">%1$d van %2$d verdien</string>
+    <string name="profile_badge_earned">Verdien</string>
+    <string name="profile_badge_progress">Vordering: %1$d van %2$d</string>
+    <string name="profile_showcase_detail">%1$s · %2$s%% van spelers</string>
+    <string name="profile_showcase_empty">Ontsluit skaars prestasies en jou sewe skaarste verskyn hier.</string>
+    <string name="profile_showcase_rarest">Skaarsste: %1$s · %2$s%% van spelers</string>
+    <string name="profile_recent_title">Onlangse voltooiings</string>
+    <string name="profile_recent_empty">Speletjies wat jy voltooi, sal hier verskyn</string>
+    <string name="profile_completion_story">Storie</string>
+    <string name="profile_completion_extra">Storie + ekstras</string>
+    <string name="profile_completion_full" formatted="false">100%</string>
+    <string name="profile_recent_row">%1$s · +%2$s punte · %3$s</string>
+    <string name="profile_error_title">Iets het verkeerd gegaan</string>
+    <string name="profile_error_load">Kon nie jou profiel laai nie. Kyk na jou verbinding en probeer weer.</string>
+    <string name="badge_first_blood_desc">Ontsluit jou eerste prestasie in enige gevolgde speletjie.</string>
+    <string name="badge_clean_sweep_desc" formatted="false">Bereik vir die eerste keer 100% voltooiing in \'n speletjie.</string>
+    <string name="badge_completion_club_desc" formatted="false">Haal 100% in tien verskillende speletjies.</string>
+    <string name="badge_finisher_desc">Voltooi drie speletjies in \'n enkele maand.</string>
+    <string name="badge_the_long_haul_desc">Voltooi \'n speletjie volledig met \'n gemiddelde voltooiingstyd van meer as 60 uur.</string>
+    <string name="badge_needle_in_a_haystack_desc" formatted="false">Ontsluit \'n prestasie wat minder as 1% van spelers het.</string>
+    <string name="badge_ghost_hunter_desc" formatted="false">Ontsluit tien prestasies wat skaarser as 5% is.</string>
+    <string name="badge_statistically_improbable_desc" formatted="false">Ontsluit drie prestasies onder 1% in dieselfde speletjie.</string>
+    <string name="badge_shelf_cleaner_desc">Voltooi \'n speletjie wat meer as ses maande onaangeraak in jou biblioteek gelê het.</string>
+    <string name="badge_dust_off_desc">Ontsluit \'n prestasie in \'n speletjie wat jy in 90 dae nie gespeel het nie.</string>
+    <string name="badge_cold_turkey_desc">Voltooi \'n speletjie gedurende \'n maand waarin jy niks nuuts by jou biblioteek gevoeg het nie.</string>
+    <string name="badge_backlog_zero_desc">Het geen speletjies oor wat as Nog nie begin gemerk is nie, met minstens vyf in jou biblioteek.</string>
+    <string name="badge_top_of_the_table_desc">Eindig \'n maand in eerste plek onder jou vriende.</string>
+    <string name="badge_photo_finish_desc">Wen \'n maand met minder as 25 punte.</string>
+    <string name="badge_comeback_desc">Klim drie of meer plekke van een maand na die volgende.</string>
+    <string name="badge_nemesis_desc">Eindig drie maande agtereenvolgens bokant dieselfde vriend.</string>
+    <string name="badge_daily_driver_desc">Ontsluit minstens een prestasie op sewe agtereenvolgende dae.</string>
+    <string name="badge_marathon_month_desc">Verdien 1 000 punte in \'n enkele maand.</string>
+    <string name="badge_genre_tourist_desc">Voltooi speletjies oor vyf verskillende genres heen.</string>
+    <string name="badge_platform_agnostic_desc">Volg speletjies van drie verskillende platforms.</string>
 
     <!-- profile -->
-    <string name="profile_level">Vlak 1</string>
-    <string name="profile_xp_progress">0 / 500 XP · ontsluit \'n prestasie om te begin</string>
-    <string name="badges_earned_count">0 van 4 verdien</string>
-    <string name="badge_completionist">Voltooier</string>
-    <string name="badge_achievement_hunter">Prestasiejagter</string>
-    <string name="badge_monthly_competitor">Maandelikse mededinger</string>
-    <string name="badge_early_bird">Vroegopstaner</string>
-    <string name="showcase_body">Wys jou skaarsste prestasies, voltooide speletjies en gemiddelde voltooiingspersentasie</string>
-    <string name="recent_activity_empty">Speletjies wat jy speel, sal hier verskyn</string>
     <string name="add_a_game">Voeg \'n speletjie by →</string>
 
     <plurals name="search_result_count">

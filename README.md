@@ -99,6 +99,21 @@ The scope for this part was the Google sign in, settings, the REST API and datab
 
 **Scoring.** Achievement points come from five rarity tiers (Common through Ultra Rare), which we sourced from Steam's global unlock percentages. Completion points scale with IGDB's average time-to-beat for that game, and a separate speed bonus rewards finishing faster than that average. An entry can be completed twice (story, then 100%) without ever being paid for the same achievement twice.
 
+**Level and XP.** XP is the total points a user has earned across every month: the sum of their completion records. The monthly leaderboard resets, XP never does. Level 1 starts at 0 XP, and each level costs 100 XP more than the one before it, so the XP needed to reach level *n* is:
+
+```
+XP to reach level n = 50 × n × (n − 1)
+```
+
+That is 100 XP for level 2, 300 for level 3, 600 for level 4 and 1,000 for level 5. The API works it out every time the profile is read (`GET /users/me/profile`) and sends the level, the XP into it and the XP the whole level takes (`api/.../profile/Levels.kt`); the app only draws the bar.
+
+**Badges.** There are 20, and each is worked out from stored data every time the profile is read, so nothing is saved per badge and a rule can change without a migration (`api/.../profile/Badges.kt`). Every badge reports its progress and target, so the profile can show "3 / 10" on one still to earn. The rules read what the database holds, which means a few are close approximations:
+
+- **Dust Off:** nothing records when a game was last played, so it counts 90 days between two unlocks in the same game.
+- **Shelf Cleaner:** a game completed more than six calendar months after it was added to the library.
+- **Genre Tourist:** IGDB's genres are stored in `game_genres` when a game is saved. A game saved before that table existed gets its genres the next time its detail screen is opened.
+- **Top of the Table, Photo Finish and Nemesis** compare the user with their friends over finished months only. **Comeback** uses the rank on the global leaderboard.
+
 **Data.** Exposed tables mirror the domain closely: users, games, achievements, library entries, unlocked achievements, completion records and monthly leaderboard entries. Games and achievements are fetched from IGDB/Steam once and cached in our own database, so repeat requests never re-hit those APIs.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

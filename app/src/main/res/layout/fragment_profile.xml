@@ -1,430 +1,475 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/page_background"
-    android:fillViewport="true"
-    android:overScrollMode="never"
-    android:scrollbars="none"
     tools:context=".fragments.ProfileFragment">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/bottom_content_inset">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
 
-        <!-- Wordmark Bar: logo, app name, edit profile and settings gear -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="@dimen/page_padding"
-            android:paddingEnd="@dimen/page_padding">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/cd_app_logo"
-                android:src="@drawable/img_logo_mark" />
-
-            <TextView
-                style="@style/Text.Wordmark"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="9dp"
-                android:layout_weight="1"
-                android:includeFontPadding="false"
-                android:text="@string/wordmark"
-                android:textColor="@color/text_secondary" />
-
-            <ImageView
-                android:id="@+id/btn_edit_profile"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/title_edit_profile"
-                android:padding="7dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_pencil"
-                app:tint="@color/text_secondary" />
-
-            <ImageView
-                android:id="@+id/btn_settings"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:layout_marginStart="6dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/cd_settings"
-                android:padding="7dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_gear"
-                app:tint="@color/text_secondary" />
-        </LinearLayout>
-
-        <!-- Identity Header: avatar, name, level and XP progress -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_padding"
-            android:layout_marginTop="14dp"
-            android:layout_marginEnd="@dimen/page_padding"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <include
-                android:id="@+id/avatarProfile"
-                layout="@layout/partial_profile_avatar"
-                android:layout_width="@dimen/settings_avatar"
-                android:layout_height="@dimen/settings_avatar" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvProfileName"
-                    style="@style/Text.HeroTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:includeFontPadding="false"
-                    android:maxLines="1"
-                    android:text="@string/profile_display_name" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:contentDescription="@null"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_trophy"
-                        app:tint="@color/gold" />
-
-                    <TextView
-                        style="@style/Text.BodyStrong"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="7dp"
-                        android:includeFontPadding="false"
-                        android:text="@string/profile_level"
-                        android:textColor="@color/gold" />
-                </LinearLayout>
-
-                <ProgressBar
-                    android:id="@+id/progress_xp"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/progress_height"
-                    android:layout_marginTop="11dp"
-                    android:max="100"
-                    android:maxHeight="@dimen/progress_height"
-                    android:minHeight="@dimen/progress_height"
-                    android:progress="0"
-                    android:progressDrawable="@drawable/progress_bar_accent" />
-
-                <TextView
-                    style="@style/Text.Caption"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="9dp"
-                    android:includeFontPadding="false"
-                    android:text="@string/profile_xp_progress" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Badges Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_padding"
-            android:layout_marginTop="@dimen/section_spacing"
-            android:layout_marginEnd="@dimen/page_padding"
-            android:background="@drawable/bg_card"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingBottom="@dimen/bottom_content_inset">
 
+            <!-- Wordmark Bar: logo, app name, edit profile and settings gear -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/page_padding"
+                android:paddingEnd="@dimen/page_padding">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/cd_app_logo"
+                    android:src="@drawable/img_logo_mark" />
+
+                <TextView
+                    style="@style/Text.Wordmark"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="9dp"
+                    android:layout_weight="1"
+                    android:includeFontPadding="false"
+                    android:text="@string/wordmark"
+                    android:textColor="@color/text_secondary" />
+
+                <ImageView
+                    android:id="@+id/btn_edit_profile"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/title_edit_profile"
+                    android:padding="7dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_pencil"
+                    app:tint="@color/text_secondary" />
+
+                <ImageView
+                    android:id="@+id/btn_settings"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="6dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_settings"
+                    android:padding="7dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_gear"
+                    app:tint="@color/text_secondary" />
+            </LinearLayout>
+
+            <!-- Identity Header: avatar, name, level and XP progress. the level and XP wait for the profile -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/page_padding"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="@dimen/page_padding"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
+                <include
+                    android:id="@+id/avatarProfile"
+                    layout="@layout/partial_profile_avatar"
+                    android:layout_width="@dimen/settings_avatar"
+                    android:layout_height="@dimen/settings_avatar" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvProfileName"
+                        style="@style/Text.HeroTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        tools:text="Dylan" />
+
+                    <LinearLayout
+                        android:id="@+id/group_xp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="7dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:contentDescription="@null"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/ic_trophy"
+                                app:tint="@color/gold" />
+
+                            <TextView
+                                android:id="@+id/tv_level"
+                                style="@style/Text.BodyStrong"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="7dp"
+                                android:includeFontPadding="false"
+                                android:textColor="@color/gold"
+                                tools:text="Level 3" />
+                        </LinearLayout>
+
+                        <ProgressBar
+                            android:id="@+id/progress_xp"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/progress_height"
+                            android:layout_marginTop="11dp"
+                            android:max="100"
+                            android:maxHeight="@dimen/progress_height"
+                            android:minHeight="@dimen/progress_height"
+                            android:progress="0"
+                            android:progressDrawable="@drawable/progress_bar_accent" />
+
+                        <TextView
+                            android:id="@+id/tv_xp_progress"
+                            style="@style/Text.Caption"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="9dp"
+                            android:includeFontPadding="false"
+                            tools:text="250 / 400 XP" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Loading, shown until the profile arrives -->
+            <ProgressBar
+                android:id="@+id/progress_profile"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="40dp" />
+
+            <!-- Error, shown instead of the sections when the profile could not be loaded -->
+            <LinearLayout
+                android:id="@+id/card_profile_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/page_padding"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:layout_marginEnd="@dimen/page_padding"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/Text.CardTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:text="@string/profile_error_title" />
+
+                <TextView
+                    android:id="@+id/tv_profile_error"
+                    style="@style/Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:includeFontPadding="false"
+                    android:lineSpacingExtra="3dp"
+                    android:text="@string/profile_error_load" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_profile_retry"
+                    style="@style/Widget.App.AccentButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/cta_height"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/try_again" />
+            </LinearLayout>
+
+            <!-- Everything the backend works out. hidden until there is a profile -->
+            <LinearLayout
+                android:id="@+id/content_profile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <!-- Stats: games in the library, games completed, achievements and this month's rank -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/page_padding"
+                    android:layout_marginTop="@dimen/section_spacing"
+                    android:layout_marginEnd="@dimen/page_padding"
+                    android:background="@drawable/bg_card"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_stat_games"
+                            style="@style/Text.SectionTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:includeFontPadding="false"
+                            tools:text="103" />
+
+                        <TextView
+                            style="@style/Text.Micro"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="@string/profile_stat_games" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_stat_completed"
+                            style="@style/Text.SectionTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:includeFontPadding="false"
+                            tools:text="4" />
+
+                        <TextView
+                            style="@style/Text.Micro"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="@string/profile_stat_completed" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_stat_achievements"
+                            style="@style/Text.SectionTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:includeFontPadding="false"
+                            tools:text="212" />
+
+                        <TextView
+                            style="@style/Text.Micro"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="@string/profile_stat_achievements" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_stat_rank"
+                            style="@style/Text.SectionTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:includeFontPadding="false"
+                            tools:text="#2" />
+
+                        <TextView
+                            style="@style/Text.Micro"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="@string/profile_stat_rank" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Badges Card: earned ones first, the rest as dashed outlines with their progress -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/page_padding"
+                    android:layout_marginTop="@dimen/section_gap"
+                    android:layout_marginEnd="@dimen/page_padding"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.SectionTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:includeFontPadding="false"
+                            android:text="@string/badges" />
+
+                        <TextView
+                            android:id="@+id/tv_badges_earned"
+                            style="@style/Text.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:includeFontPadding="false"
+                            tools:text="3 of 20 earned" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_badges"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:nestedScrollingEnabled="false"
+                        android:overScrollMode="never"
+                        tools:itemCount="8"
+                        tools:listitem="@layout/item_badge" />
+                </LinearLayout>
+
+                <!-- Rarest Achievement Showcase Card: seven slots, the rarest unlocks first -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/page_padding"
+                    android:layout_marginTop="@dimen/section_gap"
+                    android:layout_marginEnd="@dimen/page_padding"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        style="@style/Text.SectionTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:text="@string/showcase_title" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_showcase"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:nestedScrollingEnabled="false"
+                        android:overScrollMode="never"
+                        tools:itemCount="7"
+                        tools:listitem="@layout/item_showcase_tile" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/list_divider_thickness"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/border" />
+
+                    <TextView
+                        android:id="@+id/tv_showcase_note"
+                        style="@style/Text.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        tools:text="Rarest: Beat the Game on Hell · 0.4% of players" />
+                </LinearLayout>
+
+                <!-- Recent Completions -->
                 <TextView
                     style="@style/Text.SectionTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:includeFontPadding="false"
-                    android:text="@string/badges" />
-
-                <TextView
-                    style="@style/Text.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/page_padding"
+                    android:layout_marginTop="@dimen/section_spacing"
+                    android:layout_marginEnd="@dimen/page_padding"
                     android:includeFontPadding="false"
-                    android:text="@string/badges_earned_count" />
-            </LinearLayout>
-
-            <!-- the four badges, all still unearned so they sit as dashed outlines -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
+                    android:text="@string/profile_recent_title" />
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/list_recent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
-                        android:background="@drawable/bg_circle_dashed"
-                        android:contentDescription="@null"
-                        android:padding="15dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_trophy"
-                        app:tint="@color/text_tertiary" />
-
-                    <TextView
-                        style="@style/Text.Micro"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
-                        android:gravity="center_horizontal"
-                        android:text="@string/badge_completionist" />
-                </LinearLayout>
+                    android:layout_marginStart="@dimen/page_padding"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="@dimen/page_padding"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical" />
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/row_recent_empty"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
-                        android:background="@drawable/bg_circle_dashed"
-                        android:contentDescription="@null"
-                        android:padding="15dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_target"
-                        app:tint="@color/text_tertiary" />
+                    android:layout_marginStart="@dimen/page_padding"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="@dimen/page_padding"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingTop="20dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="20dp"
+                    android:visibility="gone">
 
                     <TextView
-                        style="@style/Text.Micro"
-                        android:layout_width="match_parent"
+                        style="@style/Text.Body"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
-                        android:gravity="center_horizontal"
-                        android:text="@string/badge_achievement_hunter" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
-                        android:background="@drawable/bg_circle_dashed"
-                        android:contentDescription="@null"
-                        android:padding="15dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_crown"
-                        app:tint="@color/text_tertiary" />
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:text="@string/profile_recent_empty" />
 
                     <TextView
-                        style="@style/Text.Micro"
-                        android:layout_width="match_parent"
+                        android:id="@+id/btn_add_game"
+                        style="@style/Text.SectionAction"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
-                        android:gravity="center_horizontal"
-                        android:text="@string/badge_monthly_competitor" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
-                        android:background="@drawable/bg_circle_dashed"
-                        android:contentDescription="@null"
-                        android:padding="15dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_clock"
-                        app:tint="@color/text_tertiary" />
-
-                    <TextView
-                        style="@style/Text.Micro"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
-                        android:gravity="center_horizontal"
-                        android:text="@string/badge_early_bird" />
+                        android:layout_marginStart="12dp"
+                        android:includeFontPadding="false"
+                        android:text="@string/add_a_game" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-
-        <!-- Rarest Achievement Showcase Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_padding"
-            android:layout_marginTop="@dimen/section_gap"
-            android:layout_marginEnd="@dimen/page_padding"
-            android:background="@drawable/bg_card"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                style="@style/Text.SectionTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:includeFontPadding="false"
-                android:text="@string/showcase_title" />
-
-            <!-- seven empty slots, one per showcase position -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:orientation="horizontal">
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="46dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_slot_dashed" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="46dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_slot_dashed" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="46dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_slot_dashed" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="46dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_slot_dashed" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="46dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_slot_dashed" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="46dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_slot_dashed" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="46dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_slot_dashed" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/list_divider_thickness"
-                android:layout_marginTop="16dp"
-                android:background="@color/border" />
-
-            <TextView
-                style="@style/Text.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:includeFontPadding="false"
-                android:lineSpacingExtra="3dp"
-                android:text="@string/showcase_body" />
-        </LinearLayout>
-
-        <!-- Recent Activity Section -->
-        <TextView
-            style="@style/Text.SectionTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_padding"
-            android:layout_marginTop="@dimen/section_spacing"
-            android:layout_marginEnd="@dimen/page_padding"
-            android:includeFontPadding="false"
-            android:text="@string/recent_activity" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/page_padding"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="@dimen/page_padding"
-            android:background="@drawable/bg_card"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingTop="20dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="20dp">
-
-            <TextView
-                style="@style/Text.Body"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:includeFontPadding="false"
-                android:text="@string/recent_activity_empty" />
-
-            <TextView
-                android:id="@+id/btn_add_game"
-                style="@style/Text.SectionAction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:includeFontPadding="false"
-                android:text="@string/add_a_game" />
-        </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

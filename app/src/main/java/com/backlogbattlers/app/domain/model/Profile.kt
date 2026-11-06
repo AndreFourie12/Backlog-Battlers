@@ -1,0 +1,76 @@
+package com.backlogbattlers.app.domain.model
+
+// every badge a user can earn. the backend sends the id and how far along the user is; the name,
+// description and picture are the app's (see util/Badges.kt), so they follow the app's language.
+// an id this version does not know is left out
+enum class BadgeId {
+    FIRST_BLOOD,
+    CLEAN_SWEEP,
+    COMPLETION_CLUB,
+    FINISHER,
+    THE_LONG_HAUL,
+    NEEDLE_IN_A_HAYSTACK,
+    GHOST_HUNTER,
+    STATISTICALLY_IMPROBABLE,
+    SHELF_CLEANER,
+    DUST_OFF,
+    COLD_TURKEY,
+    BACKLOG_ZERO,
+    TOP_OF_THE_TABLE,
+    PHOTO_FINISH,
+    COMEBACK,
+    NEMESIS,
+    DAILY_DRIVER,
+    MARATHON_MONTH,
+    GENRE_TOURIST,
+    PLATFORM_AGNOSTIC,
+}
+
+// one badge and how far along the user is: earned once progress reaches target
+data class BadgeProgress(val id: BadgeId, val progress: Int, val target: Int, val earned: Boolean)
+
+// one of the user's rarest achievements, for the showcase
+data class ShowcaseAchievement(
+    val achievementId: String,
+    val name: String,
+    val iconUrl: String?,
+    // the share of players who have it, e.g. 0.4 for 0.4%
+    val rarityPercent: Double,
+    val gameId: Int,
+    val gameTitle: String?,
+)
+
+// a game the user completed recently
+data class RecentCompletion(
+    val gameId: Int,
+    val gameTitle: String?,
+    val completionType: CompletionType,
+    val points: Int,
+    // epoch milliseconds
+    val completedAt: Long,
+)
+
+// everything the profile screen shows that comes from the backend. xp is the points earned in
+// total, and the level is worked out from it by the backend (see the README for the formula)
+data class Profile(
+    val userId: String,
+    val displayName: String,
+    val avatarUrl: String?,
+    val xp: Int,
+    val level: Int,
+    // xp into the current level, out of xpForNextLevel (what the whole level takes)
+    val xpIntoLevel: Int,
+    val xpForNextLevel: Int,
+    val monthlyPoints: Int,
+    // null until the user has scored this month
+    val monthRank: Int?,
+    val gamesInLibrary: Int,
+    val gamesCompleted: Int,
+    val achievementsUnlocked: Int,
+    val badges: List<BadgeProgress>,
+    val rarestAchievements: List<ShowcaseAchievement>,
+    val recentCompletions: List<RecentCompletion>,
+) {
+    val badgesEarned: Int get() = badges.count { it.earned }
+}
+//------------------------------EOF------------------------------\\

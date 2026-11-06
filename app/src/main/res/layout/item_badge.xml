@@ -1,26 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- one earned profile badge -->
+<!-- one badge in the profile's grid: earned ones are filled in gold, the rest are dashed outlines with their progress -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="0dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_weight="1"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
     android:gravity="center_horizontal"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
 
     <ImageView
         android:id="@+id/ivBadgeIcon"
-        android:layout_width="46dp"
-        android:layout_height="46dp"
-        android:background="@drawable/bg_circle_surface"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:background="@drawable/bg_circle_dashed"
         android:contentDescription="@null"
-        android:padding="12dp"
-        android:src="@drawable/ic_trophy" />
+        android:padding="15dp"
+        android:scaleType="fitCenter"
+        tools:src="@drawable/ic_trophy" />
 
     <TextView
         android:id="@+id/tvBadgeLabel"
         style="@style/Text.Micro"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="7dp"
-        android:gravity="center_horizontal" />
+        android:layout_marginTop="9dp"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:maxLines="2"
+        android:minLines="2"
+        tools:text="Needle in a Haystack" />
+
+    <TextView
+        android:id="@+id/tvBadgeProgress"
+        style="@style/Text.Micro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center_horizontal"
+        tools:text="3 / 10" />
 </LinearLayout>

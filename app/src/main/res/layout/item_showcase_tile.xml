@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- one of the seven showcase slots: a rare achievement's icon, or an empty dashed slot -->
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ivShowcaseTile"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    android:layout_height="46dp"
+    android:layout_margin="3dp"
+    android:background="@drawable/bg_slot_dashed"
+    android:contentDescription="@null"
+    android:padding="4dp"
+    android:scaleType="fitCenter"
+    tools:src="@drawable/ic_star" />
