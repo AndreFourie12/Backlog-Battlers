@@ -10,6 +10,7 @@ import com.backlogbattlers.api.db.Platform
 import com.backlogbattlers.api.db.SteamApps
 import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.db.UserSteamAccounts
+import com.backlogbattlers.api.db.VerifiedUnlocks
 import com.backlogbattlers.api.db.Users
 import com.backlogbattlers.api.db.Games
 import com.backlogbattlers.api.games.IgdbClient
@@ -38,6 +39,7 @@ import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteAll
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -404,6 +406,23 @@ class SteamImportRoutesTest {
         assertEquals(2, result.achievementsUnlocked)
         // locked achievements are left out, and a game with nothing unlocked has no unlocks
         assertEquals(mapOf(72 to setOf("ACH_PORTAL_A", "ACH_PORTAL_B")), unlocks(caller!!))
+    }
+
+    @Test
+    fun `unlocks an import brings in are confirmed by steam, so they can no longer be unchecked`() = testApplication {
+        installApi()
+        caller = newUser()
+        client.import()
+
+        val confirmed = transaction(db) { VerifiedUnlocks.selectAll().map { it[VerifiedUnlocks.achievementId] }.toSet() }
+        assertEquals(setOf("ACH_PORTAL_A", "ACH_PORTAL_B"), confirmed)
+
+        // a later import confirms what an earlier version of the app only ticked by hand
+        transaction(db) { VerifiedUnlocks.deleteAll() }
+        later(Duration.ofMinutes(5))
+        owned = listOf(620 to 360, 730 to 90, 999 to 45)
+        client.import()
+        assertEquals(setOf("ACH_PORTAL_A", "ACH_PORTAL_B"), transaction(db) { VerifiedUnlocks.selectAll().map { it[VerifiedUnlocks.achievementId] }.toSet() })
     }
 
     @Test

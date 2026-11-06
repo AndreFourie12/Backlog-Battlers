@@ -10,18 +10,25 @@ import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.Platform
 import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.db.UserSteamAccounts
+import com.backlogbattlers.api.db.VerifiedUnlocks
 import com.backlogbattlers.api.db.Users
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.igdbHttpClient
+import com.backlogbattlers.api.library.LibraryEntryDto
 import com.backlogbattlers.api.scoring.CompleteResponseDto
+import com.backlogbattlers.api.scoring.HundredPercentBlock
+import com.backlogbattlers.api.scoring.HundredPercentRefusedDto
 import com.backlogbattlers.api.scoring.currentMonthPeriod
 import com.backlogbattlers.api.scoring.monthlyPointsFor
 import com.backlogbattlers.api.steam.SteamCheckStatus
+import com.backlogbattlers.api.steam.markVerified
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.request.HttpRequestData
+import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -110,7 +117,10 @@ class CompletionRoutesTest {
         application {
             install(ContentNegotiation) { json() }
             configureErrors()
-            routing { completionRoutes(fakeIgdb, fakeSteam) { caller } }
+            routing {
+                completionRoutes(fakeIgdb, fakeSteam) { caller }
+                libraryRoutes(fakeIgdb) { caller }
+            }
         }
     }
 
@@ -236,15 +246,15 @@ class CompletionRoutesTest {
         steamUnlocked = setOf("A_RARE")
         client.complete(entry, CompletionType.MAIN_STORY)
 
-        unlock(entry, "A_VERY_RARE") // only this one is new for the second completion
-        steamUnlocked = setOf("A_RARE", "A_VERY_RARE")
+        unlock(entry, "A_VERY_RARE", "A_COMMON", "A_UNKNOWN") // the rest, so 100% is possible
+        steamUnlocked = allCodes.toSet()
         val second = client.complete(entry, CompletionType.COMPLETIONIST)
 
         val body = Json.decodeFromString<CompleteResponseDto>(second.bodyAsText())
-        assertEquals(40, body.achievementPoints) // A_VERY_RARE's own tier only, not A_RARE again
+        assertEquals(40 + 5 + 0, body.achievementPoints) // the three new ones only, not A_RARE again
         assertEquals(151, body.completionTimePoints) // Hades' avg100PercentHours, rounded
         // total for the month is both completions added together
-        assertEquals((20 + 70) + (40 + 151), monthlyPointsFor(caller!!, month))
+        assertEquals((20 + 70) + (45 + 151), monthlyPointsFor(caller!!, month))
     }
 
     @Test
@@ -405,7 +415,7 @@ class CompletionRoutesTest {
         assertEquals(listOf("A_RARE"), story.unverifiedAchievementIds)
 
         steamUnlocked = setOf("A_RARE", "A_COMMON")
-        val full = Json.decodeFromString<CompleteResponseDto>(client.complete(entry, CompletionType.COMPLETIONIST).bodyAsText())
+        val full = Json.decodeFromString<CompleteResponseDto>(client.complete(entry, CompletionType.MAIN_EXTRA).bodyAsText())
 
         assertEquals(20, full.achievementPoints) // A_RARE now, and A_COMMON is not paid a second time
         assertEquals(emptyList(), full.unverifiedAchievementIds)
@@ -423,14 +433,14 @@ class CompletionRoutesTest {
 
         unlock(entry, "A_RARE")
         steamUnlocked = setOf("A_RARE")
-        client.complete(entry, CompletionType.COMPLETIONIST)
+        client.complete(entry, CompletionType.MAIN_EXTRA)
 
         val asked = steamRequests.single().url
         assertEquals(playerSteamId, asked.parameters["steamid"])
         assertEquals("1145360", asked.parameters["appid"])
 
         // everything is paid for now, so a further completion costs no Steam call
-        client.complete(entry, CompletionType.MAIN_EXTRA)
+        client.complete(entry, CompletionType.COMPLETIONIST)
         assertEquals(1, steamRequests.size)
     }
 
@@ -447,6 +457,175 @@ class CompletionRoutesTest {
         assertEquals(HttpStatusCode.BadRequest, client.post("/users/me/library/not-an-id/complete") {
             contentType(ContentType.Application.Json); setBody("""{"completionType":"MAIN_STORY"}""")
         }.status)
+    }
+
+    private suspend fun HttpClient.refusal(entry: Uuid): HundredPercentRefusedDto {
+        val response = complete(entry, CompletionType.COMPLETIONIST)
+        assertEquals(HttpStatusCode.UnprocessableEntity, response.status)
+        return Json.decodeFromString(response.bodyAsText())
+    }
+
+    private fun verifiedOf(entry: Uuid): Set<String> = transaction(db) {
+        VerifiedUnlocks.selectAll().where { VerifiedUnlocks.libraryEntryId eq entry }.map { it[VerifiedUnlocks.achievementId] }.toSet()
+    }
+
+    @Test
+    fun `100 percent is refused while an achievement is still locked, and nothing is awarded`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_RARE", "A_COMMON", "A_VERY_RARE") // A_UNKNOWN is still locked
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_RARE", "A_COMMON", "A_VERY_RARE")
+
+        val refused = client.refusal(entry)
+
+        assertEquals(HundredPercentBlock.NOT_ALL_UNLOCKED, refused.reason)
+        assertEquals(listOf("A_UNKNOWN"), refused.achievementIds)
+        assertEquals(0, monthlyPointsFor(caller!!, month))
+        assertEquals(LibraryStatus.BACKLOG, transaction(db) { LibraryEntries.selectAll().single()[LibraryEntries.status] })
+    }
+
+    @Test
+    fun `100 percent is refused when Steam does not confirm every achievement`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, *allCodes.toTypedArray()) // all ticked...
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_RARE", "A_COMMON", "A_VERY_RARE") // ...but Steam only has three
+
+        val refused = client.refusal(entry)
+
+        assertEquals(HundredPercentBlock.NOT_VERIFIED, refused.reason)
+        assertEquals(listOf("A_UNKNOWN"), refused.achievementIds)
+        assertEquals(SteamCheckStatus.VERIFIED, refused.steamStatus)
+        assertEquals(0, monthlyPointsFor(caller!!, month))
+    }
+
+    @Test
+    fun `100 percent is refused without a linked Steam account, since nothing can be confirmed`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, *allCodes.toTypedArray())
+
+        val refused = client.refusal(entry)
+
+        assertEquals(HundredPercentBlock.NOT_VERIFIED, refused.reason)
+        assertEquals(SteamCheckStatus.NOT_LINKED, refused.steamStatus)
+        assertEquals(allCodes.sorted(), refused.achievementIds)
+        assertTrue(steamRequests.isEmpty())
+    }
+
+    @Test
+    fun `a game with no achievements cannot be completed to 100 percent, but its story can`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        transaction(db) { Games.upsert { it[id] = 5; it[title] = "Plain Game" } }
+        val entry = transaction(db) {
+            LibraryEntries.insert { it[userId] = caller!!; it[gameId] = 5; it[platform] = Platform.PC }[LibraryEntries.id]
+        }
+
+        assertEquals(HundredPercentBlock.NO_ACHIEVEMENTS, client.refusal(entry).reason)
+        assertEquals(HttpStatusCode.OK, client.complete(entry, CompletionType.MAIN_STORY).status)
+    }
+
+    @Test
+    fun `100 percent completes the game once every achievement is unlocked and confirmed, and locks them in`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, *allCodes.toTypedArray())
+        linkSteam(caller!!)
+        steamUnlocked = allCodes.toSet()
+
+        val response = client.complete(entry, CompletionType.COMPLETIONIST)
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        val body = Json.decodeFromString<CompleteResponseDto>(response.bodyAsText())
+        assertEquals(20 + 5 + 40 + 0, body.achievementPoints)
+        assertEquals(151, body.completionTimePoints)
+        val row = transaction(db) { LibraryEntries.selectAll().single() }
+        assertEquals(LibraryStatus.COMPLETED, row[LibraryEntries.status])
+        assertEquals(CompletionType.COMPLETIONIST, row[LibraryEntries.completionType])
+        assertEquals(allCodes.toSet(), verifiedOf(entry))
+    }
+
+    @Test
+    fun `completing the story after 100 percent does not take the 100 percent away`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, *allCodes.toTypedArray())
+        linkSteam(caller!!)
+        steamUnlocked = allCodes.toSet()
+        client.complete(entry, CompletionType.COMPLETIONIST)
+
+        assertEquals(HttpStatusCode.OK, client.complete(entry, CompletionType.MAIN_STORY).status)
+
+        assertEquals(CompletionType.COMPLETIONIST, transaction(db) { LibraryEntries.selectAll().single()[LibraryEntries.completionType] })
+    }
+
+    @Test
+    fun `achievements an import already confirmed are paid and count towards 100 percent without asking Steam again`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, *allCodes.toTypedArray())
+        transaction(db) { markVerified(entry, allCodes) } // what an import records
+        linkSteam(caller!!)
+        steamUnlocked = emptySet() // Steam would deny them now, but it is never asked
+
+        val response = client.complete(entry, CompletionType.COMPLETIONIST)
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(20 + 5 + 40, Json.decodeFromString<CompleteResponseDto>(response.bodyAsText()).achievementPoints)
+        assertTrue(steamRequests.isEmpty())
+    }
+
+    @Test
+    fun `an achievement Steam confirmed cannot be unchecked, while one it did not is removed as asked`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_RARE", "A_COMMON")
+        linkSteam(caller!!)
+        steamUnlocked = setOf("A_COMMON")
+        client.complete(entry, CompletionType.MAIN_STORY) // confirms A_COMMON only
+
+        val response = client.patch("/users/me/library/$entry") {
+            contentType(ContentType.Application.Json)
+            setBody("""{"unlockedAchievementIds":[]}""")
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        val updated = Json { ignoreUnknownKeys = true }.decodeFromString<LibraryEntryDto>(response.bodyAsText())
+        assertEquals(listOf("A_COMMON"), updated.unlockedAchievementIds)
+        assertEquals(listOf("A_COMMON"), updated.verifiedAchievementIds)
+    }
+
+    @Test
+    fun `the library lists which unlocked achievements are confirmed`() = testApplication {
+        installApi()
+        seedHades()
+        caller = newUser()
+        val entry = addEntry(caller!!)
+        unlock(entry, "A_RARE", "A_COMMON")
+        transaction(db) { markVerified(entry, listOf("A_RARE")) }
+
+        val listed = Json { ignoreUnknownKeys = true }.decodeFromString<List<LibraryEntryDto>>(client.get("/users/me/library").bodyAsText()).single()
+
+        assertEquals(listOf("A_COMMON", "A_RARE"), listed.unlockedAchievementIds)
+        assertEquals(listOf("A_RARE"), listed.verifiedAchievementIds)
     }
 
     @Test

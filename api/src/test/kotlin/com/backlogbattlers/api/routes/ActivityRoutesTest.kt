@@ -12,6 +12,7 @@ import com.backlogbattlers.api.db.Games
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.MonthlyLeaderboardEntries
 import com.backlogbattlers.api.db.Platform
+import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.db.Users
 import com.backlogbattlers.api.friends.acceptRequest
 import com.backlogbattlers.api.friends.sendRequest
@@ -22,6 +23,7 @@ import com.backlogbattlers.api.scoring.completeLibraryEntry
 import com.backlogbattlers.api.scoring.currentMonthPeriod
 import com.backlogbattlers.api.steam.SteamCheck
 import com.backlogbattlers.api.steam.SteamCheckStatus
+import com.backlogbattlers.api.steam.markVerified
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
@@ -93,6 +95,13 @@ class ActivityRoutesTest {
         }[LibraryEntries.id]
     }
 
+    /** Every achievement of the seeded game unlocked and confirmed by Steam, which completing to 100% needs. */
+    private fun unlockAndVerifyEverything(entry: Uuid) = transaction(db) {
+        val codes = listOf("COMMON", "RARE", "NAMELESS")
+        codes.forEach { code -> UnlockedAchievements.insert { it[libraryEntryId] = entry; it[achievementId] = code } }
+        markVerified(entry, codes)
+    }
+
     private fun event(actor: Uuid, minutesIn: Long, gameId: Int? = null) = transaction(db) {
         recordActivity(actor, ActivityType.GAME_COMPLETED, gameId = gameId, at = start.plusSeconds(minutesIn * 60))
     }
@@ -160,6 +169,7 @@ class ActivityRoutesTest {
         seedGame()
         val me = newUser("Me")
         val entry = addEntry(me)
+        unlockAndVerifyEverything(entry)
         caller = me
 
         completeLibraryEntry(me, entry, CompletionType.COMPLETIONIST, SteamCheck(SteamCheckStatus.NOT_NEEDED))
@@ -187,6 +197,7 @@ class ActivityRoutesTest {
             MonthlyLeaderboardEntries.insert { it[userId] = ahead; it[monthPeriod] = month; it[monthlyPoints] = 100_000 }
         }
         befriend(me, near)
+        unlockAndVerifyEverything(entry)
         caller = me
 
         // the completion earns more than 15 points, so Near (15) and Far (5) are passed and Ahead is not
