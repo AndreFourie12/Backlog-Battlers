@@ -343,6 +343,16 @@ object UserPictures : Table("user_pictures")
     override val primaryKey = PrimaryKey(userId)
 }
 
+// seasonannouncements table: the months the "a new season has started" push went out for, so a restart or a
+// second instance never sends it twice
+object SeasonAnnouncements : Table("season_announcements")
+{
+    val monthPeriod = varchar("month_period", 7)
+    val announcedAt = timestamp("announced_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(monthPeriod)
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -363,5 +373,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     GameGenres,
     VerifiedUnlocks,
     UserPictures,
+    SeasonAnnouncements,
 )
 //------------------------------EOF------------------------------\\

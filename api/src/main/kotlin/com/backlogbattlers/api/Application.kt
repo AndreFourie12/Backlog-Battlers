@@ -10,6 +10,7 @@ import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.igdbHttpClient
 import com.backlogbattlers.api.notifications.Notifier
 import com.backlogbattlers.api.notifications.PushSender
+import com.backlogbattlers.api.notifications.SeasonAnnouncer
 import com.backlogbattlers.api.routes.accountRoutes
 import com.backlogbattlers.api.routes.activityRoutes
 import com.backlogbattlers.api.routes.achievementRoutes
@@ -61,6 +62,8 @@ fun Application.module() {
     val igdb = IgdbClient.fromConfig()
     val steam = SteamClient.fromConfig()
     val notifier = Notifier(PushSender.fromConfig())
+    // tells everyone when a new month, and so a new season, begins
+    SeasonAnnouncer(notifier).startIn(this)
 
     // @Dylan, @Andre
     // To add a feature, create : routes/YourFeatureRoutes.kt with `fun Route.yourFeatureRoutes()`,
@@ -74,7 +77,7 @@ fun Application.module() {
         friendRoutes(notifier, currentUser = bearerCurrentUser(jwtService))
         completionRoutes(igdb, steam, notifier, currentUser = bearerCurrentUser(jwtService))
         steamRoutes(currentUser = bearerCurrentUser(jwtService))
-        steamImportRoutes(SteamImporter(igdb, steam), currentUser = bearerCurrentUser(jwtService))
+        steamImportRoutes(SteamImporter(igdb, steam, notifier = notifier), currentUser = bearerCurrentUser(jwtService))
         leaderboardRoutes(currentUser = bearerCurrentUser(jwtService))
         accountRoutes(currentUser = bearerCurrentUser(jwtService))
         meRoutes(currentUser = bearerCurrentUser(jwtService))
