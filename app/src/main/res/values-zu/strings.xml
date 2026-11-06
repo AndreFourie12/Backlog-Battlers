@@ -305,13 +305,32 @@
     <string name="about_licences_body">Lolu hlelo lwakhiwe phezu komsebenzi womthombo ovulekile okhishwe ngaphansi kwe-Apache License 2.0:\n\n• AndroidX ne-Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines ne-kotlinx.serialization\n• Ktor Client\n\nImibhalo egcwele yamalayisensi iyatholakala endaweni yokugcina yephrojekthi ngayinye.</string>
 
     <!-- activity feed -->
-    <string name="activity_no_standings_title">Akukabi khona ukulandelana</string>
-    <string name="activity_no_standings_body">Engeza umngane, bese nobabili nilandelaniswa ngamaphuzu atholwe kule nyanga.</string>
     <string name="view_standings">Buka ukulandelana</string>
     <string name="activity_today">Namuhla</string>
-    <string name="activity_event_joined">Ujoyine i-<b>Backlog Battlers</b></string>
     <string name="activity_just_now">Manje nje</string>
-    <string name="activity_feed_hint" formatted="false">Izimpumelelo ezivuliwe, ukuqeda okungu-100% nezinguquko zezinga zakho nezabangane bakho kuzovela lapha, kuhlelwe ngosuku.</string>
+    <string name="activity_standings_title">Ukulandelana</string>
+    <string name="activity_standings_body">Bona ukuthi wena nabangane bakho nikuphi kule nyanga.</string>
+    <string name="activity_yesterday">Izolo</string>
+    <string name="activity_you">Wena</string>
+    <string name="activity_unknown_game">umdlalo</string>
+    <string name="activity_completed">&lt;b&gt;%1$s&lt;/b&gt; uqede &lt;b&gt;%2$s&lt;/b&gt;</string>
+    <string name="activity_completed_100">&lt;b&gt;%1$s&lt;/b&gt; uqede &lt;b&gt;%2$s&lt;/b&gt; kuze kube ngu-100%%</string>
+    <string name="activity_unlocked_named">&lt;b&gt;%1$s&lt;/b&gt; uvule &lt;b&gt;%3$s&lt;/b&gt; ku-&lt;b&gt;%2$s&lt;/b&gt;</string>
+    <plurals name="activity_unlocked_count">
+        <item quantity="one">&lt;b&gt;%1$s&lt;/b&gt; uvule impumelelo ku-&lt;b&gt;%2$s&lt;/b&gt;</item>
+        <item quantity="other">&lt;b&gt;%1$s&lt;/b&gt; uvule izimpumelelo ezingu-&lt;b&gt;%3$d&lt;/b&gt; ku-&lt;b&gt;%2$s&lt;/b&gt;</item>
+    </plurals>
+    <string name="activity_friend_added">&lt;b&gt;%1$s&lt;/b&gt; no-&lt;b&gt;%2$s&lt;/b&gt; manje bangabangane</string>
+    <string name="activity_rank_passed">&lt;b&gt;%1$s&lt;/b&gt; weqe &lt;b&gt;%2$s&lt;/b&gt; ekulandelaneni</string>
+    <plurals name="activity_rank_passed_many">
+        <item quantity="one">&lt;b&gt;%1$s&lt;/b&gt; weqe &lt;b&gt;%2$s&lt;/b&gt; nomunye ekulandelaneni</item>
+        <item quantity="other">&lt;b&gt;%1$s&lt;/b&gt; weqe &lt;b&gt;%2$s&lt;/b&gt; nabanye abangu-%3$d ekulandelaneni</item>
+    </plurals>
+    <string name="activity_meta_points">%1$s · +amaphuzu angu-%2$s</string>
+    <string name="activity_empty_title">Akukabi khona lutho lapha</string>
+    <string name="activity_empty_body">Lapho wena noma abangane bakho beqeda umdlalo, bevula izimpumelelo, bewela omunye ekulandelaneni noma baba abangane, kuzovela lapha.</string>
+    <string name="activity_error_load">Ayikwazanga ukulayisha okwenzekayo. Hlola uxhumano lwakho bese uzama futhi.</string>
+    <string name="activity_error_title">Kukhona okungahambanga kahle</string>
 
     <!-- profile -->
     <string name="profile_level">Izinga 1</string>

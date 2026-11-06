@@ -305,13 +305,32 @@
     <string name="about_licences_body">Hierdie app is gebou op oopbronwerk wat onder die Apache-lisensie 2.0 vrygestel is:\n\n• AndroidX en Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines en kotlinx.serialization\n• Ktor Client\n\nDie volledige lisensietekste is by elke projek se bewaarplek beskikbaar.</string>
 
     <!-- activity feed -->
-    <string name="activity_no_standings_title">Nog geen ranglys nie</string>
-    <string name="activity_no_standings_body">Voeg \'n vriend by, dan word julle albei gerangskik volgens punte wat hierdie maand verdien is.</string>
     <string name="view_standings">Sien ranglys</string>
     <string name="activity_today">Vandag</string>
-    <string name="activity_event_joined">Jy het by <b>Backlog Battlers</b> aangesluit</string>
     <string name="activity_just_now">Pas</string>
-    <string name="activity_feed_hint" formatted="false">Ontsluite prestasies, 100% voltooiings en rangveranderinge van jou en jou vriende sal hier verskyn, gegroepeer per dag.</string>
+    <string name="activity_standings_title">Ranglys</string>
+    <string name="activity_standings_body">Kyk waar jy en jou vriende hierdie maand rangskik.</string>
+    <string name="activity_yesterday">Gister</string>
+    <string name="activity_you">Jy</string>
+    <string name="activity_unknown_game">\'n speletjie</string>
+    <string name="activity_completed">&lt;b&gt;%1$s&lt;/b&gt; het &lt;b&gt;%2$s&lt;/b&gt; voltooi</string>
+    <string name="activity_completed_100">&lt;b&gt;%1$s&lt;/b&gt; het &lt;b&gt;%2$s&lt;/b&gt; tot 100%% voltooi</string>
+    <string name="activity_unlocked_named">&lt;b&gt;%1$s&lt;/b&gt; het &lt;b&gt;%3$s&lt;/b&gt; in &lt;b&gt;%2$s&lt;/b&gt; ontsluit</string>
+    <plurals name="activity_unlocked_count">
+        <item quantity="one">&lt;b&gt;%1$s&lt;/b&gt; het \'n prestasie in &lt;b&gt;%2$s&lt;/b&gt; ontsluit</item>
+        <item quantity="other">&lt;b&gt;%1$s&lt;/b&gt; het &lt;b&gt;%3$d&lt;/b&gt; prestasies in &lt;b&gt;%2$s&lt;/b&gt; ontsluit</item>
+    </plurals>
+    <string name="activity_friend_added">&lt;b&gt;%1$s&lt;/b&gt; en &lt;b&gt;%2$s&lt;/b&gt; is nou vriende</string>
+    <string name="activity_rank_passed">&lt;b&gt;%1$s&lt;/b&gt; het &lt;b&gt;%2$s&lt;/b&gt; op die ranglys verbygesteek</string>
+    <plurals name="activity_rank_passed_many">
+        <item quantity="one">&lt;b&gt;%1$s&lt;/b&gt; het &lt;b&gt;%2$s&lt;/b&gt; en 1 ander op die ranglys verbygesteek</item>
+        <item quantity="other">&lt;b&gt;%1$s&lt;/b&gt; het &lt;b&gt;%2$s&lt;/b&gt; en %3$d ander op die ranglys verbygesteek</item>
+    </plurals>
+    <string name="activity_meta_points">%1$s · +%2$s punte</string>
+    <string name="activity_empty_title">Nog niks hier nie</string>
+    <string name="activity_empty_body">Wanneer jy of jou vriende \'n speletjie voltooi, prestasies ontsluit, iemand op die ranglys verbygesteek of vriende word, verskyn dit hier.</string>
+    <string name="activity_error_load">Kon nie die aktiwiteitstroom laai nie. Kyk na jou verbinding en probeer weer.</string>
+    <string name="activity_error_title">Iets het verkeerd gegaan</string>
 
     <!-- profile -->
     <string name="profile_level">Vlak 1</string>
