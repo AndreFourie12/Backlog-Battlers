@@ -49,7 +49,6 @@
     <string name="achievements_error">Couldn\'t load achievements right now.</string>
     <string name="badges">Badges</string>
     <string name="showcase_title">Rarest Achievement Showcase</string>
-    <string name="recent_activity">Recent Activity</string>
     <string name="achievement_progress">Achievement Progress</string>
     <string name="your_position">Your position</string>
     <string name="vs_last_month">vs last month</string>
@@ -362,18 +361,72 @@
     <string name="activity_empty_body">When you or your friends complete a game, unlock achievements, pass someone on the leaderboard or become friends, it shows up here.</string>
     <string name="activity_error_load">Couldn\'t load the activity feed. Check your connection and try again.</string>
     <string name="activity_error_title">Something went wrong</string>
+    <!-- profile -->
+    <string name="profile_level">Level %1$d</string>
+    <string name="profile_xp_progress">%1$s / %2$s XP</string>
+    <string name="profile_stat_games">Games</string>
+    <string name="profile_stat_completed">Completed</string>
+    <string name="profile_stat_achievements">Achievements</string>
+    <string name="profile_stat_rank">Rank</string>
+    <string name="profile_rank_value" translatable="false">#%1$d</string>
+    <string name="profile_badges_earned">%1$d of %2$d earned</string>
+    <string name="profile_badge_earned">Earned</string>
+    <string name="profile_badge_progress">Progress: %1$d of %2$d</string>
+    <string name="profile_badge_progress_short" translatable="false">%1$d / %2$d</string>
+    <string name="profile_rank_none" translatable="false">—</string>
+    <string name="profile_showcase_detail">%1$s · %2$s%% of players</string>
+    <string name="profile_showcase_empty">Unlock rare achievements and your seven rarest show up here.</string>
+    <string name="profile_showcase_rarest">Rarest: %1$s · %2$s%% of players</string>
+    <string name="profile_recent_title">Recent completions</string>
+    <string name="profile_recent_empty">Games you complete will show up here</string>
+    <string name="profile_completion_story">Story</string>
+    <string name="profile_completion_extra">Story + extras</string>
+    <string name="profile_completion_full" formatted="false">100%</string>
+    <string name="profile_recent_row">%1$s · +%2$s points · %3$s</string>
+    <string name="profile_error_title">Something went wrong</string>
+    <string name="profile_error_load">Couldn\'t load your profile. Check your connection and try again.</string>
+    <string name="badge_first_blood_name" translatable="false">First Blood</string>
+    <string name="badge_clean_sweep_name" translatable="false">Clean Sweep</string>
+    <string name="badge_completion_club_name" translatable="false">Completion Club</string>
+    <string name="badge_finisher_name" translatable="false">Finisher</string>
+    <string name="badge_the_long_haul_name" translatable="false">The Long Haul</string>
+    <string name="badge_needle_in_a_haystack_name" translatable="false">Needle in a Haystack</string>
+    <string name="badge_ghost_hunter_name" translatable="false">Ghost Hunter</string>
+    <string name="badge_statistically_improbable_name" translatable="false">Statistically Improbable</string>
+    <string name="badge_shelf_cleaner_name" translatable="false">Shelf Cleaner</string>
+    <string name="badge_dust_off_name" translatable="false">Dust Off</string>
+    <string name="badge_cold_turkey_name" translatable="false">Cold Turkey</string>
+    <string name="badge_backlog_zero_name" translatable="false">Backlog Zero</string>
+    <string name="badge_top_of_the_table_name" translatable="false">Top of the Table</string>
+    <string name="badge_photo_finish_name" translatable="false">Photo Finish</string>
+    <string name="badge_comeback_name" translatable="false">Comeback</string>
+    <string name="badge_nemesis_name" translatable="false">Nemesis</string>
+    <string name="badge_daily_driver_name" translatable="false">Daily Driver</string>
+    <string name="badge_marathon_month_name" translatable="false">Marathon Month</string>
+    <string name="badge_genre_tourist_name" translatable="false">Genre Tourist</string>
+    <string name="badge_platform_agnostic_name" translatable="false">Platform Agnostic</string>
+    <string name="badge_first_blood_desc">Unlock your first achievement in any tracked game.</string>
+    <string name="badge_clean_sweep_desc" formatted="false">Reach 100% completion on a game for the first time.</string>
+    <string name="badge_completion_club_desc" formatted="false">Hit 100% on ten different games.</string>
+    <string name="badge_finisher_desc">Complete three games in a single month.</string>
+    <string name="badge_the_long_haul_desc">Fully complete a game with an average completion time over 60 hours.</string>
+    <string name="badge_needle_in_a_haystack_desc" formatted="false">Unlock an achievement held by fewer than 1% of players.</string>
+    <string name="badge_ghost_hunter_desc" formatted="false">Unlock ten achievements rarer than 5%.</string>
+    <string name="badge_statistically_improbable_desc" formatted="false">Unlock three sub-1% achievements in the same game.</string>
+    <string name="badge_shelf_cleaner_desc">Finish a game that sat untouched in your library for over six months.</string>
+    <string name="badge_dust_off_desc">Unlock an achievement in a game you hadn\'t played in 90 days.</string>
+    <string name="badge_cold_turkey_desc">Complete a game during a month where you added nothing new to your library.</string>
+    <string name="badge_backlog_zero_desc">Have no games left marked Not Started, with at least five in your library.</string>
+    <string name="badge_top_of_the_table_desc">Finish a month in first place among your friends.</string>
+    <string name="badge_photo_finish_desc">Win a month by fewer than 25 points.</string>
+    <string name="badge_comeback_desc">Climb three or more places from one month to the next.</string>
+    <string name="badge_nemesis_desc">Finish above the same friend three months running.</string>
+    <string name="badge_daily_driver_desc">Unlock at least one achievement on seven consecutive days.</string>
+    <string name="badge_marathon_month_desc">Earn 1,000 points in a single month.</string>
+    <string name="badge_genre_tourist_desc">Complete games across five different genres.</string>
+    <string name="badge_platform_agnostic_desc">Track games from three different platforms.</string>
 
     <!-- profile -->
-    <string name="profile_display_name" translatable="false">Alex</string>
-    <string name="profile_level">Level 1</string>
-    <string name="profile_xp_progress">0 / 500 XP · unlock an achievement to start</string>
-    <string name="badges_earned_count">0 of 4 earned</string>
-    <string name="badge_completionist">Completionist</string>
-    <string name="badge_achievement_hunter">Achievement Hunter</string>
-    <string name="badge_monthly_competitor">Monthly Competitor</string>
-    <string name="badge_early_bird">Early Bird</string>
-    <string name="showcase_body">Showcase your rarest unlocks, completed games, and average completion percentage</string>
-    <string name="recent_activity_empty">Games you play will show up here</string>
     <string name="add_a_game">Add a game →</string>
 
     <plurals name="search_result_count">
