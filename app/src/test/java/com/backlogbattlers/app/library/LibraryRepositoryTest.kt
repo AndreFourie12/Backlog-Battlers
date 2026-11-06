@@ -87,6 +87,36 @@ class LibraryRepositoryTest {
     }
 
     @Test
+    fun `an achievement Steam confirmed cannot be locked again, while an ordinary one can`() = runBlocking {
+        repository.addToLibrary(HADES, Platform.PC, LibraryStatus.PLAYING)
+        val entryId = repository.observeLibrary().first().single().libraryEntryId
+        repository.setAchievementUnlocked(entryId, "ESCAPE", unlocked = true)
+        repository.setAchievementUnlocked(entryId, "BLOODLESS", unlocked = true)
+        dao.upsert(dao.rows.value.single().copy(verifiedAchievementIds = listOf("ESCAPE"))) // what the account says
+        changes = 0
+
+        repository.setAchievementUnlocked(entryId, "ESCAPE", unlocked = false)
+        assertEquals(listOf("BLOODLESS", "ESCAPE").sorted(), repository.observeLibrary().first().single().unlockedAchievementIds.sorted())
+        assertEquals(0, changes) // nothing changed, so nothing to upload
+
+        repository.setAchievementUnlocked(entryId, "BLOODLESS", unlocked = false)
+        assertEquals(listOf("ESCAPE"), repository.observeLibrary().first().single().unlockedAchievementIds)
+        assertEquals(1, changes)
+    }
+
+    @Test
+    fun `an entry is synced once nothing waits to be uploaded`() = runBlocking {
+        repository.addToLibrary(HADES, Platform.PC, LibraryStatus.PLAYING)
+        val entry = dao.rows.value.single()
+        assertEquals(false, repository.isSynced(entry.libraryEntryId))
+
+        dao.markSynced(entry.libraryEntryId, entry.updatedAt)
+
+        assertEquals(true, repository.isSynced(entry.libraryEntryId))
+        assertEquals(false, repository.isSynced("not-an-entry"))
+    }
+
+    @Test
     fun `removing hides the entry but keeps a pending delete until the account is told`() = runBlocking {
         repository.addToLibrary(HADES, Platform.PC, LibraryStatus.PLAYING)
         val entryId = repository.observeLibrary().first().single().libraryEntryId

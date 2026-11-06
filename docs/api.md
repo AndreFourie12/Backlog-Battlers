@@ -312,6 +312,37 @@ The profile screen's whole answer, worked out from the signed-in user's own data
 | 401 | `{"error":"Sign in to see your profile"}` |
 | 404 | `{"error":"Account was not found"}` (the account was deleted) |
 
+### Completing a game: `POST /users/me/library/{id}/complete`
+
+Body: `{"completionType": "MAIN_STORY"}` or `{"completionType": "COMPLETIONIST"}`. The app offers two kinds, the story and 100% (`MAIN_EXTRA` is still accepted and counts as the story). Needs `Authorization: Bearer <access token>`.
+
+- **Story** can always be completed. Steam is asked about the achievements ticked so far, and only the ones it confirms earn points.
+- **100% (`COMPLETIONIST`)** needs every achievement of the game to be unlocked **and confirmed by Steam**. Otherwise nothing is awarded and the answer is a 422 with the reason:
+
+```json
+{
+  "error": "Steam has to confirm every achievement before a game is 100% complete",
+  "reason": "NOT_VERIFIED",
+  "steamStatus": "NOT_LINKED",
+  "achievementIds": ["ACH_1", "ACH_2"]
+}
+```
+
+`reason` is `NO_ACHIEVEMENTS` (the game has none, so 100% is never possible), `NOT_ALL_UNLOCKED` (`achievementIds` are the locked ones) or `NOT_VERIFIED` (`achievementIds` are the ones Steam did not confirm; `steamStatus` says whether Steam could be asked at all: `VERIFIED`, `NOT_LINKED`, `PRIVATE_PROFILE` or `NOT_ON_STEAM`).
+
+**Confirmed unlocks.** An unlock is confirmed when a Steam import brought it in, or when Steam confirmed it as part of a completion (an unlock that was already paid for counts too). A confirmed unlock can no longer be unchecked: `PATCH /users/me/library/{id}` keeps it unlocked even when the list leaves it out, and `GET /users/me/library` lists the confirmed ones as `verifiedAchievementIds`. They are stored in the `verified_unlocks` table. Steam is never asked about a confirmed unlock again.
+
+Completing as `COMPLETIONIST` sets the entry's `completionType` to `COMPLETIONIST`, and it stays that when the story is completed afterwards.
+
+| Status | Meaning |
+|---|---|
+| 200 | Completed, with the points it earned |
+| 401 | Not signed in |
+| 404 | No such library entry |
+| 409 | Already completed as that type |
+| 422 | 100% is not possible yet, see above |
+| 502 | Steam could not be reached, nothing was completed |
+
 ### `POST /users/me/steam/import`
 
 Adds the games the user owns on Steam to their library. Needs `Authorization: Bearer <access token>`, a linked Steam account (`PUT /users/me/steam`), and `STEAM_API_KEY` on the server. No request body.

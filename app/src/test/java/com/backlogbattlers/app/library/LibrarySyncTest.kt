@@ -7,6 +7,7 @@ import com.backlogbattlers.app.data.remote.LibraryApi
 import com.backlogbattlers.app.data.remote.LibraryEntryDto
 import com.backlogbattlers.app.data.remote.UpdateLibraryEntryRequest
 import com.backlogbattlers.app.data.repository.LibrarySync
+import com.backlogbattlers.app.domain.model.CompletionType
 import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
 import io.ktor.client.HttpClient
@@ -158,7 +159,7 @@ class LibrarySyncTest {
         platform: Platform = Platform.PC,
         status: LibraryStatus = LibraryStatus.BACKLOG,
         hours: Double = 0.0,
-    ) = LibraryEntryDto(id, gameId, platform, status, hours, emptyList(), null, addedAt = 500L, updatedAt = 2_000L)
+    ) = LibraryEntryDto(id, gameId, platform, status, hours, emptyList(), completionType = null, addedAt = 500L, updatedAt = 2_000L)
 
     private fun rowsOf(id: String) = dao.rows.value.single { it.libraryEntryId == id }
 
@@ -298,6 +299,22 @@ class LibrarySyncTest {
         assertEquals("PLAYING", pulled.status)
         assertEquals(7.5f, pulled.hoursPlayed)
         assertFalse(pulled.pendingSync)
+    }
+
+    @Test
+    fun `the achievements Steam confirmed and the completion come down with the entry`() = runBlocking {
+        server["entry-1"] = remote("entry-1").copy(
+            unlockedAchievementIds = listOf("A", "B"),
+            verifiedAchievementIds = listOf("A"),
+            completionType = CompletionType.COMPLETIONIST,
+        )
+
+        sync.sync()
+
+        val pulled = rowsOf("entry-1")
+        assertEquals(listOf("A", "B"), pulled.unlockedAchievementIds)
+        assertEquals(listOf("A"), pulled.verifiedAchievementIds)
+        assertEquals("COMPLETIONIST", pulled.completionType)
     }
 
     @Test
