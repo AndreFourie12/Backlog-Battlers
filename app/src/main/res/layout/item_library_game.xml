@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- one tile of the games tab's library grid: portrait cover art with a completion pill overlaid
-     near the bottom, a "Platform · Genre" line underneath. The completion is hardcoded to 50% for
-     now: nothing tracks a real one yet -->
+     near the bottom, a "Platform · Genre" line underneath. A game completed to 100% also gets a trophy
+     and an accent coloured label -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -21,6 +21,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- shown on a game completed to 100%: a gold trophy on a dark disc in the top right of the art -->
+    <ImageView
+        android:id="@+id/iv_game_hundred"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_circle_scrim"
+        android:contentDescription="@string/cd_game_hundred"
+        android:padding="7dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_trophy"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/img_game_art"
+        app:layout_constraintTop_toTopOf="@id/img_game_art"
+        app:tint="@color/gold" />
 
     <!-- straddles the art's bottom edge on purpose: a top AND a bottom constraint to that same
          edge centers the pill on it, half over the art and half over the page below.

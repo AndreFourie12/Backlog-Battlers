@@ -54,7 +54,13 @@ class AchievementAdapter(
 
             bindIcon(icon, achievement, unlocked = item.unlocked)
 
-            status.setText(if (item.unlocked) R.string.unlocked else R.string.locked)
+            status.setText(
+                when {
+                    item.verified -> R.string.achievement_verified
+                    item.unlocked -> R.string.unlocked
+                    else -> R.string.locked
+                },
+            )
             icon.contentDescription = status.text
 
             icon.setOnClickListener { onToggle(achievement.achievementId) }
@@ -62,6 +68,8 @@ class AchievementAdapter(
             checkbox.setOnCheckedChangeListener(null)
             checkbox.isChecked = item.unlocked
             checkbox.setOnClickListener { onToggle(achievement.achievementId) }
+            // Steam confirmed it, so it cannot be unchecked: the box is dimmed and a tap explains why
+            checkbox.alpha = if (item.verified) 0.5f else 1f
         }
 
         // Steam's own icon art when the server has some (needs a STEAM_API_KEY), the plain
