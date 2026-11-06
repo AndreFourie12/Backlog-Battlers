@@ -227,12 +227,16 @@ The API sends these through Firebase Cloud Messaging to every phone the recipien
 | `FRIEND_REQUEST_ACCEPTED` | whoever sent the request | it is accepted | Friend activity | Friends |
 | `FRIEND_COMPLETED_GAME` | each of the completer's friends | a game is marked complete | Friend activity | Activity (the feed, `GET /activity`) |
 | `OVERTAKEN` | everyone the completer passed this month | a completion lifts them past you | Rank changes | Standings |
+| `ACHIEVEMENT_UNLOCKED` | the player | a Steam import finds achievements unlocked in the last 7 days (history is never pushed) | Achievements | Profile, whose recent activity lists them |
+| `SEASON_RESET` | everyone with the app on a phone | the competition month changes | Season resets | Standings |
 
 "Passed" means you had at least as many points as them before the completion and fewer after it.
 
-Pushes are data-only messages: `type`, `userId` (the recipient), `actorName` and, for `FRIEND_COMPLETED_GAME`, `gameTitle`. The app writes the text itself in the user's language and drops a push meant for an account that is no longer signed in. Nothing is sent when the recipient switched that kind off, or when the account-wide `push_notifications_enabled` flag is off. A user who has never saved settings gets everything, because the app ships with every switch on. Tokens that FCM reports as gone are deleted.
+Pushes are data-only messages: `type`, `userId` (the recipient), and then what that kind needs: `actorName` for the four about friends and rivals, plus `gameTitle` for `FRIEND_COMPLETED_GAME`; `gameTitle` (left out when the unlocks are spread over several games), `count` and `achievementName` (the rarest) for `ACHIEVEMENT_UNLOCKED`; `monthPeriod`, `lastRank` (left out when they scored nothing) and `lastPoints` for `SEASON_RESET`. The app writes the text itself in the user's language and drops a push meant for an account that is no longer signed in. Nothing is sent when the recipient switched that kind off, or when the account-wide `push_notifications_enabled` flag is off. A user who has never saved settings gets everything, because the app ships with every switch on. Tokens that FCM reports as gone are deleted.
 
-The Achievements and Season resets switches are synced and stored, but no push uses them yet.
+**Achievements.** An import tells the player about the unlocks it found: one push for each of up to three games, and past that a single push for all of them. They arrive only when an import runs (the Import button under Steam), because the API does not poll Steam by itself.
+
+**Season resets.** A background job checks every 10 minutes whether the competition month (South African time) has changed. When it has, every user with at least one registered phone gets one push saying how they finished the month before, then everyone starts from zero. Which months were announced is kept in the `season_announcements` table, so a restart or a second instance never sends one twice. The first time the job ever runs it only records the current month, because a season that began weeks ago is not news.
 
 Configure the sender with `FIREBASE_SERVICE_ACCOUNT_FILE` (path to the service-account JSON) or `FIREBASE_SERVICE_ACCOUNT_JSON` (the JSON itself). Without either, the API runs normally and only logs the pushes it would have sent.
 
@@ -417,7 +421,6 @@ Routes follow the Part 1 design document, the below routes are yet to be built:
 | `GET /leaderboard/monthly` | This month's standings |
 | `GET /users/me/progression` | XP, level and badges |
 | `GET /users/me/streak` | Login streak |
-| Season reset and achievement pushes | Pushes for the two notification switches the four live pushes don't cover |
 
 Conventions once these exist:
 

@@ -145,10 +145,14 @@ class NotifierTest {
     }
 
     @Test
-    fun `the achievement and season switches do not block the four pushes`() {
-        val othersOff = everythingOn().copy(achievementNotifications = false, seasonResetNotifications = false)
+    fun `the achievements switch covers unlock pushes, and the season switch covers season pushes, and neither covers anything else`() {
+        val achievementsOff = everythingOn().copy(achievementNotifications = false)
+        val seasonOff = everythingOn().copy(seasonResetNotifications = false)
 
-        PushType.entries.forEach { assertTrue(allowsPush(othersOff, true, it)) }
+        assertFalse(allowsPush(achievementsOff, true, PushType.ACHIEVEMENT_UNLOCKED))
+        PushType.entries.filter { it != PushType.ACHIEVEMENT_UNLOCKED }.forEach { assertTrue(allowsPush(achievementsOff, true, it)) }
+        assertFalse(allowsPush(seasonOff, true, PushType.SEASON_RESET))
+        PushType.entries.filter { it != PushType.SEASON_RESET }.forEach { assertTrue(allowsPush(seasonOff, true, it)) }
     }
 
     @Test
@@ -283,6 +287,55 @@ class NotifierTest {
         }
 
         assertEquals(emptyList(), sent)
+    }
+
+    @Test
+    fun `unlocked achievements push the game, how many and the rarest to the player, unless the achievements switch is off`() {
+        val ana = newUser("Ana", "ana-phone")
+
+        notifier.achievementsUnlocked(ana, "Hades", 3, "Beat the Game")
+
+        val push = sent.single()
+        assertEquals(listOf("ana-phone"), push.tokens)
+        assertEquals("ACHIEVEMENT_UNLOCKED", push.data["type"])
+        assertEquals("Hades", push.data["gameTitle"])
+        assertEquals("3", push.data["count"])
+        assertEquals("Beat the Game", push.data["achievementName"])
+        assertFalse("actorName" in push.data) // it is about you, not a friend
+
+        sent.clear()
+        saveSettings(ana, everythingOn().copy(achievementNotifications = false))
+        notifier.achievementsUnlocked(ana, "Hades", 3, "Beat the Game")
+        assertEquals(emptyList(), sent)
+    }
+
+    @Test
+    fun `a new season pushes how last month ended, unless the season switch is off`() {
+        val ana = newUser("Ana", "ana-phone")
+
+        notifier.seasonStarted(ana, "2026-10", lastRank = 2, lastPoints = 120)
+
+        val push = sent.single()
+        assertEquals("SEASON_RESET", push.data["type"])
+        assertEquals("2026-10", push.data["monthPeriod"])
+        assertEquals("2", push.data["lastRank"])
+        assertEquals("120", push.data["lastPoints"])
+
+        sent.clear()
+        saveSettings(ana, everythingOn().copy(seasonResetNotifications = false))
+        notifier.seasonStarted(ana, "2026-10", lastRank = 2, lastPoints = 120)
+        assertEquals(emptyList(), sent)
+    }
+
+    @Test
+    fun `a season push for someone who scored nothing has no rank`() {
+        val ana = newUser("Ana", "ana-phone")
+
+        notifier.seasonStarted(ana, "2026-10", lastRank = null, lastPoints = 0)
+
+        val data = sent.single().data
+        assertFalse("lastRank" in data)
+        assertEquals("0", data["lastPoints"])
     }
 
     @Test

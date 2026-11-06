@@ -4,6 +4,7 @@ import com.backlogbattlers.api.configureErrors
 import com.backlogbattlers.api.db.ActivityEvents
 import com.backlogbattlers.api.db.ActivityType
 import com.backlogbattlers.api.db.DatabaseFactory
+import com.backlogbattlers.api.db.Devices
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.Platform
@@ -14,6 +15,9 @@ import com.backlogbattlers.api.db.VerifiedUnlocks
 import com.backlogbattlers.api.db.Users
 import com.backlogbattlers.api.db.Games
 import com.backlogbattlers.api.games.IgdbClient
+import com.backlogbattlers.api.notifications.Notifier
+import com.backlogbattlers.api.settings.SettingsDto
+import com.backlogbattlers.api.settings.saveSettings
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.igdbHttpClient
 import com.backlogbattlers.api.steam.SteamImportDto
@@ -132,7 +136,15 @@ class SteamImportRoutesTest {
         clientSecret = "secret",
     )
 
-    private val importer = SteamImporter(fakeIgdb, fakeSteam, clock = { now })
+    // every push the import sent, as the data the phone receives
+    private val pushes = mutableListOf<Map<String, String>>()
+    private val notifier = Notifier({ _, data -> pushes += data; emptyList() }, launch = Notifier.inline)
+
+    private val importer = SteamImporter(fakeIgdb, fakeSteam, clock = { now }, notifier = notifier)
+
+    private fun withPhone(owner: Uuid) = transaction(db) {
+        Devices.insert { it[token] = "phone-$owner"; it[userId] = owner }
+    }
 
     private fun ApplicationTestBuilder.installApi() {
         application {
@@ -495,6 +507,48 @@ class SteamImportRoutesTest {
         assertEquals(72, feed[ActivityEvents.gameId])
         assertEquals(recent, feed[ActivityEvents.createdAt])
         assertEquals(caller, feed[ActivityEvents.actorId])
+    }
+
+    @Test
+    fun `new unlocks from the last week are pushed to the player, and history is not`() = testApplication {
+        installApi()
+        caller = newUser()
+        withPhone(caller!!)
+        unlockTimes["ACH_PORTAL_A"] = now.minus(Duration.ofDays(2)).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+        unlockTimes["ACH_PORTAL_B"] = Instant.parse("2020-03-14T09:26:00Z")
+
+        client.import()
+
+        val push = pushes.single()
+        assertEquals("ACHIEVEMENT_UNLOCKED", push["type"])
+        assertEquals("Portal 2", push["gameTitle"])
+        assertEquals("1", push["count"])
+        assertEquals(caller.toString(), push["userId"])
+    }
+
+    @Test
+    fun `unlocks steam gives no time for are history, so they are not pushed`() = testApplication {
+        installApi()
+        caller = newUser()
+        withPhone(caller!!)
+
+        client.import()
+
+        assertEquals(emptyList(), pushes)
+    }
+
+    @Test
+    fun `with the achievements switch off the import still brings the unlocks in, but nothing is pushed`() = testApplication {
+        installApi()
+        caller = newUser()
+        withPhone(caller!!)
+        saveSettings(caller!!, SettingsDto("en", "DARK", "HILLS", Platform.PC, achievementNotifications = false, rankChangeNotifications = true, seasonResetNotifications = true, friendActivityNotifications = true))
+        unlockTimes["ACH_PORTAL_A"] = now.minus(Duration.ofDays(1)).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+
+        client.import()
+
+        assertEquals(2, unlocks(caller!!).getValue(72).size)
+        assertEquals(emptyList(), pushes)
     }
 
     @Test
