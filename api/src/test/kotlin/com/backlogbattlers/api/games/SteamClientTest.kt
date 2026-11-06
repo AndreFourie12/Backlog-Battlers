@@ -125,7 +125,13 @@ class SteamClientTest {
 
         val result = steam.unlockedAchievements("76561198000000001", 1145360)
 
-        assertEquals(PlayerAchievements.Unlocked(setOf("AchA", "AchC")), result)
+        assertEquals(
+            PlayerAchievements.Unlocked(
+                codes = setOf("AchA", "AchC"),
+                unlockedAt = mapOf("AchA" to java.time.Instant.ofEpochSecond(1700000000), "AchC" to java.time.Instant.ofEpochSecond(1700000100)),
+            ),
+            result,
+        )
         val url = seen.single().url
         assertTrue(url.encodedPath.contains("GetPlayerAchievements"))
         assertEquals("76561198000000001", url.parameters["steamid"])

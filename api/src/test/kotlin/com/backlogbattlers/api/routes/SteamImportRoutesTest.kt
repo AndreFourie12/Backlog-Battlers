@@ -1,6 +1,8 @@
 package com.backlogbattlers.api.routes
 
 import com.backlogbattlers.api.configureErrors
+import com.backlogbattlers.api.db.ActivityEvents
+import com.backlogbattlers.api.db.ActivityType
 import com.backlogbattlers.api.db.DatabaseFactory
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
@@ -68,6 +70,7 @@ class SteamImportRoutesTest {
     // ---- fake Steam achievements: what the player has unlocked in each app ----
     private val unlockedOnSteam = mutableMapOf(620 to listOf("ACH_PORTAL_A", "ACH_PORTAL_B"), 730 to emptyList())
     private val failingAchievementApps = mutableSetOf<Int>()
+    private val unlockTimes = mutableMapOf<String, Instant>() // when Steam says each was unlocked; none by default
     private val achievementCalls = mutableListOf<Int>() // the app id of every achievement read
 
     private val fakeSteam = SteamClient(
@@ -77,7 +80,9 @@ class SteamImportRoutesTest {
                     val app = request.url.parameters["appid"]!!.toInt()
                     synchronized(achievementCalls) { achievementCalls += app }
                     if (app in failingAchievementApps) return@MockEngine respondError(HttpStatusCode.ServiceUnavailable)
-                    val rows = (unlockedOnSteam[app].orEmpty().map { """{"apiname":"$it","achieved":1}""" } +
+                    val rows = (unlockedOnSteam[app].orEmpty().map { code ->
+                        """{"apiname":"$code","achieved":1,"unlocktime":${unlockTimes[code]?.epochSecond ?: 0}}"""
+                    } +
                         """{"apiname":"ACH_LOCKED","achieved":0}""").joinToString(",")
                     return@MockEngine respond(
                         """{"playerstats":{"steamID":"$playerSteamId","success":true,"achievements":[$rows]}}""",
@@ -448,6 +453,40 @@ class SteamImportRoutesTest {
 
         assertEquals(listOf(730), achievementCalls)
         assertEquals(emptyMap(), unlocks(caller!!))
+    }
+
+    @Test
+    fun `unlocks keep the time steam gives, and only the last week's reach the activity feed`() = testApplication {
+        installApi()
+        caller = newUser()
+        val recent = now.minus(Duration.ofDays(2)).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+        val old = Instant.parse("2020-03-14T09:26:00Z")
+        unlockTimes["ACH_PORTAL_A"] = recent
+        unlockTimes["ACH_PORTAL_B"] = old
+
+        client.import()
+
+        val stored = transaction(db) {
+            UnlockedAchievements.selectAll().associate { it[UnlockedAchievements.achievementId] to it[UnlockedAchievements.unlockedAt] }
+        }
+        assertEquals(mapOf("ACH_PORTAL_A" to recent, "ACH_PORTAL_B" to old), stored)
+        val feed = transaction(db) { ActivityEvents.selectAll().toList() }.single()
+        assertEquals(ActivityType.ACHIEVEMENT_UNLOCKED, feed[ActivityEvents.type])
+        assertEquals(1, feed[ActivityEvents.itemCount]) // the 2020 unlock is history, not news
+        assertEquals(72, feed[ActivityEvents.gameId])
+        assertEquals(recent, feed[ActivityEvents.createdAt])
+        assertEquals(caller, feed[ActivityEvents.actorId])
+    }
+
+    @Test
+    fun `unlocks steam gives no time for are imported but never announced in the feed`() = testApplication {
+        installApi()
+        caller = newUser()
+
+        client.import()
+
+        assertEquals(2, unlocks(caller!!).getValue(72).size)
+        assertEquals(0, transaction(db) { ActivityEvents.selectAll().count() })
     }
 }
 //------------------------------EOF------------------------------\
