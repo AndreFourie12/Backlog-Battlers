@@ -4,9 +4,8 @@ import com.backlogbattlers.app.data.remote.ProfileApi
 import com.backlogbattlers.app.data.remote.ProfileDto
 import com.backlogbattlers.app.domain.model.BadgeId
 import com.backlogbattlers.app.domain.model.BadgeProgress
-import com.backlogbattlers.app.domain.model.CompletionType
 import com.backlogbattlers.app.domain.model.Profile
-import com.backlogbattlers.app.domain.model.RecentCompletion
+import com.backlogbattlers.app.domain.model.RecentActivity
 import com.backlogbattlers.app.domain.model.ShowcaseAchievement
 
 // reads the signed in user's profile from the backend
@@ -14,9 +13,11 @@ interface ProfileRepository {
     suspend fun getProfile(): Profile
 }
 
-// network implementation for ProfileRepository, mapping the dto to domain models
+// network implementation for ProfileRepository, mapping the dto to domain models. the server knows
+// no pictures, so artFor supplies a game's from the phone's own cache (empty when it has none)
 class ProfileRepositoryImpl(
     private val api: ProfileApi,
+    private val artFor: suspend (gameId: Int) -> List<String> = { emptyList() },
 ) : ProfileRepository {
 
     //------------------------------
@@ -26,7 +27,7 @@ class ProfileRepositoryImpl(
 
     //------------------------------
     // converts a ProfileDto to the domain Profile
-    private fun ProfileDto.toDomain(): Profile {
+    private suspend fun ProfileDto.toDomain(): Profile {
         val known = badges.mapNotNull { dto ->
             val id = runCatching { BadgeId.valueOf(dto.id) }.getOrNull() ?: return@mapNotNull null
             BadgeProgress(id, dto.progress, dto.target, dto.earned)
@@ -48,13 +49,16 @@ class ProfileRepositoryImpl(
             rarestAchievements = rarestAchievements.map {
                 ShowcaseAchievement(it.achievementId, it.name, it.iconUrl, it.rarityPercent, it.gameId, it.gameTitle)
             },
-            recentCompletions = recentCompletions.map {
-                RecentCompletion(
+            unlockedRecently = unlockedRecently,
+            recentActivity = recentActivity.map {
+                RecentActivity(
                     gameId = it.gameId,
                     gameTitle = it.gameTitle,
-                    completionType = runCatching { CompletionType.valueOf(it.completionType) }.getOrDefault(CompletionType.MAIN_STORY),
-                    points = it.points,
-                    completedAt = it.completedAt,
+                    artUrls = artFor(it.gameId),
+                    unlockedCount = it.unlockedCount,
+                    lastUnlockedAt = it.lastUnlockedAt,
+                    achievementsUnlocked = it.achievementsUnlocked,
+                    achievementsTotal = it.achievementsTotal,
                 )
             },
         )

@@ -1,11 +1,13 @@
 package com.backlogbattlers.app.fragments
 
 import android.os.Bundle
-import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.graphics.Color
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -23,22 +25,26 @@ import com.backlogbattlers.app.R
 import com.backlogbattlers.app.adapters.BadgeAdapter
 import com.backlogbattlers.app.adapters.ShowcaseAdapter
 import com.backlogbattlers.app.domain.model.BadgeProgress
-import com.backlogbattlers.app.domain.model.CompletionType
 import com.backlogbattlers.app.domain.model.Profile
 import com.backlogbattlers.app.domain.model.ShowcaseAchievement
 import com.backlogbattlers.app.util.badgeInfo
 import com.backlogbattlers.app.util.bindProfileAvatar
+import com.backlogbattlers.app.util.daysSince
 import com.backlogbattlers.app.util.formatPoints
+import com.backlogbattlers.app.util.loadLandscapeArt
 import com.backlogbattlers.app.util.setVisible
 import com.backlogbattlers.app.viewmodels.ProfileViewModel
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-// the profile screen: the signed in user's name and picture, their level and XP, stats, badges,
-// rarest achievements and recent completions. the backend works the numbers out (see
-// ProfileViewModel); this shows them, with a spinner while they load and a retry if they cannot.
-// pull down to reload. the pencil opens edit profile and the gear opens settings
+// the profile screen: the signed in user's name and picture, their level and XP, a preview of their
+// badges (See all opens the rest), the rarest achievements, and the games they
+// unlocked achievements in lately. the backend works the numbers out (see ProfileViewModel); this
+// shows them, with a spinner while they load and a retry if they cannot. pull down to reload. the
+// pencil opens edit profile and the gear opens settings
 class ProfileFragment : Fragment() {
 
     private val viewModel: ProfileViewModel by viewModels()
@@ -73,9 +79,8 @@ class ProfileFragment : Fragment() {
             Log.d(TAG, "Opening settings from the profile header")
             findNavController().navigate(R.id.action_profileFragment_to_settingsFragment)
         }
-        view.findViewById<View>(R.id.btn_add_game).setOnClickListener {
-            Log.d(TAG, "Opening search to add a first game from the profile")
-            findNavController().navigate(R.id.action_profileFragment_to_searchFragment)
+        view.findViewById<View>(R.id.btn_badges_see_all).setOnClickListener {
+            viewModel.uiState.value.profile?.let { showAllBadges(it) }
         }
         view.findViewById<View>(R.id.btn_profile_retry).setOnClickListener { viewModel.refresh() }
 
@@ -91,7 +96,7 @@ class ProfileFragment : Fragment() {
         }
         val showcaseAdapter = ShowcaseAdapter(onClick = ::showAchievement)
         view.findViewById<RecyclerView>(R.id.rv_showcase).apply {
-            layoutManager = GridLayoutManager(requireContext(), ShowcaseAdapter.SLOTS)
+            layoutManager = GridLayoutManager(requireContext(), ShowcaseAdapter.COLUMNS)
             adapter = showcaseAdapter
         }
 
@@ -143,53 +148,76 @@ class ProfileFragment : Fragment() {
         view.findViewById<TextView>(R.id.tv_xp_progress).text =
             getString(R.string.profile_xp_progress, formatPoints(profile.xpIntoLevel), formatPoints(profile.xpForNextLevel))
 
-        view.findViewById<TextView>(R.id.tv_stat_games).text = formatPoints(profile.gamesInLibrary)
-        view.findViewById<TextView>(R.id.tv_stat_completed).text = formatPoints(profile.gamesCompleted)
-        view.findViewById<TextView>(R.id.tv_stat_achievements).text = formatPoints(profile.achievementsUnlocked)
-        view.findViewById<TextView>(R.id.tv_stat_rank).text =
-            profile.monthRank?.let { getString(R.string.profile_rank_value, it) } ?: getString(R.string.profile_rank_none)
-
-        // earned badges first, then the ones closest to being earned
         view.findViewById<TextView>(R.id.tv_badges_earned).text =
             getString(R.string.profile_badges_earned, profile.badgesEarned, profile.badges.size)
-        badgeAdapter.submitList(
-            profile.badges.sortedWith(
-                compareByDescending<BadgeProgress> { it.earned }
-                    .thenByDescending { it.progress.toFloat() / it.target }
-                    .thenBy { it.id.ordinal },
-            ),
-        )
+        badgeAdapter.submitList(sortedBadges(profile).take(BADGE_PREVIEW))
 
         showcaseAdapter.achievements = profile.rarestAchievements
-        val rarest = profile.rarestAchievements.firstOrNull()
-        view.findViewById<TextView>(R.id.tv_showcase_note).text =
-            if (rarest == null) getString(R.string.profile_showcase_empty)
-            else getString(R.string.profile_showcase_rarest, rarest.name, percentText(rarest.rarityPercent))
 
-        bindRecentCompletions(view, profile)
+        bindRecentActivity(view, profile)
     }
 
     //------------------------------
-    // one row for each of the latest completions, or the empty row with its add a game link
-    private fun bindRecentCompletions(view: View, profile: Profile) {
-        val list = view.findViewById<android.widget.LinearLayout>(R.id.list_recent)
+    // earned badges first, then the ones closest to being earned
+    private fun sortedBadges(profile: Profile): List<BadgeProgress> = profile.badges.sortedWith(
+        compareByDescending<BadgeProgress> { it.earned }
+            .thenByDescending { it.progress.toFloat() / it.target }
+            .thenBy { it.id.ordinal },
+    )
+
+    //------------------------------
+    // the bottom sheet See all opens: every badge, in the same order as the preview
+    private fun showAllBadges(profile: Profile) {
+        Log.d(TAG, "Opening all ${profile.badges.size} badges")
+        val dialog = BottomSheetDialog(requireContext())
+        dialog.setContentView(R.layout.sheet_badges)
+        val list = dialog.findViewById<RecyclerView>(R.id.list_badges) ?: return
+        dialog.findViewById<TextView>(R.id.tv_sheet_badges_earned)?.text =
+            getString(R.string.profile_badges_earned, profile.badgesEarned, profile.badges.size)
+
+        list.layoutManager = GridLayoutManager(requireContext(), BADGE_COLUMNS)
+        list.adapter = BadgeAdapter(onClick = ::showBadge).also { it.submitList(sortedBadges(profile)) }
+
+        // the sheet draws its own rounded background, so the dialog's square one is cleared
+        dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.setBackgroundColor(Color.TRANSPARENT)
+        dialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        dialog.behavior.skipCollapsed = true
+        dialog.show()
+    }
+
+    //------------------------------
+    // one card for each game unlocked in lately, or the empty note
+    private fun bindRecentActivity(view: View, profile: Profile) {
+        view.findViewById<TextView>(R.id.tv_recent_window).text = getString(R.string.profile_recent_window, profile.unlockedRecently)
+        val list = view.findViewById<LinearLayout>(R.id.list_recent)
         list.removeAllViews()
-        list.setVisible(profile.recentCompletions.isNotEmpty())
-        view.findViewById<View>(R.id.row_recent_empty).setVisible(profile.recentCompletions.isEmpty())
+        list.setVisible(profile.recentActivity.isNotEmpty())
+        view.findViewById<View>(R.id.row_recent_empty).setVisible(profile.recentActivity.isEmpty())
 
         val inflater = LayoutInflater.from(requireContext())
-        profile.recentCompletions.forEachIndexed { index, done ->
-            if (index > 0) list.addView(inflater.inflate(R.layout.partial_divider, list, false))
-            val row = inflater.inflate(R.layout.item_recent_completion, list, false)
-            row.findViewById<TextView>(R.id.tv_recent_title).text = done.gameTitle ?: getString(R.string.activity_unknown_game)
-            row.findViewById<TextView>(R.id.tv_recent_subtitle).text = getString(
-                R.string.profile_recent_row,
-                getString(completionLabel(done.completionType)),
-                formatPoints(done.points),
-                DateUtils.formatDateTime(requireContext(), done.completedAt, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_MONTH),
-            )
-            list.addView(row)
+        val now = System.currentTimeMillis()
+        profile.recentActivity.forEach { game ->
+            val card = inflater.inflate(R.layout.item_recent_activity, list, false)
+            card.findViewById<ImageView>(R.id.iv_recent_art).apply {
+                clipToOutline = true
+                loadLandscapeArt(game.artUrls)
+            }
+            card.findViewById<TextView>(R.id.tv_recent_title).text = game.gameTitle ?: getString(R.string.activity_unknown_game)
+            card.findViewById<TextView>(R.id.tv_recent_subtitle).text =
+                resources.getQuantityString(R.plurals.profile_recent_unlocked, game.unlockedCount, game.unlockedCount, whenText(game.lastUnlockedAt, now))
+            card.findViewById<ProgressBar>(R.id.progress_recent).progress =
+                if (game.achievementsTotal > 0) (game.achievementsUnlocked * 100 / game.achievementsTotal).coerceIn(0, 100) else 0
+            card.findViewById<TextView>(R.id.tv_recent_progress).text =
+                getString(R.string.profile_recent_progress_value, game.achievementsUnlocked, game.achievementsTotal)
+            list.addView(card)
         }
+    }
+
+    // Today, Yesterday, or how many days ago
+    private fun whenText(then: Long, now: Long): String = when (val days = daysSince(then, now)) {
+        0 -> getString(R.string.profile_recent_today)
+        1 -> getString(R.string.profile_recent_yesterday)
+        else -> resources.getQuantityString(R.plurals.profile_recent_days_ago, days, days)
     }
 
     //------------------------------
@@ -219,15 +247,12 @@ class ProfileFragment : Fragment() {
     private fun percentText(percent: Double): String =
         if (percent % 1.0 == 0.0) percent.toInt().toString() else String.format(Locale.getDefault(), "%.1f", percent)
 
-    private fun completionLabel(type: CompletionType): Int = when (type) {
-        CompletionType.MAIN_STORY -> R.string.profile_completion_story
-        CompletionType.MAIN_EXTRA -> R.string.profile_completion_extra
-        CompletionType.COMPLETIONIST -> R.string.profile_completion_full
-    }
-
     private companion object {
         const val TAG = "ProfileFragment"
         const val BADGE_COLUMNS = 4
+
+        // the badges the card shows before See all
+        const val BADGE_PREVIEW = 4
     }
 }
 //------------------------------EOF------------------------------\

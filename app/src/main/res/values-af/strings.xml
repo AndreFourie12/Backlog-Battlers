@@ -333,22 +333,26 @@
     <!-- profile -->
     <string name="profile_level">Vlak %1$d</string>
     <string name="profile_xp_progress">%1$s / %2$s XP</string>
-    <string name="profile_stat_games">Speletjies</string>
-    <string name="profile_stat_completed">Voltooi</string>
-    <string name="profile_stat_achievements">Prestasies</string>
-    <string name="profile_stat_rank">Rang</string>
+    <string name="profile_see_all">Sien almal</string>
     <string name="profile_badges_earned">%1$d van %2$d verdien</string>
     <string name="profile_badge_earned">Verdien</string>
     <string name="profile_badge_progress">Vordering: %1$d van %2$d</string>
     <string name="profile_showcase_detail">%1$s · %2$s%% van spelers</string>
-    <string name="profile_showcase_empty">Ontsluit skaars prestasies en jou sewe skaarste verskyn hier.</string>
-    <string name="profile_showcase_rarest">Skaarsste: %1$s · %2$s%% van spelers</string>
-    <string name="profile_recent_title">Onlangse voltooiings</string>
-    <string name="profile_recent_empty">Speletjies wat jy voltooi, sal hier verskyn</string>
-    <string name="profile_completion_story">Storie</string>
-    <string name="profile_completion_extra">Storie + ekstras</string>
-    <string name="profile_completion_full" formatted="false">100%</string>
-    <string name="profile_recent_row">%1$s · +%2$s punte · %3$s</string>
+    <string name="profile_recent_title">Onlangse aktiwiteit</string>
+    <string name="profile_recent_window">%1$d ontsluit in die afgelope 2 weke</string>
+    <string name="profile_recent_empty">Prestasies wat jy ontsluit, sal hier verskyn</string>
+    <plurals name="profile_recent_unlocked">
+        <item quantity="one">%1$d prestasie ontsluit · %2$s</item>
+        <item quantity="other">%1$d prestasies ontsluit · %2$s</item>
+    </plurals>
+    <string name="profile_recent_progress">Prestasievordering</string>
+    <string name="profile_recent_progress_value">%1$d van %2$d</string>
+    <string name="profile_recent_today">Vandag</string>
+    <string name="profile_recent_yesterday">Gister</string>
+    <plurals name="profile_recent_days_ago">
+        <item quantity="one">%1$d dag gelede</item>
+        <item quantity="other">%1$d dae gelede</item>
+    </plurals>
     <string name="profile_error_title">Iets het verkeerd gegaan</string>
     <string name="profile_error_load">Kon nie jou profiel laai nie. Kyk na jou verbinding en probeer weer.</string>
     <string name="badge_first_blood_desc">Ontsluit jou eerste prestasie in enige gevolgde speletjie.</string>

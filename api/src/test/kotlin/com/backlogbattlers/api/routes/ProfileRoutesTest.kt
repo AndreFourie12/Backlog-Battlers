@@ -99,9 +99,11 @@ class ProfileRoutesTest {
         }
     }
 
-    private fun unlock(entry: Uuid, code: String) = transaction(db) {
-        UnlockedAchievements.insert { it[libraryEntryId] = entry; it[achievementId] = code }
+    private fun unlock(entry: Uuid, code: String, at: Instant = Instant.now()) = transaction(db) {
+        UnlockedAchievements.insert { it[libraryEntryId] = entry; it[achievementId] = code; it[unlockedAt] = at }
     }
+
+    private fun daysAgo(days: Long): Instant = Instant.now().minusSeconds(days * 86_400)
 
     private fun points(user: Uuid, period: String, amount: Int) = transaction(db) {
         MonthlyLeaderboardEntries.insert { it[userId] = user; it[monthPeriod] = period; it[monthlyPoints] = amount }
@@ -148,7 +150,8 @@ class ProfileRoutesTest {
         assertEquals(20, p.badges.size)
         assertEquals(0, p.badges.count { it.earned })
         assertEquals(emptyList(), p.rarestAchievements)
-        assertEquals(emptyList(), p.recentCompletions)
+        assertEquals(0, p.unlockedRecently)
+        assertEquals(emptyList(), p.recentActivity)
     }
 
     @Test
@@ -205,21 +208,21 @@ class ProfileRoutesTest {
     }
 
     @Test
-    fun `the showcase is the rarest unlocked achievements, rarest first, at most seven`() = testApplication {
+    fun `the showcase is the rarest unlocked achievements, rarest first, at most fourteen`() = testApplication {
         installApi()
         seedGame(1, "Hades")
         val me = newUser()
         val entry = addEntry(me, 1)
-        (1..9).forEach { achievement(1, "A$it", rarity = it * 3.0) }
+        (1..16).forEach { achievement(1, "A$it", rarity = it * 3.0) }
         achievement(1, "NO_RARITY", null)
         achievement(1, "NOT_MINE", 0.1)
-        (1..9).forEach { unlock(entry, "A$it") }
+        (1..16).forEach { unlock(entry, "A$it") }
         unlock(entry, "NO_RARITY")
         caller = me
 
         val p = profile()
 
-        assertEquals((1..7).map { "A$it" }, p.rarestAchievements.map { it.achievementId })
+        assertEquals((1..14).map { "A$it" }, p.rarestAchievements.map { it.achievementId })
         assertEquals(3.0, p.rarestAchievements.first().rarityPercent)
         assertEquals("A1 name", p.rarestAchievements.first().name)
         assertEquals("https://icons.test/A1.jpg", p.rarestAchievements.first().iconUrl)
@@ -227,20 +230,75 @@ class ProfileRoutesTest {
     }
 
     @Test
-    fun `recent completions are the latest five with their points`() = testApplication {
+    fun `recent activity is each game unlocked in over the last two weeks, with its progress`() = testApplication {
+        installApi()
+        seedGame(1, "Elden Ring")
+        seedGame(2, "Hollow Knight")
+        seedGame(3, "Hades")
+        (1..5).forEach { achievement(1, "E$it", 50.0) }
+        (1..3).forEach { achievement(2, "K$it", 50.0) }
+        (1..2).forEach { achievement(3, "H$it", 50.0) }
+        val me = newUser()
+        val elden = addEntry(me, 1)
+        val knight = addEntry(me, 2)
+        val hades = addEntry(me, 3)
+        // two this week and one a month ago: three in the game, two of them recent
+        unlock(elden, "E1", daysAgo(2))
+        unlock(elden, "E2", daysAgo(3))
+        unlock(elden, "E3", daysAgo(30))
+        unlock(knight, "K1", daysAgo(5))
+        // everything in Hades is older than two weeks, so it is not recent activity
+        unlock(hades, "H1", daysAgo(20))
+        caller = me
+
+        val p = profile()
+
+        assertEquals(3, p.unlockedRecently)
+        assertEquals(listOf("Elden Ring", "Hollow Knight"), p.recentActivity.map { it.gameTitle })
+        val first = p.recentActivity.first()
+        assertEquals(1, first.gameId)
+        assertEquals(2, first.unlockedCount)
+        assertEquals(3, first.achievementsUnlocked)
+        assertEquals(5, first.achievementsTotal)
+        assertEquals(1, p.recentActivity.last().unlockedCount)
+        assertEquals(1, p.recentActivity.last().achievementsUnlocked)
+        assertEquals(3, p.recentActivity.last().achievementsTotal)
+        // the time is the latest unlock in the window, not the oldest
+        assertEquals(true, first.lastUnlockedAt > daysAgo(3).toEpochMilli())
+    }
+
+    @Test
+    fun `recent activity lists the five latest games`() = testApplication {
         installApi()
         val me = newUser()
-        (1..6).forEach { n ->
+        (1..7).forEach { n ->
             seedGame(n, "Game $n")
-            complete(me, addEntry(me, n, LibraryStatus.COMPLETED), CompletionType.MAIN_STORY, n * 10, "2026-10-0$n")
+            achievement(n, "A", 50.0)
+            unlock(addEntry(me, n), "A", daysAgo(n.toLong()))
         }
         caller = me
 
-        val recent = profile().recentCompletions
+        val p = profile()
 
-        assertEquals(listOf("Game 6", "Game 5", "Game 4", "Game 3", "Game 2"), recent.map { it.gameTitle })
-        assertEquals(listOf(60, 50, 40, 30, 20), recent.map { it.points })
-        assertEquals(CompletionType.MAIN_STORY, recent.first().completionType)
+        assertEquals(7, p.unlockedRecently)
+        assertEquals(listOf("Game 1", "Game 2", "Game 3", "Game 4", "Game 5"), p.recentActivity.map { it.gameTitle })
+    }
+
+    @Test
+    fun `a game with more unlocks than the achievement list holds never shows more than its total`() = testApplication {
+        installApi()
+        seedGame(1, "Hades")
+        achievement(1, "A", 50.0)
+        val me = newUser()
+        val entry = addEntry(me, 1)
+        unlock(entry, "A")
+        unlock(entry, "ORPHAN") // an unlock whose achievement the list does not know
+        caller = me
+
+        val p = profile().recentActivity.single()
+
+        assertEquals(2, p.achievementsUnlocked)
+        assertEquals(2, p.achievementsTotal)
     }
 
     @Test

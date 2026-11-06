@@ -40,14 +40,19 @@ data class ShowcaseAchievement(
     val gameTitle: String?,
 )
 
-// a game the user completed recently
-data class RecentCompletion(
+// a game the user unlocked achievements in during the last two weeks
+data class RecentActivity(
     val gameId: Int,
     val gameTitle: String?,
-    val completionType: CompletionType,
-    val points: Int,
-    // epoch milliseconds
-    val completedAt: Long,
+    // the game's pictures worth trying for the thumbnail, best first. empty when the phone has never seen the game
+    val artUrls: List<String>,
+    // unlocked in those two weeks
+    val unlockedCount: Int,
+    // epoch milliseconds of the latest of them
+    val lastUnlockedAt: Long,
+    // unlocked in this game altogether, out of achievementsTotal
+    val achievementsUnlocked: Int,
+    val achievementsTotal: Int,
 )
 
 // everything the profile screen shows that comes from the backend. xp is the points earned in
@@ -69,7 +74,9 @@ data class Profile(
     val achievementsUnlocked: Int,
     val badges: List<BadgeProgress>,
     val rarestAchievements: List<ShowcaseAchievement>,
-    val recentCompletions: List<RecentCompletion>,
+    // unlocked over every game in the last two weeks
+    val unlockedRecently: Int,
+    val recentActivity: List<RecentActivity>,
 ) {
     val badgesEarned: Int get() = badges.count { it.earned }
 }

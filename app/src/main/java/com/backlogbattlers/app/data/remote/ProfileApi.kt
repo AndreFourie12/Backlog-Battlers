@@ -14,8 +14,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
 
-// dtos for GET /users/me/profile. badge ids and the completion type stay text, so one this
-// version does not know cannot stop the whole profile from loading
+// dtos for GET /users/me/profile. badge ids stay text, so one this version does not know cannot
+// stop the whole profile from loading
 @Serializable
 data class BadgeDto(val id: String, val progress: Int, val target: Int, val earned: Boolean)
 
@@ -30,12 +30,13 @@ data class ShowcaseAchievementDto(
 )
 
 @Serializable
-data class RecentCompletionDto(
+data class RecentActivityDto(
     val gameId: Int,
     val gameTitle: String? = null,
-    val completionType: String,
-    val points: Int,
-    val completedAt: Long,
+    val unlockedCount: Int,
+    val lastUnlockedAt: Long,
+    val achievementsUnlocked: Int,
+    val achievementsTotal: Int,
 )
 
 @Serializable
@@ -54,7 +55,8 @@ data class ProfileDto(
     val achievementsUnlocked: Int = 0,
     val badges: List<BadgeDto> = emptyList(),
     val rarestAchievements: List<ShowcaseAchievementDto> = emptyList(),
-    val recentCompletions: List<RecentCompletionDto> = emptyList(),
+    val unlockedRecently: Int = 0,
+    val recentActivity: List<RecentActivityDto> = emptyList(),
 )
 
 // authenticated http client for the signed in user's profile: GET /users/me/profile
