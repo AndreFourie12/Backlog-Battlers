@@ -1,10 +1,16 @@
 package com.backlogbattlers.api.games
 
+import com.backlogbattlers.api.db.GameGenres
 import com.backlogbattlers.api.db.Games
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.upsert
+
+// the length of the genre column
+private const val MAX_GENRE_LENGTH = 100
 
 /** Keeps our own copy of the game so leaderboards and scoring can use it without calling IGDB. */
 fun saveGame(game: GameDto) {
@@ -15,6 +21,17 @@ fun saveGame(game: GameDto) {
             it[title] = game.title
             it[avgCompletionHours] = game.avgCompletionHours
             it[avg100PercentHours] = game.avg100PercentHours
+        }
+        // a copy of the game that came without genres must not wipe the ones already stored
+        val genres = game.genres.map { it.trim().take(MAX_GENRE_LENGTH) }.filter { it.isNotEmpty() }.distinct()
+        if (genres.isNotEmpty()) {
+            GameGenres.deleteWhere { GameGenres.gameId eq game.gameId }
+            genres.forEach { name ->
+                GameGenres.insert {
+                    it[gameId] = game.gameId
+                    it[genre] = name
+                }
+            }
         }
     }
 }

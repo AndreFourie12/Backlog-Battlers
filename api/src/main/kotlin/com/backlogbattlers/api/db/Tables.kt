@@ -307,6 +307,18 @@ object ActivityEvents : Table("activity_events")
     }
 }
 
+// game_genres table: the IGDB genres of each saved game, one row per genre. IGDB's genres are only
+// sent to the app and were never stored, and the Genre Tourist badge counts the genres of the games
+// someone has completed. filled whenever a game is saved (see saveGame), so a game saved before this
+// table existed gets its genres the next time it is opened
+object GameGenres : Table("game_genres")
+{
+    val gameId = reference("game_id", Games.id, onDelete = ReferenceOption.CASCADE)
+    val genre = varchar("genre", 100)
+
+    override val primaryKey = PrimaryKey(gameId, genre)
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -324,5 +336,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     SteamApps,
     SteamAchievementChecks,
     ActivityEvents,
+    GameGenres,
 )
 //------------------------------EOF------------------------------\\
