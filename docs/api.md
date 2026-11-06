@@ -145,6 +145,25 @@ Everything the account owns goes with it: library entries and their unlocked ach
 | 401 | `{"error":"Sign in to manage your account"}` (missing, invalid or expired token) |
 | 404 | `{"error":"Account was not found"}` (already deleted) |
 
+### `GET /users/me` and `PATCH /users/me`
+
+The signed-in user's name and picture, as friends see them. Both need `Authorization: Bearer <access token>`.
+
+```json
+{ "userId": "7f3c…", "displayName": "Dylan", "avatarUrl": "https://…", "pictureId": "pfp_03" }
+```
+
+`PATCH` takes `{"displayName": "Dyl"}`, `{"pictureId": "pfp_03"}` or both, and answers with the saved user. A field that is left out (or null) stays as it is, and an empty `pictureId` takes the picture away. The name is trimmed and has to be 1 to 20 characters. `pictureId` is the app's own id for one of the pictures it ships (the API only checks it is letters, digits and underscores, up to 32). Signing in again never overwrites a name that was changed here.
+
+Friends see the change at once: the name is read from the account everywhere, and `pictureId` rides along with the name on the friends list (`pictureId`), friend requests (`fromPictureId`), friend search (`pictureId`), the leaderboard (`pictureId`), the activity feed (`actorPictureId`), the profile (`pictureId`) and the sign-in answer (`user.pictureId`, so a new phone starts with it). `avatarUrl` is still the Google photo, which the app shows when no picture was picked. Pictures are kept in the `user_pictures` table.
+
+| Status | Meaning |
+|---|---|
+| 200 | Saved (or, for `GET`, the user) |
+| 400 | An empty or too long name, a picture id of the wrong shape, or nothing to change |
+| 401 | `{"error":"Sign in to change your profile"}` |
+| 404 | `{"error":"Account was not found"}` |
+
 ### `GET /users/me/settings` and `PUT /users/me/settings`
 
 The app's preferences, saved to the account so they follow the user to another phone. Both need `Authorization: Bearer <access token>`. The fingerprint lock is not included: it belongs to one phone's sensor.
@@ -390,8 +409,6 @@ Routes follow the Part 1 design document, the below routes are yet to be built:
 | Route | Purpose |
 |---|---|
 | `POST /auth/sso/google` | Sign in or register with Google |
-| `GET /users/me` | The signed-in user's profile |
-| `PATCH /users/me` | Change settings |
 | `GET /users/me/library` | The user's library |
 | `POST /users/me/library` | Add a game to the library |
 | `PATCH /users/me/library/{id}` | Update hours, status, unlocked achievements |
