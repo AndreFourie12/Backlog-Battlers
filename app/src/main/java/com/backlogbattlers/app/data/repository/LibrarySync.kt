@@ -40,29 +40,44 @@ class LibrarySync(
     private val lock = Mutex()
 
     //------------------------------
-    // what the app does on sign-in, on launch and after every change to the library
-    suspend fun sync() {
+    // what the app does on sign-in, on launch, after every change to the library and when the
+    // connection comes back. returns true when every change reached the account and the account's
+    // library was merged in, false when nobody is signed in or any part failed (e.g. offline)
+    suspend fun sync(): Boolean {
         lock.withLock {
-            val userId = currentUserId() ?: return
-            val token = accessToken() ?: return
+            val userId = currentUserId() ?: return false
+            val token = accessToken() ?: return false
             // the account can change while the token is fetched; never mix two accounts' libraries
-            if (currentUserId() != userId) return
-            try {
-                push(userId, token)
+            if (currentUserId() != userId) return false
+            return try {
+                val pushed = push(userId, token)
                 pull(userId, token)
+                pushed
             } catch (e: CancellationException) {
                 throw e
             } catch (e: SessionExpiredException) {
                 Log.w(TAG, "Library not synced: the session has expired")
+                false
             } catch (e: Exception) {
                 Log.w(TAG, "Library could not be synced, will retry on the next sync: ${e.message}")
+                false
             }
         }
     }
 
     //------------------------------
-    // uploads every pending change. a change that fails stays pending and does not stop the others
-    private suspend fun push(userId: String, token: String) {
+    // true when there is a change on this phone the account has not been sent yet, so the
+    // "waiting to sync" state can be shown and a reconnect knows whether it has anything to send
+    suspend fun hasPendingChanges(): Boolean {
+        val userId = currentUserId() ?: return false
+        return dao.getPendingSync(userId).isNotEmpty()
+    }
+
+    //------------------------------
+    // uploads every pending change. a change that fails stays pending and does not stop the others.
+    // returns whether every one of them was uploaded
+    private suspend fun push(userId: String, token: String): Boolean {
+        var allUploaded = true
         for (entry in dao.getPendingSync(userId)) {
             try {
                 if (entry.pendingDelete) {
@@ -82,8 +97,10 @@ class LibrarySync(
                 throw e
             } catch (e: Exception) {
                 Log.w(TAG, "A library change could not be uploaded, will retry: ${e.message}")
+                allUploaded = false
             }
         }
+        return allUploaded
     }
 
     //------------------------------

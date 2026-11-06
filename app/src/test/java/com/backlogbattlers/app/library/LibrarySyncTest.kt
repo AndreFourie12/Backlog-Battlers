@@ -406,6 +406,65 @@ class LibrarySyncTest {
         assertEquals(listOf("bobs-entry", "entry-1"), dao.rows.value.map { it.libraryEntryId }.sorted())
         assertEquals(BOB, rowsOf("bobs-entry").userId)
     }
+
+    @Test
+    fun `a sync that sends everything and downloads the library reports success`() = runBlocking {
+        dao.upsert(local("entry-1"))
+
+        assertTrue(sync.sync())
+    }
+
+    @Test
+    fun `a sync with no connection reports failure and leaves the change pending`() = runBlocking {
+        dao.upsert(local("entry-1"))
+        offline = true
+
+        assertFalse(sync.sync())
+        assertTrue(rowsOf("entry-1").pendingSync)
+    }
+
+    @Test
+    fun `a sync where an upload is refused reports failure even though the download worked`() = runBlocking {
+        server["entry-2"] = remote("entry-2", gameId = CELESTE)
+        dao.upsert(local("entry-1"))
+        failWrites = true
+
+        assertFalse(sync.sync())
+        assertTrue(rowsOf("entry-1").pendingSync)
+    }
+
+    @Test
+    fun `nobody signed in reports failure`() = runBlocking {
+        signedInAs = null
+
+        assertFalse(sync.sync())
+    }
+
+    @Test
+    fun `pending changes are reported until they have been uploaded`() = runBlocking {
+        assertFalse(sync.hasPendingChanges())
+
+        dao.upsert(local("entry-1"))
+        assertTrue(sync.hasPendingChanges())
+
+        sync.sync()
+        assertFalse(sync.hasPendingChanges())
+    }
+
+    @Test
+    fun `a removal waiting to be sent counts as pending`() = runBlocking {
+        dao.upsert(local("entry-1").copy(pendingDelete = true))
+
+        assertTrue(sync.hasPendingChanges())
+    }
+
+    @Test
+    fun `another account's pending changes are not reported`() = runBlocking {
+        dao.upsert(local("bobs-entry", gameId = CELESTE, userId = BOB))
+
+        assertFalse(sync.hasPendingChanges())
+    }
+
     private companion object {
         const val ALICE = "user-alice"
         const val BOB = "user-bob"

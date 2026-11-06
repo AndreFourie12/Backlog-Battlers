@@ -29,10 +29,13 @@ class SettingsSync(
 ) {
 
     //------------------------------
-    // what the app does on sign-in and on launch
-    suspend fun sync() {
-        if (settingsRepository.isSyncPending()) push() else pull()
-    }
+    // what the app does on sign-in, on launch and when the connection comes back. returns whether
+    // the phone and the account ended up in step
+    suspend fun sync(): Boolean = if (settingsRepository.isSyncPending()) push() else pull()
+
+    //------------------------------
+    // true when a settings change is waiting to be uploaded
+    suspend fun hasPendingChanges(): Boolean = settingsRepository.isSyncPending()
 
     //------------------------------
     // uploads this phone's settings. returns whether they reached the account
@@ -54,13 +57,13 @@ class SettingsSync(
     //------------------------------
     // downloads the account's settings and applies them here. an account that has never saved
     // any (a new user, or one from before settings were synced) gets this phone's instead
-    suspend fun pull() {
-        try {
-            val token = accessToken() ?: return
+    // returns whether the settings were downloaded (or uploaded, for a new account)
+    suspend fun pull(): Boolean {
+        return try {
+            val token = accessToken() ?: return false
             val saved = settingsApi.getSettings(token)
             if (saved == null) {
-                push()
-                return
+                return push()
             }
             val before = settingsRepository.observeSettings().first()
             val after = saved.toSettings(keeping = before)
@@ -70,11 +73,13 @@ class SettingsSync(
                 applyToApp(before, after)
                 settingsRepository.replaceSyncedSettings(after)
             }
+            true
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             // nothing to undo: the phone simply keeps the settings it has
             Log.w(TAG, "Settings could not be downloaded: ${e.message}")
+            false
         }
     }
 

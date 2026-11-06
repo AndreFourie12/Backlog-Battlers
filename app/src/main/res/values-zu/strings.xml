@@ -463,6 +463,12 @@
 
     <!-- shown when the backend stops accepting the session and the user is sent back to login -->
     <string name="session_expired">Isikhathi sakho sesiphelile. Sicela ungene futhi.</string>
+
+    <!-- the strip across the top of the app while offline, and the waiting-to-sync marker on library tiles -->
+    <string name="sync_banner_offline">Awuxhumekile ku-inthanethi. Izinguquko zakho zigcinwe futhi zizovumelaniswa lapho usubuyele ku-inthanethi.</string>
+    <string name="sync_banner_syncing">Usubuyele ku-inthanethi. Kuvumelaniswa izinguquko zakho…</string>
+    <string name="sync_banner_synced">Zonke izinguquko zivumelanisiwe</string>
+    <string name="cd_pending_sync">Kulindele ukuvumelanisa</string>
     <string name="detail_complete_none_title">Akuqedwa okwamanje</string>
     <string name="detail_complete_none_hint">Uqede indaba noma uvule konke? Kumaka ukuze uthole amaphuzu.</string>
     <string name="detail_complete_story_title">Indaba iqediwe</string>

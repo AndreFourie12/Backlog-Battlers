@@ -43,6 +43,7 @@ import com.backlogbattlers.app.data.repository.SteamAccountRepository
 import com.backlogbattlers.app.data.repository.SteamAccountRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsRepositoryImpl
 import com.backlogbattlers.app.data.repository.SettingsSync
+import com.backlogbattlers.app.data.repository.SyncCoordinator
 import com.backlogbattlers.app.notifications.PushTokenRegistrar
 import com.backlogbattlers.app.util.AndroidBiometricAvailabilityChecker
 import com.backlogbattlers.app.util.BiometricAvailabilityChecker
@@ -251,6 +252,28 @@ object ServiceLocator {
                     if (after.language != currentLanguage()) applyLanguage(after.language)
                 }
             },
+        )
+    }
+
+    // whether the phone has a working connection. MainApplication starts it listening on launch
+    val connectivityMonitor: ConnectivityMonitor by lazy {
+        val context = applicationContext ?: error("ServiceLocator must be initialized with context before accessing connectivityMonitor")
+        ConnectivityMonitor(context)
+    }
+
+    // uploads what was changed offline as soon as the connection is back, and drives the banner
+    // across the top of the app. built on launch (see MainApplication) so it is already listening
+    val syncCoordinator: SyncCoordinator by lazy {
+        SyncCoordinator(
+            online = connectivityMonitor.isOnline,
+            scope = applicationScope,
+            syncAll = {
+                // both always run, so a library that can't be reached still lets the settings through
+                val libraryDone = librarySync.sync()
+                val settingsDone = settingsSync.sync()
+                libraryDone && settingsDone
+            },
+            hasPending = { librarySync.hasPendingChanges() || settingsSync.hasPendingChanges() },
         )
     }
 

@@ -520,6 +520,12 @@
 
     <!-- shown when the backend stops accepting the session and the user is sent back to login -->
     <string name="session_expired">Your session has expired. Please sign in again.</string>
+
+    <!-- the strip across the top of the app while offline, and the waiting-to-sync marker on library tiles -->
+    <string name="sync_banner_offline">You\'re offline. Your changes are saved and will sync when you\'re back.</string>
+    <string name="sync_banner_syncing">Back online. Syncing your changes…</string>
+    <string name="sync_banner_synced">All changes synced</string>
+    <string name="cd_pending_sync">Waiting to sync</string>
     <string name="detail_complete_none_title">Not completed yet</string>
     <string name="detail_complete_none_hint">Finished the story, or unlocked everything? Mark it off to earn points.</string>
     <string name="detail_complete_story_title">Story completed</string>

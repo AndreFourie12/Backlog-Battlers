@@ -463,6 +463,12 @@
 
     <!-- shown when the backend stops accepting the session and the user is sent back to login -->
     <string name="session_expired">Jou sessie het verval. Meld asseblief weer aan.</string>
+
+    <!-- the strip across the top of the app while offline, and the waiting-to-sync marker on library tiles -->
+    <string name="sync_banner_offline">Jy is vanlyn. Jou veranderinge is gestoor en sal sinkroniseer wanneer jy weer aanlyn is.</string>
+    <string name="sync_banner_syncing">Weer aanlyn. Sinkroniseer tans jou veranderinge…</string>
+    <string name="sync_banner_synced">Alle veranderinge is gesinkroniseer</string>
+    <string name="cd_pending_sync">Wag om te sinkroniseer</string>
     <string name="detail_complete_none_title">Nog nie voltooi nie</string>
     <string name="detail_complete_none_hint">Die storie klaar of alles ontsluit? Merk dit af om punte te verdien.</string>
     <string name="detail_complete_story_title">Storie voltooi</string>
