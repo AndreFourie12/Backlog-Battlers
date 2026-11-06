@@ -1,5 +1,6 @@
 package com.backlogbattlers.api.library
 
+import com.backlogbattlers.api.activity.recordUnlocks
 import com.backlogbattlers.api.db.Achievements
 import com.backlogbattlers.api.db.CompletionType
 import com.backlogbattlers.api.db.Games
@@ -180,12 +181,14 @@ fun updateEntry(owner: Uuid, entryId: Uuid, request: UpdateEntryRequest): Update
                 (UnlockedAchievements.libraryEntryId eq entryId) and (UnlockedAchievements.achievementId inList toRemove)
             }
         }
-        (wanted.toSet() - current).forEach { newlyUnlocked ->
+        val added = wanted.toSet() - current
+        added.forEach { newlyUnlocked ->
             UnlockedAchievements.insert {
                 it[UnlockedAchievements.libraryEntryId] = entryId
                 it[UnlockedAchievements.achievementId] = newlyUnlocked
             }
         }
+        recordUnlocks(owner, gameId, added)
     }
 
     val changesEntry = request.status != null || request.hoursPlayed != null || wanted != null

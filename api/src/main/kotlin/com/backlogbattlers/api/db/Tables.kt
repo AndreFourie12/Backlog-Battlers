@@ -17,6 +17,8 @@ import org.jetbrains.exposed.v1.javatime.time
 enum class Platform { PC, PLAYSTATION, XBOX, SWITCH, OTHER }
 enum class LibraryStatus { BACKLOG, PLAYING, COMPLETED, ABANDONED }
 enum class CompletionType {MAIN_STORY, MAIN_EXTRA, COMPLETIONIST }
+// what happened, for the activity feed
+enum class ActivityType { GAME_COMPLETED, ACHIEVEMENT_UNLOCKED, FRIEND_ADDED, RANK_PASSED }
 
 // Users Table
 object Users : Table("users") {
@@ -273,6 +275,38 @@ object SteamAchievementChecks : Table("steam_achievement_checks")
     override val primaryKey = PrimaryKey(libraryEntryId)
 }
 
+// activity_events table: one row for each thing the activity feed tells people about, written at
+// the moment it happens (a completion, new achievements, a friend request accepted, passing someone
+// on the leaderboard). the feed reads the rows of the caller and their friends, newest first.
+// kept in the SQL database rather than a document store: the feed is one indexed query, and the
+// rows go with their actor when an account is deleted
+object ActivityEvents : Table("activity_events")
+{
+    val id = uuid("id").clientDefault { Uuid.random() }
+    // who did it
+    val actorId = reference("actor_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val type = enumerationByName<ActivityType>("type", 24)
+    // the game it was about (an IGDB id; the title is read from Games). null for the friend and rank events
+    val gameId = integer("game_id").nullable()
+    // the other person: the friend added, or the closest person passed on the leaderboard
+    val subjectId = reference("subject_id", Users.id, onDelete = ReferenceOption.CASCADE).nullable()
+    // achievements unlocked, or people passed
+    val itemCount = integer("item_count").default(1)
+    // points a completion earned
+    val points = integer("points").nullable()
+    // the completion type, or the name of the rarest achievement unlocked
+    val detail = varchar("detail", 255).nullable()
+    val createdAt = timestamp("created_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(id)
+
+    init
+    {
+        // "the newest events of these people", read for every feed page
+        index(false, actorId, createdAt)
+    }
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -289,5 +323,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     UserSteamAccounts,
     SteamApps,
     SteamAchievementChecks,
+    ActivityEvents,
 )
 //------------------------------EOF------------------------------\\

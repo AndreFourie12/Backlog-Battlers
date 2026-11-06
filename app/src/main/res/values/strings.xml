@@ -336,14 +336,32 @@
     <string name="about_licences_body">This app is built on open source work released under the Apache License 2.0:\n\n• AndroidX and Jetpack (Core, AppCompat, Activity, Fragment, Lifecycle, Navigation, Room, DataStore, Security, Credentials)\n• Material Components for Android\n• Kotlin Coroutines and kotlinx.serialization\n• Ktor Client\n\nFull licence texts are available from each project\'s repository.</string>
 
     <!-- activity feed -->
-    <string name="activity_no_standings_title">No standings yet</string>
-    <string name="activity_no_standings_body">Add a friend and you\'ll both be ranked by points earned this month.</string>
     <string name="view_standings">View Standings</string>
     <string name="activity_today">Today</string>
-    <string name="activity_event_joined">You joined <b>Backlog Battlers</b></string>
     <string name="activity_just_now">Just now</string>
-    <string name="activity_feed_hint" formatted="false">Achievement unlocks, 100% completions and rank changes from you and your friends will show up here, grouped by day.</string>
-    <string name="profile_avatar_initial" translatable="false">A</string>
+    <string name="activity_standings_title">Standings</string>
+    <string name="activity_standings_body">See where you and your friends rank this month.</string>
+    <string name="activity_yesterday">Yesterday</string>
+    <string name="activity_you">You</string>
+    <string name="activity_unknown_game">a game</string>
+    <string name="activity_completed">&lt;b&gt;%1$s&lt;/b&gt; completed &lt;b&gt;%2$s&lt;/b&gt;</string>
+    <string name="activity_completed_100">&lt;b&gt;%1$s&lt;/b&gt; completed &lt;b&gt;%2$s&lt;/b&gt; to 100%%</string>
+    <string name="activity_unlocked_named">&lt;b&gt;%1$s&lt;/b&gt; unlocked &lt;b&gt;%3$s&lt;/b&gt; in &lt;b&gt;%2$s&lt;/b&gt;</string>
+    <plurals name="activity_unlocked_count">
+        <item quantity="one">&lt;b&gt;%1$s&lt;/b&gt; unlocked an achievement in &lt;b&gt;%2$s&lt;/b&gt;</item>
+        <item quantity="other">&lt;b&gt;%1$s&lt;/b&gt; unlocked &lt;b&gt;%3$d&lt;/b&gt; achievements in &lt;b&gt;%2$s&lt;/b&gt;</item>
+    </plurals>
+    <string name="activity_friend_added">&lt;b&gt;%1$s&lt;/b&gt; and &lt;b&gt;%2$s&lt;/b&gt; are now friends</string>
+    <string name="activity_rank_passed">&lt;b&gt;%1$s&lt;/b&gt; passed &lt;b&gt;%2$s&lt;/b&gt; on the leaderboard</string>
+    <plurals name="activity_rank_passed_many">
+        <item quantity="one">&lt;b&gt;%1$s&lt;/b&gt; passed &lt;b&gt;%2$s&lt;/b&gt; and 1 other on the leaderboard</item>
+        <item quantity="other">&lt;b&gt;%1$s&lt;/b&gt; passed &lt;b&gt;%2$s&lt;/b&gt; and %3$d others on the leaderboard</item>
+    </plurals>
+    <string name="activity_meta_points">%1$s · +%2$s points</string>
+    <string name="activity_empty_title">Nothing here yet</string>
+    <string name="activity_empty_body">When you or your friends complete a game, unlock achievements, pass someone on the leaderboard or become friends, it shows up here.</string>
+    <string name="activity_error_load">Couldn\'t load the activity feed. Check your connection and try again.</string>
+    <string name="activity_error_title">Something went wrong</string>
 
     <!-- profile -->
     <string name="profile_display_name" translatable="false">Alex</string>

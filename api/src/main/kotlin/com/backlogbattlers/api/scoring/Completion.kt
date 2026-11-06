@@ -1,6 +1,8 @@
 package com.backlogbattlers.api.scoring
 
+import com.backlogbattlers.api.activity.recordActivity
 import com.backlogbattlers.api.db.Achievements
+import com.backlogbattlers.api.db.ActivityType
 import com.backlogbattlers.api.db.CompletionRecords
 import com.backlogbattlers.api.db.CompletionType
 import com.backlogbattlers.api.db.Games
@@ -8,6 +10,7 @@ import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.MonthlyLeaderboardEntries
 import com.backlogbattlers.api.db.UnlockedAchievements
+import com.backlogbattlers.api.notifications.overtaken
 import com.backlogbattlers.api.steam.SteamCheck
 import com.backlogbattlers.api.steam.SteamCheckStatus
 import kotlinx.serialization.Serializable
@@ -139,6 +142,26 @@ fun completeLibraryEntry(
     }
 
     val newMonthlyTotal = addMonthlyPoints(owner, monthPeriod, totalPoints)
+
+    // the feed: the completion itself, and who it lifted them past on this month's leaderboard
+    // the pass is a result of the completion, so it is stamped a millisecond later: it then always sits
+    // above the completion in the feed, instead of the two tying and showing in either order
+    val happenedAt = Instant.now()
+    recordActivity(owner, ActivityType.GAME_COMPLETED, gameId = gameId, points = totalPoints, detail = completionType.name, at = happenedAt)
+    val standings = MonthlyLeaderboardEntries.selectAll()
+        .where { MonthlyLeaderboardEntries.monthPeriod eq monthPeriod }
+        .associate { it[MonthlyLeaderboardEntries.userId] to it[MonthlyLeaderboardEntries.monthlyPoints] }
+    val passed = overtaken(owner, pointsBefore = newMonthlyTotal - totalPoints, pointsAfter = newMonthlyTotal, standings = standings)
+    if (passed.isNotEmpty()) {
+        // the one named in the feed is the closest of them, the one with the most points
+        recordActivity(
+            owner,
+            ActivityType.RANK_PASSED,
+            subject = passed.maxBy { standings.getValue(it) },
+            count = passed.size,
+            at = happenedAt.plusMillis(1),
+        )
+    }
 
     CompletionResult.Completed(
         CompleteResponseDto(

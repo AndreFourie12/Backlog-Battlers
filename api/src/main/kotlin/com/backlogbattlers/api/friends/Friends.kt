@@ -1,5 +1,7 @@
 package com.backlogbattlers.api.friends
 
+import com.backlogbattlers.api.activity.recordActivity
+import com.backlogbattlers.api.db.ActivityType
 import com.backlogbattlers.api.db.FriendRequests
 import com.backlogbattlers.api.db.Friendships
 import com.backlogbattlers.api.db.LibraryEntries
@@ -247,6 +249,7 @@ fun acceptRequest(owner: Uuid, requestId: Uuid): RespondToRequestResult = transa
         it[Friendships.userBId] = userBId
     }
     FriendRequests.deleteWhere { FriendRequests.id eq requestId }
+    recordActivity(owner, ActivityType.FRIEND_ADDED, subject = sender)
 
     val senderUser = Users.selectAll().where { Users.id eq sender }.single()
 
