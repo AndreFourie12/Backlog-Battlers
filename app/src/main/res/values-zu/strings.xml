@@ -505,4 +505,6 @@
     <string name="achievement_verified">Iqinisekiswe ku-Steam</string>
     <string name="achievement_verified_locked">I-Steam iqinisekise le mpumelelo, ngakho ayikwazi ukukhishwa uphawu.</string>
     <string name="cd_game_hundred" formatted="false">Iqediwe ku-100%</string>
+    <string name="edit_profile_no_connection">Iphrofayela yakho ayikwazanga ukulondolozwa. Hlola uxhumano lwakho bese uzama futhi.</string>
+    <string name="edit_profile_save_failed">Iphrofayela yakho ayikwazanga ukulondolozwa. Zama futhi ngokushesha.</string>
 </resources>

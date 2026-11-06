@@ -15,6 +15,7 @@ import com.backlogbattlers.app.data.local.TokenStorage
 import com.backlogbattlers.app.data.local.dao.UserDao
 import com.backlogbattlers.app.data.local.entity.UserEntity
 import com.backlogbattlers.app.data.remote.AuthApi
+import com.backlogbattlers.app.data.remote.ProfileRejectedException
 import com.backlogbattlers.app.data.remote.SessionExpiredException
 import com.backlogbattlers.app.domain.model.User
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -48,8 +49,10 @@ interface AuthRepository {
     // signs in user with Google authentication
     suspend fun signInWithGoogle(activity: Activity): AuthResult
 
-    // renames the signed in user locally, returns false when nobody is signed in
-    suspend fun updateDisplayName(displayName: String): Boolean
+    // saves the signed in user's name and/or picture on the account, so friends and other phones see
+    // them, and renames them here too. null leaves that one as it is, and an empty pictureId takes the
+    // picture away. nothing changes here unless the account took it
+    suspend fun updateProfile(displayName: String? = null, pictureId: String? = null): ProfileSaveResult
 
     // signs out current user
     suspend fun signOut()
@@ -70,6 +73,24 @@ interface AuthRepository {
 
     // permanently deletes the signed-in user's account on the backend, then signs out locally
     suspend fun deleteAccount(): DeleteAccountResult
+}
+
+//------------------------------
+// how saving the name and picture ended. the screen turns each into its own message
+enum class ProfileSaveResult {
+    SAVED,
+
+    // nobody is signed in, or the session could not be renewed
+    NOT_SIGNED_IN,
+
+    // the backend could not be reached
+    NO_CONNECTION,
+
+    // the backend refused the name or picture
+    REJECTED,
+
+    // anything else went wrong
+    FAILED,
 }
 
 //------------------------------
@@ -191,13 +212,26 @@ class AuthRepositoryImpl(
     }
 
     //------------------------------
-    // renames the signed in user in room. the change is local for now, it will
-    // go up with the rest of the profile once /users is wired into the app
-    override suspend fun updateDisplayName(displayName: String): Boolean {
-        val userId = tokenStorage.getUserId() ?: return false
-        val existing = userDao.getUser(userId) ?: return false
-        userDao.upsert(existing.copy(displayName = displayName))
-        return true
+    // saves the name and/or picture on the account first, and only when it took them renames the user in
+    // room (to the name the account kept). friends, the leaderboard and the feed read the account's copy
+    override suspend fun updateProfile(displayName: String?, pictureId: String?): ProfileSaveResult {
+        val userId = tokenStorage.getUserId() ?: return ProfileSaveResult.NOT_SIGNED_IN
+        return try {
+            val accessToken = freshAccessToken() ?: return ProfileSaveResult.NOT_SIGNED_IN
+            val saved = authApi.updateProfile(accessToken, displayName, pictureId)
+            userDao.getUser(userId)?.let { userDao.upsert(it.copy(displayName = saved.displayName)) }
+            ProfileSaveResult.SAVED
+        } catch (_: SessionExpiredException) {
+            ProfileSaveResult.NOT_SIGNED_IN
+        } catch (_: ProfileRejectedException) {
+            ProfileSaveResult.REJECTED
+        } catch (e: IOException) {
+            Log.e("AuthRepository", "Saving the profile could not reach the backend: ${e.message}", e)
+            ProfileSaveResult.NO_CONNECTION
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Saving the profile failed: ${e.message}", e)
+            ProfileSaveResult.FAILED
+        }
     }
 
     //------------------------------

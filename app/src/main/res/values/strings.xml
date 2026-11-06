@@ -562,4 +562,6 @@
     <string name="achievement_verified">Verified on Steam</string>
     <string name="achievement_verified_locked">Steam confirmed this achievement, so it cannot be unchecked.</string>
     <string name="cd_game_hundred" formatted="false">Completed to 100%</string>
+    <string name="edit_profile_no_connection">Your profile could not be saved. Check your connection and try again.</string>
+    <string name="edit_profile_save_failed">Your profile could not be saved. Try again in a moment.</string>
 </resources>

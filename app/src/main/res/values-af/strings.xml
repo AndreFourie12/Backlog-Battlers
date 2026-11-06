@@ -505,4 +505,6 @@
     <string name="achievement_verified">Op Steam geverifieer</string>
     <string name="achievement_verified_locked">Steam het hierdie prestasie bevestig, so dit kan nie ongedaan gemaak word nie.</string>
     <string name="cd_game_hundred" formatted="false">Tot 100% voltooi</string>
+    <string name="edit_profile_no_connection">Jou profiel kon nie gestoor word nie. Kyk na jou verbinding en probeer weer.</string>
+    <string name="edit_profile_save_failed">Jou profiel kon nie gestoor word nie. Probeer netnou weer.</string>
 </resources>
