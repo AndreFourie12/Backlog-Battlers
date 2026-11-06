@@ -22,6 +22,18 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="A" />
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_avatar_picture"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
+
     <!-- Sender Name -->
     <TextView
         android:id="@+id/tv_friend_name"

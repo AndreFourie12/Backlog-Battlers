@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.domain.model.FriendRequest
 import com.backlogbattlers.app.util.avatarColorFor
+import com.backlogbattlers.app.util.showProfilePicture
 import com.backlogbattlers.app.util.initialsFor
 
 // adapter for displaying incoming friend requests with accept and reject actions
@@ -24,6 +26,7 @@ class RequestAdapter(
     // viewholder wrapping views for a single friend request item
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvAvatarInitial: TextView = itemView.findViewById(R.id.tv_avatar_initial)
+        val ivAvatarPicture: ImageView = itemView.findViewById(R.id.iv_avatar_picture)
         val tvFriendName: TextView = itemView.findViewById(R.id.tv_friend_name)
         val btnAccept: Button = itemView.findViewById(R.id.btn_accept)
         val btnReject: Button = itemView.findViewById(R.id.btn_reject)
@@ -56,6 +59,7 @@ class RequestAdapter(
         holder.tvAvatarInitial.text = initialsFor(request.fromDisplayName)
         val colorRes = avatarColorFor(request.fromUserId)
         holder.tvAvatarInitial.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, colorRes))
+        holder.ivAvatarPicture.showProfilePicture(request.fromPictureId)
 
         holder.tvFriendName.text = request.fromDisplayName
 

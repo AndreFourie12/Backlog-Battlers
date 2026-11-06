@@ -8,12 +8,14 @@ import androidx.lifecycle.viewModelScope
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.remote.SessionExpiredException
 import com.backlogbattlers.app.data.repository.AuthRepository
+import com.backlogbattlers.app.data.repository.ProfileCustomizationRepository
 import com.backlogbattlers.app.data.repository.FriendsRepository
 import com.backlogbattlers.app.domain.model.Friend
 import com.backlogbattlers.app.domain.model.FriendRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -38,6 +40,7 @@ data class FriendsUiState(
 class FriendsViewModel(
     private val friendsRepository: FriendsRepository = ServiceLocator.friendsRepository,
     private val authRepository: AuthRepository = ServiceLocator.authRepository,
+    private val customizationRepository: ProfileCustomizationRepository = ServiceLocator.profileCustomizationRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FriendsUiState())
@@ -61,7 +64,10 @@ class FriendsViewModel(
 
                 // this if statement builds the signed in user's own row, with achievementCount
                 val selfFriend = self?.let {
-                    Friend(it.userId, it.displayName, it.avatarUrl, monthlyPoints = 0, achievementCount = 0, isOnline = true)
+                    Friend(
+                        it.userId, it.displayName, it.avatarUrl, monthlyPoints = 0, achievementCount = 0, isOnline = true,
+                        pictureId = customizationRepository.observeCustomization().first().pictureId,
+                    )
                 }
                 val combined = if (selfFriend != null) friends + selfFriend else friends
                 val sorted = combined.sortedWith(compareByDescending<Friend> { friend -> friend.monthlyPoints }.thenBy { friend -> friend.displayName })

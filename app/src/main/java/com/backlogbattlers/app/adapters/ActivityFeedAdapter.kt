@@ -91,7 +91,7 @@ class ActivityFeedAdapter : ListAdapter<ActivityRow, RecyclerView.ViewHolder>(Di
                 val event = row.event
 
                 // this avatar is the picture the actor picked, or else their initial on a colour of their own
-                val picture = profilePictureFor(event.actorAvatarUrl)
+                val picture = profilePictureFor(event.actorPictureId)
                 holder.tvInitial.text = initialsFor(event.actorName)
                 holder.tvInitial.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, avatarColorFor(event.actorId)))
                 if (picture != null) holder.ivPicture.setImageResource(picture.drawable) else holder.ivPicture.setImageDrawable(null)
