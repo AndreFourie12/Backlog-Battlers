@@ -16,6 +16,10 @@ private val MONTH_PERIOD_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM")
 fun currentMonthPeriod(now: Instant = Instant.now()): String =
     YearMonth.from(now.atZone(COMPETITION_ZONE)).format(MONTH_PERIOD_FORMAT)
 
+/** The competition month before [monthPeriod], e.g. "2026-08" for "2026-09". */
+fun previousMonthPeriod(monthPeriod: String): String =
+    YearMonth.parse(monthPeriod, MONTH_PERIOD_FORMAT).minusMonths(1).format(MONTH_PERIOD_FORMAT)
+
 /** The calendar day [at] falls on in the competition zone, which is what "a day" means for streaks. */
 fun competitionDate(at: Instant): LocalDate = at.atZone(COMPETITION_ZONE).toLocalDate()
 

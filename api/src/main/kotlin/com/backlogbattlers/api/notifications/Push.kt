@@ -24,6 +24,12 @@ enum class PushType(val isWanted: (SettingsDto) -> Boolean) {
 
     /** Someone passed you on this month's leaderboard. */
     OVERTAKEN({ it.rankChangeNotifications }),
+
+    /** You unlocked achievements, which a Steam import found. Behind the Achievements switch. */
+    ACHIEVEMENT_UNLOCKED({ it.achievementNotifications }),
+
+    /** A new month began, so the leaderboard started again. Behind the Season resets switch. */
+    SEASON_RESET({ it.seasonResetNotifications }),
 }
 
 /**
@@ -33,17 +39,31 @@ enum class PushType(val isWanted: (SettingsDto) -> Boolean) {
  */
 data class Push(
     val type: PushType,
-    /** Who did it: the friend who sent, accepted, completed or overtook. */
-    val actorName: String,
-    /** The game, for [PushType.FRIEND_COMPLETED_GAME]. */
+    /** Who did it: the friend who sent, accepted, completed or overtook. Empty for the pushes about you alone. */
+    val actorName: String = "",
+    /** The game, for [PushType.FRIEND_COMPLETED_GAME] and [PushType.ACHIEVEMENT_UNLOCKED] (left out when it is several games). */
     val gameTitle: String? = null,
+    /** The rarest of the unlocked achievements, for [PushType.ACHIEVEMENT_UNLOCKED]. */
+    val achievementName: String? = null,
+    /** How many achievements were unlocked, for [PushType.ACHIEVEMENT_UNLOCKED]. */
+    val count: Int? = null,
+    /** The month that has just started, as 2026-12, for [PushType.SEASON_RESET]. */
+    val monthPeriod: String? = null,
+    /** How the user finished the month before, for [PushType.SEASON_RESET]: their rank (null when they scored nothing) and points. */
+    val lastRank: Int? = null,
+    val lastPoints: Int? = null,
 ) {
     /** The data payload. [recipient] lets the app drop a push meant for an account that has since signed out. */
     fun data(recipient: Uuid): Map<String, String> = buildMap {
         put("type", type.name)
         put("userId", recipient.toString())
-        put("actorName", actorName)
+        if (actorName.isNotBlank()) put("actorName", actorName)
         if (gameTitle != null) put("gameTitle", gameTitle)
+        if (achievementName != null) put("achievementName", achievementName)
+        if (count != null) put("count", count.toString())
+        if (monthPeriod != null) put("monthPeriod", monthPeriod)
+        if (lastRank != null) put("lastRank", lastRank.toString())
+        if (lastPoints != null) put("lastPoints", lastPoints.toString())
     }
 }
 

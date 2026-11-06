@@ -60,6 +60,19 @@ class Notifier(
         }
     }
 
+    /**
+     * [owner] has [count] new achievements in [gameTitle] (null when they are spread over several games).
+     * [rarest] is the rarest one's name, when it is known.
+     */
+    fun achievementsUnlocked(owner: Uuid, gameTitle: String?, count: Int, rarest: String?) = later {
+        deliver(owner, Push(PushType.ACHIEVEMENT_UNLOCKED, gameTitle = gameTitle, achievementName = rarest, count = count))
+    }
+
+    /** A new season began. [user] finished [monthPeriod]'s predecessor in [lastRank] place (null: no points) with [lastPoints]. */
+    fun seasonStarted(user: Uuid, monthPeriod: String, lastRank: Int?, lastPoints: Int) = later {
+        deliver(user, Push(PushType.SEASON_RESET, monthPeriod = monthPeriod, lastRank = lastRank, lastPoints = lastPoints))
+    }
+
     /** Sends [push] to every phone of [recipient], unless they switched that kind off. */
     suspend fun deliver(recipient: Uuid, push: Push) {
         if (!wantsPush(recipient, push.type)) {
