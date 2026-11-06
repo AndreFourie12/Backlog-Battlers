@@ -319,6 +319,40 @@ object GameGenres : Table("game_genres")
     override val primaryKey = PrimaryKey(gameId, genre)
 }
 
+// the unlocks Steam has confirmed for a library entry, by an import or by a check when the game was completed.
+// a confirmed unlock cannot be unchecked again, and a game can only be completed to 100% once every
+// achievement is one. a table of its own rather than a column on UnlockedAchievements, because
+// SchemaUtils.create adds missing tables but never adds columns to existing ones
+object VerifiedUnlocks : Table("verified_unlocks")
+{
+    val libraryEntryId = reference("library_entry_id", LibraryEntries.id, onDelete = ReferenceOption.CASCADE)
+    val achievementId = varchar("achievement_id", 64)
+    val verifiedAt = timestamp("verified_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(libraryEntryId, achievementId)
+}
+
+// userpictures table: the profile picture a user picked, saved so friends and other phones see it.
+// the id is the app's own (the app ships the pictures), the API only keeps it. a table of its own for
+// the reason UserSettings is one: SchemaUtils.create never adds columns to an existing table
+object UserPictures : Table("user_pictures")
+{
+    val userId = reference("user_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val pictureId = varchar("picture_id", 32)
+
+    override val primaryKey = PrimaryKey(userId)
+}
+
+// seasonannouncements table: the months the "a new season has started" push went out for, so a restart or a
+// second instance never sends it twice
+object SeasonAnnouncements : Table("season_announcements")
+{
+    val monthPeriod = varchar("month_period", 7)
+    val announcedAt = timestamp("announced_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(monthPeriod)
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -337,5 +371,8 @@ val ALL_TABLES: Array<Table> = arrayOf(
     SteamAchievementChecks,
     ActivityEvents,
     GameGenres,
+    VerifiedUnlocks,
+    UserPictures,
+    SeasonAnnouncements,
 )
 //------------------------------EOF------------------------------\\

@@ -39,6 +39,16 @@
             android:gravity="center"
             android:textColor="@color/text_primary"
             tools:text="D" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_avatar_picture"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
     </FrameLayout>
 
     <!-- Plain Rank Text (for ranks 4+) -->

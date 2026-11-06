@@ -15,6 +15,7 @@ import com.backlogbattlers.api.friends.SendRequestResponseDto
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.igdbHttpClient
+import com.backlogbattlers.api.steam.markVerified
 import com.backlogbattlers.api.scoring.currentMonthPeriod
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -180,6 +181,8 @@ class ActivityFriendsScenarioTest {
         client.befriend(me, bob)
         Thread.sleep(5)
         client.unlock(alice, aliceHades, "H_RARE", "H_COMMON", "H_MID")
+        // 100% needs every achievement confirmed by Steam, which an import would have recorded
+        transaction(db) { markVerified(aliceHades, listOf("H_RARE", "H_COMMON", "H_MID")) }
         Thread.sleep(5)
         client.complete(alice, aliceHades, "COMPLETIONIST")
         Thread.sleep(5)

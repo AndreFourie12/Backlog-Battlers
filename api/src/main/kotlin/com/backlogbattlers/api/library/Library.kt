@@ -9,8 +9,11 @@ import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.db.Platform
 import com.backlogbattlers.api.db.SteamApps
 import com.backlogbattlers.api.db.UnlockedAchievements
+import com.backlogbattlers.api.db.VerifiedUnlocks
 import com.backlogbattlers.api.games.GameDto
 import com.backlogbattlers.api.games.steamArtUrl
+import com.backlogbattlers.api.steam.markVerified
+import com.backlogbattlers.api.steam.verifiedIds
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
@@ -37,6 +40,8 @@ data class LibraryEntryDto(
     val status: LibraryStatus,
     val hoursPlayed: Double,
     val unlockedAchievementIds: List<String>,
+    /** The unlocked ones Steam has confirmed. They cannot be unchecked, and 100% needs every achievement to be one. */
+    val verifiedAchievementIds: List<String> = emptyList(),
     val completionType: CompletionType?,
     val addedAt: Long,
     val updatedAt: Long,
@@ -72,7 +77,10 @@ sealed interface CreateResult {
 data class UpdateEntryRequest(
     val status: LibraryStatus? = null,
     val hoursPlayed: Double? = null,
-    /** The complete set of unlocked achievements, not just the newly unlocked ones. */
+    /**
+     * The complete set of unlocked achievements, not just the newly unlocked ones. A confirmed
+     * achievement (see [LibraryEntryDto.verifiedAchievementIds]) stays unlocked even when it is left out.
+     */
     val unlockedAchievementIds: List<String>? = null,
 )
 
@@ -175,7 +183,8 @@ fun updateEntry(owner: Uuid, entryId: Uuid, request: UpdateEntryRequest): Update
             .where { UnlockedAchievements.libraryEntryId eq entryId }
             .map { it[UnlockedAchievements.achievementId] }
             .toSet()
-        val toRemove = current - wanted.toSet()
+        // a confirmed unlock can never be unchecked, so it stays even when the list leaves it out
+        val toRemove = current - wanted.toSet() - verifiedIds(entryId)
         if (toRemove.isNotEmpty()) {
             UnlockedAchievements.deleteWhere {
                 (UnlockedAchievements.libraryEntryId eq entryId) and (UnlockedAchievements.achievementId inList toRemove)
@@ -212,9 +221,16 @@ fun deleteEntry(owner: Uuid, entryId: Uuid): Boolean = transaction {
 
 /** Turns entry rows into DTOs, loading all their unlocked achievement ids in one query. Call inside a transaction. */
 private fun toDtos(rows: List<ResultRow>): List<LibraryEntryDto> {
-    val unlockedByEntry = UnlockedAchievements.selectAll()
-        .where { UnlockedAchievements.libraryEntryId inList rows.map { it[LibraryEntries.id] } }
-        .groupBy({ it[UnlockedAchievements.libraryEntryId] }, { it[UnlockedAchievements.achievementId] })
+    val entryIds = rows.map { it[LibraryEntries.id] }
+    val unlockRows = UnlockedAchievements.selectAll().where { UnlockedAchievements.libraryEntryId inList entryIds }.toList()
+    val unlockedByEntry = unlockRows.groupBy({ it[UnlockedAchievements.libraryEntryId] }, { it[UnlockedAchievements.achievementId] })
+    // confirmed: recorded by an import or a check, or already paid for (see verifiedIds)
+    val confirmedByEntry = (
+        VerifiedUnlocks.selectAll().where { VerifiedUnlocks.libraryEntryId inList entryIds }
+            .map { it[VerifiedUnlocks.libraryEntryId] to it[VerifiedUnlocks.achievementId] } +
+            unlockRows.filter { it[UnlockedAchievements.countedForPoints] }
+                .map { it[UnlockedAchievements.libraryEntryId] to it[UnlockedAchievements.achievementId] }
+        ).groupBy({ it.first }, { it.second })
 
     return rows.map { row ->
         LibraryEntryDto(
@@ -224,6 +240,8 @@ private fun toDtos(rows: List<ResultRow>): List<LibraryEntryDto> {
             status = row[LibraryEntries.status],
             hoursPlayed = row[LibraryEntries.hoursPlayed],
             unlockedAchievementIds = unlockedByEntry[row[LibraryEntries.id]].orEmpty().sorted(),
+            verifiedAchievementIds = confirmedByEntry[row[LibraryEntries.id]].orEmpty().toSet()
+                .intersect(unlockedByEntry[row[LibraryEntries.id]].orEmpty().toSet()).sorted(),
             completionType = row[LibraryEntries.completionType],
             addedAt = row[LibraryEntries.addedAt].toEpochMilli(),
             updatedAt = row[LibraryEntries.updatedAt].toEpochMilli(),

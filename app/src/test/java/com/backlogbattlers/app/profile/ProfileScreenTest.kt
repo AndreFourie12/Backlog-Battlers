@@ -11,6 +11,7 @@ import com.backlogbattlers.app.data.repository.DeleteAccountResult
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepository
 import com.backlogbattlers.app.data.repository.ProfileRepository
 import com.backlogbattlers.app.data.repository.ProfileRepositoryImpl
+import com.backlogbattlers.app.data.repository.ProfileSaveResult
 import com.backlogbattlers.app.domain.model.BadgeId
 import com.backlogbattlers.app.domain.model.BadgeProgress
 import com.backlogbattlers.app.domain.model.Profile
@@ -70,7 +71,7 @@ class ProfileScreenTest {
 
     private val seen = mutableListOf<HttpRequestData>()
     private var body = """
-        {"userId":"u1","displayName":"Dylan","avatarUrl":null,"xp":850,"level":4,"xpIntoLevel":250,"xpForNextLevel":400,
+        {"userId":"u1","displayName":"Dylan","avatarUrl":null,"pictureId":"pfp_05","xp":850,"level":4,"xpIntoLevel":250,"xpForNextLevel":400,
          "monthlyPoints":80,"monthRank":2,"gamesInLibrary":103,"gamesCompleted":4,"achievementsUnlocked":212,
          "badges":[
            {"id":"NEMESIS","progress":1,"target":3,"earned":false},
@@ -112,6 +113,7 @@ class ProfileScreenTest {
         val profile = repository.getProfile()
 
         assertEquals("Dylan", profile.displayName)
+        assertEquals("pfp_05", profile.pictureId)
         assertEquals(4, profile.level)
         assertEquals(250, profile.xpIntoLevel)
         assertEquals(400, profile.xpForNextLevel)
@@ -185,7 +187,12 @@ class ProfileScreenTest {
         override fun observeCurrentUser(): Flow<User?> = MutableStateFlow(user)
         override suspend fun getCurrentUser(): User? = user
         override suspend fun signInWithGoogle(activity: Activity): AuthResult = AuthResult.Failure(R.string.sign_in_failed)
-        override suspend fun updateDisplayName(displayName: String): Boolean = false
+        // what the screen asked the account to save, as (name, picture)
+        val saved = mutableListOf<Pair<String?, String?>>()
+        override suspend fun updateProfile(displayName: String?, pictureId: String?): ProfileSaveResult {
+            saved += displayName to pictureId
+            return ProfileSaveResult.SAVED
+        }
         override suspend fun signOut() = Unit
         override suspend fun freshAccessToken(): String? = null
         override suspend fun renewAccessToken(): String? = null
@@ -216,10 +223,11 @@ class ProfileScreenTest {
     }
 
     private companion object {
-        fun sample(level: Int) = Profile(
+        fun sample(level: Int, pictureId: String? = null) = Profile(
             userId = "u1",
             displayName = "Dylan",
             avatarUrl = null,
+            pictureId = pictureId,
             xp = 0,
             level = level,
             xpIntoLevel = 0,
@@ -261,6 +269,40 @@ class ProfileScreenTest {
         assertEquals("pfp_03", state.customization.pictureId)
         assertFalse(state.isLoading)
         assertNull(state.errorMessage)
+    }
+
+    @Test
+    fun `a picture only this phone has is sent to the account, so friends can see it`() = runTest {
+        customization.saved.value = ProfileCustomization(pictureId = "pfp_03")
+        fake.profile = sample(level = 1, pictureId = null)
+
+        viewModel()
+
+        assertEquals(listOf<Pair<String?, String?>>(null to "pfp_03"), auth.saved)
+        assertEquals("pfp_03", customization.saved.value.pictureId)
+    }
+
+    @Test
+    fun `a picture only the account has is kept on this phone, as on a new phone`() = runTest {
+        customization.saved.value = ProfileCustomization(pictureId = null)
+        fake.profile = sample(level = 1, pictureId = "pfp_09")
+
+        val state = viewModel().state()
+
+        assertEquals("pfp_09", customization.saved.value.pictureId)
+        assertEquals("pfp_09", state.customization.pictureId)
+        assertTrue(auth.saved.isEmpty())
+    }
+
+    @Test
+    fun `a picture both sides have is left alone, even when they differ`() = runTest {
+        customization.saved.value = ProfileCustomization(pictureId = "pfp_03")
+        fake.profile = sample(level = 1, pictureId = "pfp_09")
+
+        viewModel()
+
+        assertEquals("pfp_03", customization.saved.value.pictureId)
+        assertTrue(auth.saved.isEmpty())
     }
 
     @Test

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.domain.model.Friend
 import com.backlogbattlers.app.util.avatarColorFor
+import com.backlogbattlers.app.util.showProfilePicture
 import com.backlogbattlers.app.util.formatPoints
 import com.backlogbattlers.app.util.initialsFor
 import com.backlogbattlers.app.util.medalRingFor
@@ -29,6 +30,7 @@ class FriendAdapter(
         val cardFriend: View = itemView.findViewById(R.id.card_friend)
         val ivAvatarRing: ImageView = itemView.findViewById(R.id.iv_avatar_ring)
         val tvAvatarInitial: TextView = itemView.findViewById(R.id.tv_avatar_initial)
+        val ivAvatarPicture: ImageView = itemView.findViewById(R.id.iv_avatar_picture)
         val tvRank: TextView = itemView.findViewById(R.id.tv_rank)
         val tvFriendName: TextView = itemView.findViewById(R.id.tv_friend_name)
         val tvYouSuffix: TextView = itemView.findViewById(R.id.tv_you_suffix)
@@ -84,6 +86,7 @@ class FriendAdapter(
         holder.tvAvatarInitial.text = initialsFor(friend.displayName)
         val colorRes = avatarColorFor(friend.userId)
         holder.tvAvatarInitial.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, colorRes))
+        holder.ivAvatarPicture.showProfilePicture(friend.pictureId)
 
         holder.tvFriendName.text = friend.displayName
 

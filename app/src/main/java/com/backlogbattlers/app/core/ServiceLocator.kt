@@ -11,6 +11,7 @@ import com.backlogbattlers.app.data.remote.ActivityApi
 import com.backlogbattlers.app.data.remote.FriendsApi
 import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.remote.LeaderboardApi
+import com.backlogbattlers.app.data.remote.CompletionApi
 import com.backlogbattlers.app.data.remote.ProfileApi
 import com.backlogbattlers.app.data.remote.LibraryApi
 import com.backlogbattlers.app.data.remote.SettingsApi
@@ -30,6 +31,8 @@ import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.LibraryRepositoryImpl
 import com.backlogbattlers.app.data.repository.LibrarySync
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepository
+import com.backlogbattlers.app.data.repository.CompletionRepository
+import com.backlogbattlers.app.data.repository.CompletionRepositoryImpl
 import com.backlogbattlers.app.data.repository.ProfileRepository
 import com.backlogbattlers.app.data.repository.ProfileRepositoryImpl
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepositoryImpl
@@ -159,6 +162,18 @@ object ServiceLocator {
             artFor = { gameId ->
                 gameRepository.getGame(gameId)?.let { game -> game.landscapeArtUrls + listOfNotNull(game.coverImageUrl) }.orEmpty()
             },
+        )
+    }
+
+    val completionApi: CompletionApi by lazy {
+        CompletionApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokens = accessTokenSource)
+    }
+
+    val completionRepository: CompletionRepository by lazy {
+        CompletionRepositoryImpl(
+            completionApi,
+            syncLibrary = { librarySync.sync() },
+            isSynced = { libraryEntryId -> libraryRepository.isSynced(libraryEntryId) },
         )
     }
 

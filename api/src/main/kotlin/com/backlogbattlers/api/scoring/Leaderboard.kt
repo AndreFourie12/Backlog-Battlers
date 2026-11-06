@@ -2,6 +2,7 @@ package com.backlogbattlers.api.scoring
 
 import com.backlogbattlers.api.db.MonthlyLeaderboardEntries
 import com.backlogbattlers.api.db.Users
+import com.backlogbattlers.api.profile.pictureIdsFor
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
@@ -22,6 +23,8 @@ data class LeaderboardEntryDto(
     val displayName: String,
     val avatarUrl: String?,
     val monthlyPoints: Int,
+    /** The picture they picked, by the app's id. */
+    val pictureId: String? = null,
 )
 
 @Serializable
@@ -61,6 +64,8 @@ fun monthlyLeaderboard(caller: Uuid?, monthPeriod: String = currentMonthPeriod()
         Users.selectAll().where { Users.id inList userIds }.associateBy { it[Users.id] }
     }
 
+    val pictures = pictureIdsFor(userIds + listOfNotNull(caller))
+
     val ranked = rows.mapIndexedNotNull { index, row ->
         val user = usersById[row[MonthlyLeaderboardEntries.userId]] ?: return@mapIndexedNotNull null
         LeaderboardEntryDto(
@@ -69,15 +74,16 @@ fun monthlyLeaderboard(caller: Uuid?, monthPeriod: String = currentMonthPeriod()
             displayName = user[Users.displayName],
             avatarUrl = user[Users.avatarUrl],
             monthlyPoints = row[MonthlyLeaderboardEntries.monthlyPoints],
+            pictureId = pictures[row[MonthlyLeaderboardEntries.userId]],
         )
     }
 
-    val me = caller?.let { id -> callerRow(id, ranked) }
+    val me = caller?.let { id -> callerRow(id, ranked, pictures[id]) }
     LeaderboardResponseDto(monthPeriod, seasonEndsAt(monthPeriod).toEpochMilli(), ranked.take(limit), me)
 }
 
 /** The caller's row from [ranked] if they are on the board, otherwise a zero-point row placed one past the last rank. */
-private fun callerRow(caller: Uuid, ranked: List<LeaderboardEntryDto>): LeaderboardEntryDto? {
+private fun callerRow(caller: Uuid, ranked: List<LeaderboardEntryDto>, pictureId: String?): LeaderboardEntryDto? {
     ranked.find { it.userId == caller.toString() }?.let { return it }
 
     val user = Users.selectAll().where { Users.id eq caller }.singleOrNull() ?: return null
@@ -87,6 +93,7 @@ private fun callerRow(caller: Uuid, ranked: List<LeaderboardEntryDto>): Leaderbo
         displayName = user[Users.displayName],
         avatarUrl = user[Users.avatarUrl],
         monthlyPoints = 0,
+        pictureId = pictureId,
     )
 }
 

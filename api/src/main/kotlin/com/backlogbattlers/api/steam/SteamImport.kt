@@ -1,5 +1,7 @@
 package com.backlogbattlers.api.steam
 
+import com.backlogbattlers.api.db.Achievements
+import com.backlogbattlers.api.db.Games
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
 import com.backlogbattlers.api.activity.recordUnlocks
@@ -12,6 +14,7 @@ import com.backlogbattlers.api.games.OwnedGames
 import com.backlogbattlers.api.games.PlayerAchievements
 import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.games.saveGame
+import com.backlogbattlers.api.notifications.Notifier
 import com.backlogbattlers.api.games.toDto
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
@@ -90,6 +93,8 @@ class SteamImporter(
     private val steam: SteamClient,
     private val clock: () -> Instant = Instant::now,
     private val cooldown: Duration = DEFAULT_COOLDOWN,
+    // tells the player about new unlocks, behind their Achievements switch
+    private val notifier: Notifier = Notifier.Disabled,
 ) {
     // when each user last imported. per server process, which is enough to stop repeated taps
     private val lastImport = ConcurrentHashMap<Uuid, Instant>()
@@ -245,6 +250,7 @@ class SteamImporter(
         }
 
         var added = 0
+        val news = mutableListOf<UnlockNews>()
         transaction {
             answers.forEach { (check, answer) ->
                 // this game's details are hidden on Steam: leave it to be read once they are public
@@ -263,10 +269,13 @@ class SteamImporter(
                         times[code]?.let { time -> it[unlockedAt] = time }
                     }
                 }
+                // Steam itself says these are unlocked, so they are confirmed, and cannot be unchecked any more
+                markVerified(check.entryId, (have + fresh).filter { it in unlocked })
                 // only unlocks from the last week reach the activity feed; an import must not announce a whole history
                 val recent = fresh.filter { code -> times[code]?.let { it >= now.minus(FEED_WINDOW) } == true }
                 if (recent.isNotEmpty()) {
                     recordUnlocks(owner, check.gameId, recent, at = recent.maxOf { times.getValue(it) })
+                    unlockNews(check.gameId, recent)?.let { news += it }
                 }
                 if (fresh.isNotEmpty()) {
                     LibraryEntries.update({ LibraryEntries.id eq check.entryId }) { it[updatedAt] = now }
@@ -279,8 +288,32 @@ class SteamImporter(
                 }
             }
         }
+        tell(owner, news)
         log.info("Steam import read achievements for {} games, {} new unlocks", answers.size, added)
         return added
+    }
+
+    // what an import found in one game, for the player's push
+    private data class UnlockNews(val gameTitle: String, val count: Int, val rarest: String?)
+
+    // the game's title and the rarest of the new unlocks, read inside the import's transaction
+    private fun unlockNews(gameId: Int, codes: List<String>): UnlockNews? {
+        val title = Games.selectAll().where { Games.id eq gameId }.singleOrNull()?.get(Games.title) ?: return null
+        val rarest = Achievements.selectAll()
+            .where { (Achievements.gameId eq gameId) and (Achievements.achievementId inList codes) }
+            .filter { it[Achievements.rarityPercent] != null }
+            .minByOrNull { it[Achievements.rarityPercent]!! }
+            ?.get(Achievements.name)
+        return UnlockNews(title, codes.size, rarest)
+    }
+
+    // one push for each of up to three games, and past that one for all of them, so a long import is not a burst of pushes
+    private fun tell(owner: Uuid, news: List<UnlockNews>) {
+        when {
+            news.isEmpty() -> Unit
+            news.size <= MAX_SEPARATE_PUSHES -> news.forEach { notifier.achievementsUnlocked(owner, it.gameTitle, it.count, it.rarest) }
+            else -> notifier.achievementsUnlocked(owner, gameTitle = null, count = news.sumOf { it.count }, rarest = null)
+        }
     }
 
     companion object {
@@ -289,6 +322,9 @@ class SteamImporter(
         // Steam achievement reads in flight at once: a big library finishes in seconds, without a
         // burst Steam might throttle
         private const val PARALLEL_ACHIEVEMENT_CALLS = 4
+
+        // the most games an import tells the player about one by one
+        private const val MAX_SEPARATE_PUSHES = 3
 
         // how far back an unlock still counts as news for the activity feed
         private val FEED_WINDOW: Duration = Duration.ofDays(7)

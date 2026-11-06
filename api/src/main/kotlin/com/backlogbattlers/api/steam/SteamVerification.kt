@@ -3,12 +3,14 @@ package com.backlogbattlers.api.steam
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.db.UserSteamAccounts
+import com.backlogbattlers.api.db.VerifiedUnlocks
 import com.backlogbattlers.api.games.IgdbClient
 import com.backlogbattlers.api.games.PlayerAchievements
 import com.backlogbattlers.api.games.SteamClient
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -91,8 +93,40 @@ enum class SteamCheckStatus {
 data class SteamCheck(val status: SteamCheckStatus, val confirmed: Set<String> = emptySet())
 
 /**
+ * The unlocks of [entryId] that Steam has confirmed: the ones an import or an earlier check recorded,
+ * and the ones already paid for, which were only paid once Steam confirmed them. Call inside a transaction.
+ */
+fun verifiedIds(entryId: Uuid): Set<String> {
+    val recorded = VerifiedUnlocks.selectAll().where { VerifiedUnlocks.libraryEntryId eq entryId }
+        .map { it[VerifiedUnlocks.achievementId] }
+    val paid = UnlockedAchievements.selectAll()
+        .where { (UnlockedAchievements.libraryEntryId eq entryId) and (UnlockedAchievements.countedForPoints eq true) }
+        .map { it[UnlockedAchievements.achievementId] }
+    return (recorded + paid).toSet()
+}
+
+/** Records [ids] as confirmed for [entryId]. Only ids that are unlocked on the entry are recorded. Call inside a transaction. */
+fun markVerified(entryId: Uuid, ids: Collection<String>) {
+    if (ids.isEmpty()) return
+    val unlocked = UnlockedAchievements.selectAll()
+        .where { (UnlockedAchievements.libraryEntryId eq entryId) and (UnlockedAchievements.achievementId inList ids.toList()) }
+        .map { it[UnlockedAchievements.achievementId] }
+        .toSet()
+    val already = VerifiedUnlocks.selectAll().where { VerifiedUnlocks.libraryEntryId eq entryId }
+        .map { it[VerifiedUnlocks.achievementId] }
+        .toSet()
+    (unlocked - already).forEach { code ->
+        VerifiedUnlocks.insert {
+            it[libraryEntryId] = entryId
+            it[achievementId] = code
+        }
+    }
+}
+
+/**
  * Asks Steam which of the entry's not-yet-paid achievements [owner] has really unlocked. Only those
- * are checked, so an entry that was already paid for never costs a Steam call. Throws a
+ * are checked, and not even those that an import already confirmed, so an entry that was already
+ * paid for or confirmed never costs a Steam call. Throws a
  * SteamException or IgdbException when either service is down, so the caller can refuse to go on
  * rather than treat an outage as "nothing unlocked".
  */
@@ -101,9 +135,11 @@ suspend fun checkUnlocks(owner: Uuid, entryId: Uuid, igdb: IgdbClient, steam: St
         val entry = LibraryEntries.selectAll()
             .where { (LibraryEntries.id eq entryId) and (LibraryEntries.userId eq owner) }
             .singleOrNull() ?: return@transaction null
+        val confirmed = verifiedIds(entryId)
         val ids = UnlockedAchievements.selectAll()
             .where { (UnlockedAchievements.libraryEntryId eq entryId) and (UnlockedAchievements.countedForPoints eq false) }
             .map { it[UnlockedAchievements.achievementId] }
+            .filter { it !in confirmed }
         entry[LibraryEntries.gameId] to ids
     } ?: return SteamCheck(SteamCheckStatus.NOT_NEEDED) // no such entry: the completion itself answers 404
     if (waiting.isEmpty()) return SteamCheck(SteamCheckStatus.NOT_NEEDED)

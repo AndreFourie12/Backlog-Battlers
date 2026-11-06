@@ -1,13 +1,18 @@
 package com.backlogbattlers.app.viewmodels
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.backlogbattlers.app.R
 import com.backlogbattlers.app.core.ServiceLocator
+import com.backlogbattlers.app.data.repository.CompletionRepository
 import com.backlogbattlers.app.data.repository.GameRepository
 import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.domain.model.Achievement
+import com.backlogbattlers.app.domain.model.CompleteOutcome
+import com.backlogbattlers.app.domain.model.CompletionType
 import com.backlogbattlers.app.domain.model.Game
 import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
@@ -23,10 +28,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// one of a game's achievements, paired with whether the signed in user has unlocked it
+// one of a game's achievements, paired with whether the signed in user has unlocked it, and whether
+// Steam has confirmed that unlock (which locks it in: it cannot be unchecked any more)
 data class AchievementUiItem(
     val achievement: Achievement,
     val unlocked: Boolean,
+    val verified: Boolean = false,
 ) {
     val points: Int get() = achievementPoints(achievement.rarityPercent)
 }
@@ -41,6 +48,14 @@ data class GameDetailUiState(
     // the default platform from Settings, and the platform the game is filed under once it is in the library
     val preferredPlatform: Platform = Platform.PC,
     val libraryPlatform: Platform? = null,
+    // how far the game has been completed, null while it has not been
+    val completionType: CompletionType? = null,
+    // the backend is being asked to complete the game
+    val completing: Boolean = false,
+    // a message from strings.xml for the screen to show once (a tap on an achievement Steam confirmed)
+    @StringRes val message: Int? = null,
+    // how the last attempt to complete the game went, for the screen to show once
+    val completionOutcome: CompleteOutcome? = null,
 ) {
     // what the header shows: where the game is filed if it is in the library, otherwise where it would be
     val platform: Platform?
@@ -50,6 +65,15 @@ data class GameDetailUiState(
     val totalCount: Int get() = achievements.size
     val earnedPoints: Int get() = achievements.filter { it.unlocked }.sumOf { it.points }
     val totalPoints: Int get() = achievements.sumOf { it.points }
+
+    // any completion includes the story, and 100% is the furthest a game goes
+    val storyCompleted: Boolean get() = completionType != null
+    val hundredPercentCompleted: Boolean get() = completionType == CompletionType.COMPLETIONIST
+
+    // every achievement ticked. 100% needs that, and then Steam has to confirm each one
+    val allUnlocked: Boolean get() = totalCount > 0 && unlockedCount == totalCount
+    val canCompleteStory: Boolean get() = !storyCompleted
+    val canCompleteHundredPercent: Boolean get() = !hundredPercentCompleted && allUnlocked
 
     // whole achievements unlocked out of the whole list, not a points ratio
     val completionPercent: Int
@@ -63,6 +87,8 @@ class GameDetailViewModel(
     private val gameRepository: GameRepository = ServiceLocator.gameRepository,
     private val libraryRepository: LibraryRepository = ServiceLocator.libraryRepository,
     private val settingsRepository: SettingsRepository = ServiceLocator.settingsRepository,
+    // fetched when a game is first completed, so building this view model needs no backend
+    private val completionRepository: () -> CompletionRepository = { ServiceLocator.completionRepository },
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameDetailUiState())
@@ -131,11 +157,13 @@ class GameDetailViewModel(
                 libraryEntryId = entry?.libraryEntryId
                 val filedUnder = entry?.platform
                 val unlockedIds = entry?.unlockedAchievementIds.orEmpty().toSet()
+                val verifiedIds = entry?.verifiedAchievementIds.orEmpty().toSet()
                 _uiState.update {
                     it.copy(
                         libraryPlatform = filedUnder,
+                        completionType = entry?.completionType,
                         achievements = achievements.map { a ->
-                            AchievementUiItem(a, unlocked = a.achievementId in unlockedIds)
+                            AchievementUiItem(a, unlocked = a.achievementId in unlockedIds, verified = a.achievementId in verifiedIds)
                         }.sortedByDescending { item -> item.achievement.rarityPercent ?: 0.0 },
                         achievementsLoading = false,
                         achievementsFailed = false,
@@ -145,22 +173,21 @@ class GameDetailViewModel(
         }
     }
 
-    // unlocks a locked achievement, or locks one back if tapped again. Tracking an achievement
-    // implies tracking the game, so a game not yet in the library is added to it first
+    // unlocks a locked achievement, or locks one back if tapped again, unless Steam has confirmed it:
+    // that one stays unlocked and the screen says why. Tracking an achievement implies tracking the
+    // game, so a game not yet in the library is added to it first
     fun toggleAchievement(achievementId: String) {
         val gameId = loadedGameId ?: return
         val item = _uiState.value.achievements.firstOrNull { it.achievement.achievementId == achievementId } ?: return
+        if (item.unlocked && item.verified) {
+            _uiState.update { it.copy(message = R.string.achievement_verified_locked) }
+            return
+        }
         val makeUnlocked = !item.unlocked
 
         viewModelScope.launch {
             try {
-                val entryId = libraryEntryId ?: run {
-                    val preferred = settingsRepository.observeSettings().first().defaultPlatform
-                    val platform = _uiState.value.game?.let { primaryPlatform(it.platforms, preferred) } ?: Platform.OTHER
-                    libraryRepository.addToLibrary(gameId, platform, LibraryStatus.BACKLOG)
-                    libraryRepository.observeByGameId(gameId).first()?.libraryEntryId
-                } ?: return@launch
-                libraryEntryId = entryId
+                val entryId = ensureEntry(gameId) ?: return@launch
                 libraryRepository.setAchievementUnlocked(entryId, achievementId, makeUnlocked)
             } catch (e: CancellationException) {
                 throw e
@@ -168,6 +195,46 @@ class GameDetailViewModel(
                 Log.e(TAG, "Toggling $achievementId on game $gameId failed", e)
             }
         }
+    }
+
+    // asks the backend to complete the game: its story, or 100%. the backend checks the achievements
+    // with Steam and refuses a 100% that is not earned. a game not in the library yet is added first.
+    // how it went arrives in the state's completionOutcome, and the entry follows it through the library
+    fun complete(type: CompletionType) {
+        val gameId = loadedGameId ?: return
+        if (_uiState.value.completing) return
+        _uiState.update { it.copy(completing = true) }
+
+        viewModelScope.launch {
+            val outcome = try {
+                val entryId = ensureEntry(gameId)
+                if (entryId == null) CompleteOutcome.Failed else completionRepository().complete(entryId, type)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Completing game $gameId as $type failed", e)
+                CompleteOutcome.Failed
+            }
+            _uiState.update { it.copy(completing = false, completionOutcome = outcome) }
+        }
+    }
+
+    // the screen has shown the one-off message, or the outcome of completing the game
+    fun messageShown() {
+        _uiState.update { it.copy(message = null) }
+    }
+
+    fun outcomeShown() {
+        _uiState.update { it.copy(completionOutcome = null) }
+    }
+
+    // the library entry for this game, added first when there is none yet
+    private suspend fun ensureEntry(gameId: Int): String? {
+        libraryEntryId?.let { return it }
+        val preferred = settingsRepository.observeSettings().first().defaultPlatform
+        val platform = _uiState.value.game?.let { primaryPlatform(it.platforms, preferred) } ?: Platform.OTHER
+        libraryRepository.addToLibrary(gameId, platform, LibraryStatus.BACKLOG)
+        return libraryRepository.observeByGameId(gameId).first()?.libraryEntryId?.also { libraryEntryId = it }
     }
 
     private companion object {

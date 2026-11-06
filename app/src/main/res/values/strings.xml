@@ -520,4 +520,64 @@
 
     <!-- shown when the backend stops accepting the session and the user is sent back to login -->
     <string name="session_expired">Your session has expired. Please sign in again.</string>
+    <string name="detail_complete_none_title">Not completed yet</string>
+    <string name="detail_complete_none_hint">Finished the story, or unlocked everything? Mark it off to earn points.</string>
+    <string name="detail_complete_story_title">Story completed</string>
+    <string name="detail_complete_story_hint" formatted="false">Unlock every achievement and Steam will confirm them for 100%.</string>
+    <string name="detail_complete_hundred_title" formatted="false">100% completed</string>
+    <string name="detail_complete_hundred_hint">Every achievement unlocked and verified on Steam.</string>
+    <string name="detail_complete_button">Mark as complete</string>
+    <string name="detail_completing">Completing…</string>
+    <string name="complete_sheet_title">Mark as complete</string>
+    <string name="complete_story_title">Story complete</string>
+    <string name="complete_story_hint">You finished the main story.</string>
+    <string name="complete_hundred_title" formatted="false">100% complete</string>
+    <string name="complete_hundred_ready">Every achievement is unlocked. Steam will confirm each one.</string>
+    <string name="complete_hundred_locked">Unlock all %1$d achievements first (%2$d to go).</string>
+    <string name="complete_hundred_none">This game has no achievements to complete.</string>
+    <string name="complete_done_hint">Already completed</string>
+    <string name="complete_confirm_title">Mark as complete?</string>
+    <string name="complete_confirm_story">This marks the story as completed and awards points. It cannot be undone.</string>
+    <string name="complete_confirm_hundred" formatted="false">Steam will check every achievement. If they all check out, the game is completed to 100%, the achievements are locked in and you earn points. It cannot be undone.</string>
+    <string name="complete_confirm_yes">Complete</string>
+    <string name="complete_result_story_title">Story completed!</string>
+    <string name="complete_result_hundred_title" formatted="false">100% completed!</string>
+    <string name="complete_result_points">You earned %1$s points.</string>
+    <plurals name="complete_result_unverified">
+        <item quantity="one">%1$d achievement you ticked was not confirmed by Steam, so it earned nothing.</item>
+        <item quantity="other">%1$d achievements you ticked were not confirmed by Steam, so they earned nothing.</item>
+    </plurals>
+    <string name="complete_not_ready_title" formatted="false">Not 100% yet</string>
+    <string name="complete_not_ready_locked">Unlock every achievement first. %1$d still locked.</string>
+    <string name="complete_not_ready_none" formatted="false">This game has no achievements, so it cannot be completed to 100%.</string>
+    <string name="complete_not_ready_not_linked">Link your Steam account in Settings so Steam can confirm your achievements.</string>
+    <string name="complete_not_ready_private">Your Steam profile or game details are private, so Steam cannot confirm your achievements. Make them public and try again.</string>
+    <string name="complete_not_ready_not_on_steam">This game is not on Steam, so its achievements cannot be confirmed.</string>
+    <string name="complete_not_ready_unconfirmed">Steam did not confirm %1$d of your achievements. Only achievements you earned on Steam count.</string>
+    <string name="complete_error_title">Could not complete the game</string>
+    <string name="complete_error_already">This game is already completed that way.</string>
+    <string name="complete_error_not_synced">Your latest changes could not be saved yet. Check your connection and try again.</string>
+    <string name="complete_error_steam">Steam could not be reached to check your achievements. Nothing was completed, try again in a moment.</string>
+    <string name="complete_error_failed">Check your connection and try again.</string>
+    <string name="achievement_verified">Verified on Steam</string>
+    <string name="achievement_verified_locked">Steam confirmed this achievement, so it cannot be unchecked.</string>
+    <string name="cd_game_hundred" formatted="false">Completed to 100%</string>
+    <string name="edit_profile_no_connection">Your profile could not be saved. Check your connection and try again.</string>
+    <string name="edit_profile_save_failed">Your profile could not be saved. Try again in a moment.</string>
+    <string name="channel_achievements">Achievements</string>
+    <string name="channel_achievements_body">When you unlock achievements in your games</string>
+    <string name="push_achievement_title">Achievement unlocked</string>
+    <string name="push_achievement_one">You unlocked %1$s in %2$s.</string>
+    <plurals name="push_achievement_many">
+        <item quantity="one">You unlocked a new achievement in %2$s.</item>
+        <item quantity="other">You unlocked %1$d new achievements in %2$s.</item>
+    </plurals>
+    <string name="push_achievement_rarest">Rarest: %1$s.</string>
+    <plurals name="push_achievement_summary">
+        <item quantity="one">You unlocked a new achievement.</item>
+        <item quantity="other">You unlocked %1$d new achievements across several games.</item>
+    </plurals>
+    <string name="push_season_title">A new season has started</string>
+    <string name="push_season_result">Last month you finished #%1$d with %2$s points. Everyone starts again from zero.</string>
+    <string name="push_season_none">Points have reset to zero. Be the first to score this month.</string>
 </resources>

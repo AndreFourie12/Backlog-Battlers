@@ -7,6 +7,7 @@ import com.backlogbattlers.api.db.Friendships
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.db.Users
+import com.backlogbattlers.api.profile.pictureIdsFor
 import com.backlogbattlers.api.scoring.monthlyPointsFor
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.SortOrder
@@ -36,6 +37,8 @@ data class FriendDto(
     val monthlyPoints: Int,
     val achievementCount: Int,
     val isOnline: Boolean,
+    // the picture they picked, by the app's id
+    val pictureId: String? = null,
 )
 
 // an incoming, unanswered friend request
@@ -46,6 +49,7 @@ data class FriendRequestDto(
     val fromDisplayName: String,
     val fromAvatarUrl: String?,
     val createdAt: Long,
+    val fromPictureId: String? = null,
 )
 
 // one person found by a friend search, tagged with the caller's relationship to them
@@ -55,6 +59,7 @@ data class FriendSearchResultDto(
     val displayName: String,
     val avatarUrl: String?,
     val status: FriendRelationshipStatus,
+    val pictureId: String? = null,
 )
 
 // body of POST /users/me/friends/requests
@@ -111,6 +116,8 @@ private fun relationshipStatus(owner: Uuid, other: Uuid): FriendRelationshipStat
 fun listFriends(owner: Uuid): List<FriendDto> = transaction {
     val friendships = Friendships.selectAll().where { (Friendships.userAId eq owner) or (Friendships.userBId eq owner) }.toList()
 
+    val pictures = pictureIdsFor(friendships.map { if (it[Friendships.userAId] == owner) it[Friendships.userBId] else it[Friendships.userAId] })
+
     // this loop maps each friendship row to a FriendDto by loading the other user's details
     val friendDtos = friendships.map { row ->
         val userA = row[Friendships.userAId]
@@ -125,6 +132,7 @@ fun listFriends(owner: Uuid): List<FriendDto> = transaction {
             monthlyPoints = monthlyPointsFor(friendId),
             achievementCount = achievementCountFor(friendId),
             isOnline = friendUser[Users.lastLoginDate] == LocalDate.now(),
+            pictureId = pictures[friendId],
         )
     }
 
@@ -140,6 +148,8 @@ fun listIncomingRequests(owner: Uuid): List<FriendRequestDto> = transaction {
         .orderBy(FriendRequests.createdAt, SortOrder.DESC)
         .toList()
 
+    val pictures = pictureIdsFor(requests.map { it[FriendRequests.senderId] })
+
     // this loop maps incoming request rows to FriendRequestDto with sender details
     requests.map { row ->
         val senderId = row[FriendRequests.senderId]
@@ -150,6 +160,7 @@ fun listIncomingRequests(owner: Uuid): List<FriendRequestDto> = transaction {
             fromDisplayName = sender[Users.displayName],
             fromAvatarUrl = sender[Users.avatarUrl],
             createdAt = row[FriendRequests.createdAt].toEpochMilli(),
+            fromPictureId = pictures[senderId],
         )
     }
 }
@@ -162,6 +173,8 @@ fun searchUsers(owner: Uuid, query: String): List<FriendSearchResultDto> = trans
         .limit(MAX_SEARCH_RESULTS)
         .toList()
 
+    val pictures = pictureIdsFor(matches.map { it[Users.id] })
+
     // this loop converts each matching user into a FriendSearchResultDto tagged with relationship status
     matches.map { user ->
         val userId = user[Users.id]
@@ -170,6 +183,7 @@ fun searchUsers(owner: Uuid, query: String): List<FriendSearchResultDto> = trans
             displayName = user[Users.displayName],
             avatarUrl = user[Users.avatarUrl],
             status = relationshipStatus(owner, userId),
+            pictureId = pictures[userId],
         )
     }
 }
@@ -261,6 +275,7 @@ fun acceptRequest(owner: Uuid, requestId: Uuid): RespondToRequestResult = transa
             monthlyPoints = monthlyPointsFor(sender),
             achievementCount = achievementCountFor(sender),
             isOnline = senderUser[Users.lastLoginDate] == LocalDate.now(),
+            pictureId = pictureIdsFor(listOf(sender))[sender],
         ),
     )
 }

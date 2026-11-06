@@ -463,4 +463,64 @@
 
     <!-- shown when the backend stops accepting the session and the user is sent back to login -->
     <string name="session_expired">Jou sessie het verval. Meld asseblief weer aan.</string>
+    <string name="detail_complete_none_title">Nog nie voltooi nie</string>
+    <string name="detail_complete_none_hint">Die storie klaar of alles ontsluit? Merk dit af om punte te verdien.</string>
+    <string name="detail_complete_story_title">Storie voltooi</string>
+    <string name="detail_complete_story_hint" formatted="false">Ontsluit elke prestasie en Steam sal dit vir 100% bevestig.</string>
+    <string name="detail_complete_hundred_title" formatted="false">100% voltooi</string>
+    <string name="detail_complete_hundred_hint">Elke prestasie ontsluit en op Steam geverifieer.</string>
+    <string name="detail_complete_button">Merk as voltooi</string>
+    <string name="detail_completing">Voltooi tans…</string>
+    <string name="complete_sheet_title">Merk as voltooi</string>
+    <string name="complete_story_title">Storie voltooi</string>
+    <string name="complete_story_hint">Jy het die hoofstorie klaargemaak.</string>
+    <string name="complete_hundred_title" formatted="false">100% voltooi</string>
+    <string name="complete_hundred_ready">Elke prestasie is ontsluit. Steam sal elkeen bevestig.</string>
+    <string name="complete_hundred_locked">Ontsluit eers al %1$d prestasies (nog %2$d).</string>
+    <string name="complete_hundred_none">Hierdie speletjie het geen prestasies om te voltooi nie.</string>
+    <string name="complete_done_hint">Reeds voltooi</string>
+    <string name="complete_confirm_title">Merk as voltooi?</string>
+    <string name="complete_confirm_story">Dit merk die storie as voltooi en ken punte toe. Dit kan nie ongedaan gemaak word nie.</string>
+    <string name="complete_confirm_hundred" formatted="false">Steam sal elke prestasie nagaan. As almal klop, word die speletjie tot 100% voltooi, die prestasies word vasgesluit en jy verdien punte. Dit kan nie ongedaan gemaak word nie.</string>
+    <string name="complete_confirm_yes">Voltooi</string>
+    <string name="complete_result_story_title">Storie voltooi!</string>
+    <string name="complete_result_hundred_title" formatted="false">100% voltooi!</string>
+    <string name="complete_result_points">Jy het %1$s punte verdien.</string>
+    <plurals name="complete_result_unverified">
+        <item quantity="one">%1$d prestasie wat jy afgemerk het, is nie deur Steam bevestig nie en het niks verdien nie.</item>
+        <item quantity="other">%1$d prestasies wat jy afgemerk het, is nie deur Steam bevestig nie en het niks verdien nie.</item>
+    </plurals>
+    <string name="complete_not_ready_title" formatted="false">Nog nie 100% nie</string>
+    <string name="complete_not_ready_locked">Ontsluit eers elke prestasie. Nog %1$d gesluit.</string>
+    <string name="complete_not_ready_none" formatted="false">Hierdie speletjie het geen prestasies nie en kan dus nie tot 100% voltooi word nie.</string>
+    <string name="complete_not_ready_not_linked">Koppel jou Steam-rekening in Instellings sodat Steam jou prestasies kan bevestig.</string>
+    <string name="complete_not_ready_private">Jou Steam-profiel of speletjiebesonderhede is privaat, so Steam kan nie jou prestasies bevestig nie. Maak dit openbaar en probeer weer.</string>
+    <string name="complete_not_ready_not_on_steam">Hierdie speletjie is nie op Steam nie, so sy prestasies kan nie bevestig word nie.</string>
+    <string name="complete_not_ready_unconfirmed">Steam het %1$d van jou prestasies nie bevestig nie. Net prestasies wat jy op Steam verdien het, tel.</string>
+    <string name="complete_error_title">Kon nie die speletjie voltooi nie</string>
+    <string name="complete_error_already">Hierdie speletjie is reeds so voltooi.</string>
+    <string name="complete_error_not_synced">Jou jongste veranderinge kon nog nie gestoor word nie. Kyk na jou verbinding en probeer weer.</string>
+    <string name="complete_error_steam">Steam kon nie bereik word om jou prestasies na te gaan nie. Niks is voltooi nie, probeer netnou weer.</string>
+    <string name="complete_error_failed">Kyk na jou verbinding en probeer weer.</string>
+    <string name="achievement_verified">Op Steam geverifieer</string>
+    <string name="achievement_verified_locked">Steam het hierdie prestasie bevestig, so dit kan nie ongedaan gemaak word nie.</string>
+    <string name="cd_game_hundred" formatted="false">Tot 100% voltooi</string>
+    <string name="edit_profile_no_connection">Jou profiel kon nie gestoor word nie. Kyk na jou verbinding en probeer weer.</string>
+    <string name="edit_profile_save_failed">Jou profiel kon nie gestoor word nie. Probeer netnou weer.</string>
+    <string name="channel_achievements">Prestasies</string>
+    <string name="channel_achievements_body">Wanneer jy prestasies in jou speletjies ontsluit</string>
+    <string name="push_achievement_title">Prestasie ontsluit</string>
+    <string name="push_achievement_one">Jy het %1$s in %2$s ontsluit.</string>
+    <plurals name="push_achievement_many">
+        <item quantity="one">Jy het \'n nuwe prestasie in %2$s ontsluit.</item>
+        <item quantity="other">Jy het %1$d nuwe prestasies in %2$s ontsluit.</item>
+    </plurals>
+    <string name="push_achievement_rarest">Skaarsste: %1$s.</string>
+    <plurals name="push_achievement_summary">
+        <item quantity="one">Jy het \'n nuwe prestasie ontsluit.</item>
+        <item quantity="other">Jy het %1$d nuwe prestasies oor verskeie speletjies ontsluit.</item>
+    </plurals>
+    <string name="push_season_title">\'n Nuwe seisoen het begin</string>
+    <string name="push_season_result">Verlede maand het jy #%1$d geëindig met %2$s punte. Almal begin weer van nul.</string>
+    <string name="push_season_none">Punte is teruggestel na nul. Wees die eerste om hierdie maand punte te verdien.</string>
 </resources>

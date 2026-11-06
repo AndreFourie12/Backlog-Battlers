@@ -4,6 +4,7 @@ import com.backlogbattlers.api.auth.GoogleIdTokenVerifier
 import com.backlogbattlers.api.auth.JwtService
 import com.backlogbattlers.api.db.Users
 import com.backlogbattlers.api.logging.SignedInUserKey
+import com.backlogbattlers.api.profile.pictureIdsFor
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -34,6 +35,8 @@ data class UserAuthDto(
     val email: String,
     val avatarUrl: String?,
     val isNewUser: Boolean,
+    // the picture they picked on another phone, by the app's id
+    val pictureId: String? = null,
 )
 
 //------------------------------
@@ -120,6 +123,7 @@ fun Route.authRoutes(
             }
         }
 
+        val pictureId = pictureIdsFor(listOf(Uuid.parse(userDbData.id)))[Uuid.parse(userDbData.id)]
         val accessToken = jwtService.generateAccessToken(userDbData.id)
         val refreshToken = jwtService.generateRefreshToken(userDbData.id)
 
@@ -133,6 +137,7 @@ fun Route.authRoutes(
                 email = userDbData.email,
                 avatarUrl = userDbData.avatarUrl,
                 isNewUser = isNewUser,
+                pictureId = pictureId,
             ),
         )
         // so this request's log line shows who signed in (UUID only, never the token)

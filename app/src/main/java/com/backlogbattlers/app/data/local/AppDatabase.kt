@@ -27,7 +27,7 @@ private const val TAG = "AppDatabase"
     // !!!changing an entity? increment the version AND add a Migration below (see MIGRATION_4_5).
     // from version 4 on the database is migrated, not wiped, so library changes that have not
     // synced yet survive an app update. a version bump with no migration now crashes on purpose
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -55,7 +55,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "backlog_battlers.db",
                 )
-                    .addMigrations(Migration4To5(currentUserId), MIGRATION_5_6, MIGRATION_6_7)
+                    .addMigrations(Migration4To5(currentUserId), MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                     // the Part 2 builds (versions 1-3) only ever held test data, so those are still wiped
                     .fallbackToDestructiveMigrationFrom(true, 1, 2, 3)
                     .build()
@@ -103,6 +103,16 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE `library_entries` ADD COLUMN `pendingDelete` INTEGER NOT NULL DEFAULT 0")
         Log.i(TAG, "Database 6 -> 7: library entries can now wait to be deleted from the account")
+    }
+}
+
+//------------------------------
+// version 7 -> 8: a library entry remembers which unlocked achievements Steam has confirmed, so they can't be unchecked.
+// entries from before this know of none until the next sync with the account brings them in
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `library_entries` ADD COLUMN `verifiedAchievementIds` TEXT NOT NULL DEFAULT ''")
+        Log.i(TAG, "Database 7 -> 8: library entries can now hold their confirmed achievements")
     }
 }
 //------------------------------EOF------------------------------\\

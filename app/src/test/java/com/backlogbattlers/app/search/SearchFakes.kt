@@ -155,8 +155,24 @@ class FakeLibraryRepository : LibraryRepository {
         entries.value = entries.value.filterNot { it.libraryEntryId == libraryEntryId }
     }
 
+    // nothing here ever waits to be uploaded, unless a test says so
+    var synced = true
+
+    override suspend fun isSynced(libraryEntryId: String): Boolean = synced
+
     override suspend fun clear(userId: String) {
         entries.value = emptyList()
+    }
+
+    // what the account would have told the phone: Steam confirmed these unlocks, or the game is completed
+    fun confirm(gameId: Int, vararg achievementIds: String) {
+        entries.value = entries.value.map {
+            if (it.gameId == gameId) it.copy(verifiedAchievementIds = achievementIds.toList()) else it
+        }
+    }
+
+    fun complete(gameId: Int, type: CompletionType) {
+        entries.value = entries.value.map { if (it.gameId == gameId) it.copy(completionType = type) else it }
     }
 }
 

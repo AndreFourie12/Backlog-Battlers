@@ -22,6 +22,7 @@ data class LeaderboardEntryDto(
     val displayName: String,
     val avatarUrl: String?,
     val monthlyPoints: Int,
+    val pictureId: String? = null,
 )
 
 // dto representing the full GET /leaderboard/monthly response

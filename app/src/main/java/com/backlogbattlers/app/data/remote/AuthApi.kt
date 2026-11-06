@@ -6,6 +6,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.delete
 import io.ktor.client.request.header
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -29,6 +30,8 @@ data class UserDto(
     val email: String,
     val avatarUrl: String?,
     val isNewUser: Boolean,
+    // the picture they picked on another phone, by the app's id
+    val pictureId: String? = null,
 )
 
 /** Response payload for Google Single Sign-On authentication. */
@@ -38,6 +41,22 @@ data class SsoGoogleResponse(
     val refreshToken: String,
     val expiresIn: Long,
     val user: UserDto,
+)
+
+/** Body of PATCH /users/me. A field left null stays as it is on the account; an empty pictureId takes the picture away. */
+@Serializable
+data class UpdateMeRequestDto(
+    val displayName: String? = null,
+    val pictureId: String? = null,
+)
+
+/** The signed-in user as saved on the account. */
+@Serializable
+data class MeDto(
+    val userId: String,
+    val displayName: String,
+    val avatarUrl: String? = null,
+    val pictureId: String? = null,
 )
 
 /** Request payload for refreshing an access token. */
@@ -96,6 +115,28 @@ class AuthApi(
     }
 
     //------------------------------
+    // PATCHes the signed-in user's name and/or picture on the account, so friends see the change. the
+    // backend refuses a name that is empty or too long (a 400, thrown as ProfileRejectedException)
+    suspend fun updateProfile(accessToken: String, displayName: String?, pictureId: String?): MeDto {
+        val response = httpClient.patch("$baseUrl/users/me") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            setBody(UpdateMeRequestDto(displayName, pictureId))
+        }
+        when {
+            response.status == HttpStatusCode.Unauthorized -> throw SessionExpiredException()
+            response.status == HttpStatusCode.BadRequest -> throw ProfileRejectedException()
+            !response.status.isSuccess() -> {
+                val errorText = runCatching { response.body<String>() }.getOrDefault("HTTP ${response.status.value}")
+                Log.e("AuthApi", "Update profile request failed [${response.status.value}]: $errorText")
+                throw IllegalStateException("Server returned HTTP ${response.status.value}: $errorText")
+            }
+        }
+        return response.body()
+    }
+
+    //------------------------------
     // DELETEs the signed-in user's account on the backend, along with everything it owns.
     // a 404 counts as done (the account is already gone); a 401 means the session is no longer valid
     suspend fun deleteAccount(accessToken: String) {
@@ -113,6 +154,9 @@ class AuthApi(
         }
     }
 }
+
+/** Thrown when the backend refuses a name or picture as it is. */
+class ProfileRejectedException : Exception("The profile change was refused")
 
 /** Thrown when the backend no longer accepts the stored session, so the user has to sign in again. */
 class SessionExpiredException : Exception("The session has expired")

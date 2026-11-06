@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,8 +44,8 @@ data class ProfileUiState(
 // viewmodel for the profile screen: the signed in user's name and picture, and the profile the
 // backend works out (level and XP, stats, badges, rarest achievements, recent completions)
 class ProfileViewModel(
-    authRepository: AuthRepository = ServiceLocator.authRepository,
-    customizationRepository: ProfileCustomizationRepository = ServiceLocator.profileCustomizationRepository,
+    private val authRepository: AuthRepository = ServiceLocator.authRepository,
+    private val customizationRepository: ProfileCustomizationRepository = ServiceLocator.profileCustomizationRepository,
     private val profileRepository: ProfileRepository = ServiceLocator.profileRepository,
     private val clock: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
@@ -83,6 +84,7 @@ class ProfileViewModel(
                 Log.d(TAG, "Loaded the profile: level ${profile.level}, ${profile.badgesEarned} badges earned")
                 loadedAt = clock()
                 load.update { it.copy(profile = profile, isLoading = false, isRefreshing = false) }
+                syncPicture(profile)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: SessionExpiredException) {
@@ -95,6 +97,27 @@ class ProfileViewModel(
                     if (it.profile == null) it.copy(isLoading = false, isRefreshing = false, errorMessage = R.string.profile_error_load)
                     else it.copy(isLoading = false, isRefreshing = false, message = R.string.profile_error_load)
                 }
+            }
+        }
+    }
+
+    //------------------------------
+    // the picture is kept on the account too, so friends see it and a new phone has it. one that only the
+    // account has is taken here; one that only this phone has (picked before pictures were saved to the
+    // account) is sent up. best effort: a failure just leaves it for the next time
+    private fun syncPicture(profile: Profile) {
+        viewModelScope.launch {
+            try {
+                val mine = customizationRepository.observeCustomization().first()
+                val onAccount = profile.pictureId
+                when {
+                    onAccount != null && mine.pictureId == null -> customizationRepository.save(mine.copy(pictureId = onAccount))
+                    onAccount == null && mine.pictureId != null -> authRepository.updateProfile(pictureId = mine.pictureId)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "The profile picture could not be synced", e)
             }
         }
     }

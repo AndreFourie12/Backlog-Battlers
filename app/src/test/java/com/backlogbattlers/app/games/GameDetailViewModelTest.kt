@@ -1,12 +1,18 @@
 package com.backlogbattlers.app.games
 
+import com.backlogbattlers.app.data.repository.CompletionRepository
+import com.backlogbattlers.app.domain.model.CompleteOutcome
+import com.backlogbattlers.app.domain.model.CompletionType
+import com.backlogbattlers.app.domain.model.HundredPercentBlock
 import com.backlogbattlers.app.domain.model.LibraryStatus
 import com.backlogbattlers.app.domain.model.Platform
+import com.backlogbattlers.app.domain.model.SteamStatus
 import com.backlogbattlers.app.search.FakeGameRepository
 import com.backlogbattlers.app.search.FakeLibraryRepository
 import com.backlogbattlers.app.search.FakeSettingsRepository
 import com.backlogbattlers.app.search.achievement
 import com.backlogbattlers.app.search.game
+import com.backlogbattlers.app.R
 import com.backlogbattlers.app.viewmodels.GameDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,6 +25,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -44,7 +51,22 @@ class GameDetailViewModelTest {
 
     private val settings = FakeSettingsRepository()
 
-    private fun viewModel() = GameDetailViewModel(games, library, settings)
+    // what the backend would answer, and what it was asked
+    private class FakeCompletionRepository : CompletionRepository {
+        var outcome: CompleteOutcome = CompleteOutcome.Completed(CompletionType.MAIN_STORY, 95, 0, SteamStatus.NOT_NEEDED)
+        var failure: Throwable? = null
+        val asked = mutableListOf<Pair<String, CompletionType>>()
+
+        override suspend fun complete(libraryEntryId: String, type: CompletionType): CompleteOutcome {
+            asked += libraryEntryId to type
+            failure?.let { throw it }
+            return outcome
+        }
+    }
+
+    private val completion = FakeCompletionRepository()
+
+    private fun viewModel() = GameDetailViewModel(games, library, settings, completionRepository = { completion })
 
     @Test
     fun `a freshly loaded game starts fully locked`() = runTest {
@@ -180,6 +202,144 @@ class GameDetailViewModelTest {
         state = viewModel.uiState.value
         assertFalse(state.achievementsFailed)
         assertEquals(1, state.totalCount)
+    }
+
+    private suspend fun kotlinx.coroutines.test.TestScope.loadedWithTwoAchievements(): GameDetailViewModel {
+        games.cachedGames = mapOf(1 to game(1, "Hades", platforms = listOf("PC")))
+        games.achievementsByGame = mapOf(1 to listOf(achievement("a", rarityPercent = 60.0), achievement("b", rarityPercent = 10.0)))
+        val viewModel = viewModel()
+        viewModel.load(1)
+        advanceUntilIdle()
+        return viewModel
+    }
+
+    @Test
+    fun `an achievement Steam confirmed stays unlocked when tapped, and the screen says why`() = runTest {
+        val viewModel = loadedWithTwoAchievements()
+        viewModel.toggleAchievement("a")
+        advanceUntilIdle()
+        library.confirm(1, "a")
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.achievements.single { it.achievement.achievementId == "a" }.verified)
+
+        viewModel.toggleAchievement("a")
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.achievements.single { it.achievement.achievementId == "a" }.unlocked)
+        assertEquals(R.string.achievement_verified_locked, state.message)
+        viewModel.messageShown()
+        assertNull(viewModel.uiState.value.message)
+    }
+
+    @Test
+    fun `an achievement that is only ticked can still be unticked`() = runTest {
+        val viewModel = loadedWithTwoAchievements()
+        viewModel.toggleAchievement("a")
+        advanceUntilIdle()
+
+        viewModel.toggleAchievement("a")
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.achievements.single { it.achievement.achievementId == "a" }.unlocked)
+        assertNull(viewModel.uiState.value.message)
+    }
+
+    @Test
+    fun `100 percent is only offered once every achievement is ticked, and the story until it is completed`() = runTest {
+        val viewModel = loadedWithTwoAchievements()
+        assertTrue(viewModel.uiState.value.canCompleteStory)
+        assertFalse(viewModel.uiState.value.canCompleteHundredPercent)
+
+        viewModel.toggleAchievement("a")
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.canCompleteHundredPercent)
+
+        viewModel.toggleAchievement("b")
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.canCompleteHundredPercent)
+
+        library.complete(1, CompletionType.MAIN_STORY)
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.storyCompleted)
+        assertFalse(viewModel.uiState.value.canCompleteStory)
+        assertTrue(viewModel.uiState.value.canCompleteHundredPercent)
+
+        library.complete(1, CompletionType.COMPLETIONIST)
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.hundredPercentCompleted)
+        assertFalse(viewModel.uiState.value.canCompleteHundredPercent)
+    }
+
+    @Test
+    fun `a game with no achievements can complete its story but never offers 100 percent`() = runTest {
+        games.cachedGames = mapOf(1 to game(1, "Plain Game"))
+        games.achievementsByGame = mapOf(1 to emptyList())
+        val viewModel = viewModel()
+        viewModel.load(1)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.canCompleteStory)
+        assertFalse(viewModel.uiState.value.canCompleteHundredPercent)
+    }
+
+    @Test
+    fun `completing asks the backend for that entry and type, and the outcome is shown once`() = runTest {
+        val viewModel = loadedWithTwoAchievements()
+        viewModel.toggleAchievement("a")
+        advanceUntilIdle()
+        val entryId = library.observeByGameId(1).first()!!.libraryEntryId
+
+        viewModel.complete(CompletionType.MAIN_STORY)
+        advanceUntilIdle()
+
+        assertEquals(listOf(entryId to CompletionType.MAIN_STORY), completion.asked)
+        val state = viewModel.uiState.value
+        assertEquals(completion.outcome, state.completionOutcome)
+        assertFalse(state.completing)
+        viewModel.outcomeShown()
+        assertNull(viewModel.uiState.value.completionOutcome)
+    }
+
+    @Test
+    fun `completing a game that is not in the library yet adds it first`() = runTest {
+        val viewModel = loadedWithTwoAchievements()
+        assertNull(library.observeByGameId(1).first())
+
+        viewModel.complete(CompletionType.MAIN_STORY)
+        advanceUntilIdle()
+
+        val entry = library.observeByGameId(1).first()
+        assertEquals(Platform.PC, entry?.platform)
+        assertEquals(listOf(entry!!.libraryEntryId to CompletionType.MAIN_STORY), completion.asked)
+    }
+
+    @Test
+    fun `a refused 100 percent is passed on as it came, and a request that fails says so`() = runTest {
+        val viewModel = loadedWithTwoAchievements()
+        completion.outcome = CompleteOutcome.NotReady(HundredPercentBlock.NOT_VERIFIED, SteamStatus.NOT_LINKED, 2)
+        viewModel.complete(CompletionType.COMPLETIONIST)
+        advanceUntilIdle()
+        assertEquals(completion.outcome, viewModel.uiState.value.completionOutcome)
+        viewModel.outcomeShown()
+
+        completion.failure = java.io.IOException("offline")
+        viewModel.complete(CompletionType.COMPLETIONIST)
+        advanceUntilIdle()
+
+        assertEquals(CompleteOutcome.Failed, viewModel.uiState.value.completionOutcome)
+        assertFalse(viewModel.uiState.value.completing)
+    }
+
+    @Test
+    fun `a second tap while completing does not ask the backend twice`() = runTest {
+        val viewModel = loadedWithTwoAchievements()
+
+        viewModel.complete(CompletionType.MAIN_STORY)
+        viewModel.complete(CompletionType.MAIN_STORY)
+        advanceUntilIdle()
+
+        assertEquals(1, completion.asked.size)
     }
 
     @Test

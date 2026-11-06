@@ -25,6 +25,7 @@ import com.backlogbattlers.app.viewmodels.GameDetailUiState
 class GameDetailHeaderAdapter(
     private val onBack: () -> Unit,
     private val onFavouriteToggle: () -> Unit,
+    private val onComplete: () -> Unit,
 ) : RecyclerView.Adapter<GameDetailHeaderAdapter.ViewHolder>() {
 
     private var state = GameDetailUiState()
@@ -33,7 +34,7 @@ class GameDetailHeaderAdapter(
     override fun getItemCount() = 1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(parent.inflateChild(R.layout.partial_detail_header), onBack, onFavouriteToggle)
+        return ViewHolder(parent.inflateChild(R.layout.partial_detail_header), onBack, onFavouriteToggle, onComplete)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -54,6 +55,7 @@ class GameDetailHeaderAdapter(
         view: View,
         onBack: () -> Unit,
         onFavouriteToggle: () -> Unit,
+        onComplete: () -> Unit,
     ) : RecyclerView.ViewHolder(view) {
 
         private val backdrop: ImageView = view.findViewById(R.id.iv_detail_backdrop)
@@ -67,10 +69,15 @@ class GameDetailHeaderAdapter(
         private val statPoints: TextView = view.findViewById(R.id.tv_stat_points)
         private val statAchievements: TextView = view.findViewById(R.id.tv_stat_achievements)
         private val statCompletionTime: TextView = view.findViewById(R.id.tv_stat_completion_time)
+        private val completeIcon: ImageView = view.findViewById(R.id.iv_detail_complete_icon)
+        private val completeTitle: TextView = view.findViewById(R.id.tv_detail_complete_title)
+        private val completeHint: TextView = view.findViewById(R.id.tv_detail_complete_hint)
+        private val completeButton: TextView = view.findViewById(R.id.btn_detail_complete)
 
         init {
             view.findViewById<View>(R.id.btn_detail_back).setOnClickListener { onBack() }
             favouriteButton.setOnClickListener { onFavouriteToggle() }
+            completeButton.setOnClickListener { onComplete() }
         }
 
         fun bind(state: GameDetailUiState, isFavourite: Boolean) {
@@ -95,6 +102,25 @@ class GameDetailHeaderAdapter(
 
             val color = if (isFavourite) R.color.destructive else R.color.white
             favouriteButton.imageTintList = ContextCompat.getColorStateList(context, color)
+
+            renderCompletion(state)
+        }
+
+        // where the game stands: not completed, its story completed, or 100%. there is nothing left to do
+        // at 100%, so the button goes
+        private fun renderCompletion(state: GameDetailUiState) {
+            val context = itemView.context
+            val (title, hint) = when {
+                state.hundredPercentCompleted -> R.string.detail_complete_hundred_title to R.string.detail_complete_hundred_hint
+                state.storyCompleted -> R.string.detail_complete_story_title to R.string.detail_complete_story_hint
+                else -> R.string.detail_complete_none_title to R.string.detail_complete_none_hint
+            }
+            completeTitle.setText(title)
+            completeHint.setText(hint)
+            completeIcon.imageTintList = ContextCompat.getColorStateList(context, if (state.storyCompleted) R.color.gold else R.color.text_tertiary)
+            completeButton.setVisible(!state.hundredPercentCompleted)
+            completeButton.isEnabled = !state.completing
+            completeButton.setText(if (state.completing) R.string.detail_completing else R.string.detail_complete_button)
         }
 
         private fun renderGame(game: Game?, platform: Platform?) {

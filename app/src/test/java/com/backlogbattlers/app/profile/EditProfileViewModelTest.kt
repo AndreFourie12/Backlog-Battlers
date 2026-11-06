@@ -6,6 +6,7 @@ import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.AuthResult
 import com.backlogbattlers.app.data.repository.DeleteAccountResult
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepository
+import com.backlogbattlers.app.data.repository.ProfileSaveResult
 import com.backlogbattlers.app.domain.model.ProfileCustomization
 import com.backlogbattlers.app.domain.model.User
 import com.backlogbattlers.app.viewmodels.EditProfileEvent
@@ -97,19 +98,84 @@ class EditProfileViewModelTest {
 
         assertEquals(ProfileCustomization(pictureId = "wizard", showShowcase = false), customization.saved.value)
         assertEquals("Sam", auth.displayName)
+        assertEquals("wizard", auth.pictureOnAccount) // the account has it too, not just this phone
         assertEquals(listOf<EditProfileEvent>(EditProfileEvent.Saved), events)
         assertFalse(vm.uiState.value.hasChanges)
     }
 
     @Test
-    fun `an unchanged name is not written again`() = runTest {
+    fun `an unchanged name and picture are not sent to the account again`() = runTest {
         val vm = viewModel()
 
         vm.setShowBadges(false)
         vm.save()
 
-        assertEquals(0, auth.nameWrites)
+        assertEquals(0, auth.writes)
         assertFalse(customization.saved.value.showBadges)
+    }
+
+    @Test
+    fun `only what changed is sent to the account`() = runTest {
+        customization.saved.value = ProfileCustomization(pictureId = "knight")
+
+        viewModel().apply { onNameChanged("Sam"); save() }
+        assertEquals("Sam" to null, auth.lastSent) // the picture did not change
+
+        viewModel().apply { choosePicture("wizard"); save() }
+        assertEquals(null to "wizard", auth.lastSent) // the name did not change
+
+        viewModel().apply { removePicture(); save() }
+        assertEquals(null to "", auth.lastSent) // an empty id takes it away
+        assertNull(auth.pictureOnAccount)
+    }
+
+    @Test
+    fun `when the account cannot be reached nothing is kept on this phone, and the screen says so`() = runTest {
+        auth.result = ProfileSaveResult.NO_CONNECTION
+        val vm = viewModel()
+        val events = mutableListOf<EditProfileEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.events.collect { events += it } }
+
+        vm.choosePicture("wizard")
+        vm.onNameChanged("Sam")
+        vm.save()
+
+        assertEquals(listOf<EditProfileEvent>(EditProfileEvent.Rejected(R.string.edit_profile_no_connection)), events)
+        assertEquals(ProfileCustomization(), customization.saved.value)
+        assertEquals("Alex", auth.displayName)
+        assertFalse(vm.uiState.value.saving)
+        assertTrue("the draft is kept, so the user can try again", vm.uiState.value.hasChanges)
+
+        // and once the account answers, the same draft saves
+        auth.result = ProfileSaveResult.SAVED
+        vm.save()
+        assertEquals("Sam", auth.displayName)
+        assertEquals("wizard", customization.saved.value.pictureId)
+    }
+
+    @Test
+    fun `a refusal or failure from the account is its own message`() = runTest {
+        val vm = viewModel()
+        val events = mutableListOf<EditProfileEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.events.collect { events += it } }
+        vm.onNameChanged("Sam")
+
+        auth.result = ProfileSaveResult.REJECTED
+        vm.save()
+        auth.result = ProfileSaveResult.FAILED
+        vm.save()
+        auth.result = ProfileSaveResult.NOT_SIGNED_IN
+        vm.save()
+
+        assertEquals(
+            listOf(
+                EditProfileEvent.Rejected(R.string.edit_profile_save_failed),
+                EditProfileEvent.Rejected(R.string.edit_profile_save_failed),
+                EditProfileEvent.Rejected(R.string.edit_profile_signed_out),
+            ),
+            events,
+        )
+        assertEquals("Alex", auth.displayName)
     }
 
     @Test
@@ -162,17 +228,25 @@ class EditProfileViewModelTest {
 
     private class FakeAuthRepository : AuthRepository {
         var user: User? = User("u1", "Alex", "alex@example.com", null, 0, 1, 0, null)
+        // what the account holds, what was last sent to it as (name, picture), and how it answers
         var displayName = "Alex"
-        var nameWrites = 0
+        var pictureOnAccount: String? = null
+        var writes = 0
+        var lastSent: Pair<String?, String?>? = null
+        var result = ProfileSaveResult.SAVED
 
         override fun observeCurrentUser(): Flow<User?> = MutableStateFlow(user)
         override suspend fun getCurrentUser(): User? = user
         override suspend fun signInWithGoogle(activity: Activity): AuthResult = AuthResult.Failure(R.string.sign_in_failed)
-        override suspend fun updateDisplayName(displayName: String): Boolean {
-            if (user == null) return false
-            nameWrites++
-            this.displayName = displayName
-            return true
+        override suspend fun updateProfile(displayName: String?, pictureId: String?): ProfileSaveResult {
+            if (user == null) return ProfileSaveResult.NOT_SIGNED_IN
+            writes++
+            lastSent = displayName to pictureId
+            if (result == ProfileSaveResult.SAVED) {
+                displayName?.let { this.displayName = it }
+                pictureId?.let { pictureOnAccount = it.ifEmpty { null } }
+            }
+            return result
         }
         override suspend fun signOut() = Unit
         override suspend fun freshAccessToken(): String? = null

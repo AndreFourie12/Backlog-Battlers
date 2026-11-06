@@ -149,7 +149,18 @@ data class LibraryEntry(
     val addedAt: Long,
     val updatedAt: Long,
     val pendingSync: Boolean = false,
-)
+    // the unlocked achievements Steam has confirmed (by an import or when the game was completed).
+    // they cannot be unchecked, and 100% needs every achievement of the game to be one
+    val verifiedAchievementIds: List<String> = emptyList(),
+) {
+    // the story is completed, or the game is completed to 100%, which includes it
+    val storyCompleted: Boolean
+        get() = completionType == CompletionType.MAIN_STORY || completionType == CompletionType.MAIN_EXTRA || completionType == CompletionType.COMPLETIONIST
+
+    // completed to 100%: every achievement unlocked and confirmed by Steam
+    val hundredPercentCompleted: Boolean
+        get() = completionType == CompletionType.COMPLETIONIST
+}
 
 //------------------------------
 // LibraryGame data class pairs a library entry with its game, for the games tab's library list
@@ -189,6 +200,8 @@ data class Friend(
     val monthlyPoints: Int,
     val achievementCount: Int,
     val isOnline: Boolean,
+    // the picture they picked, by the app's id
+    val pictureId: String? = null,
 )
 
 // one row of the monthly leaderboard. rank comes from the backend (ties share a rank),
@@ -199,6 +212,7 @@ data class LeaderboardEntry(
     val displayName: String,
     val avatarUrl: String?,
     val monthlyPoints: Int,
+    val pictureId: String? = null,
 )
 
 // this month's leaderboard: the current page of ranked entries, plus the signed in user's own
@@ -215,6 +229,7 @@ data class FriendRequest(
     val fromDisplayName: String,
     val fromAvatarUrl: String?,
     val createdAt: Long,
+    val fromPictureId: String? = null,
 )
 
 // one person found while searching for someone to add
@@ -223,5 +238,6 @@ data class FriendSearchResult(
     val displayName: String,
     val avatarUrl: String?,
     val status: FriendRelationshipStatus,
+    val pictureId: String? = null,
 )
 //------------------------------EOF------------------------------\\

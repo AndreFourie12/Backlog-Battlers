@@ -5,6 +5,7 @@ import androidx.biometric.BiometricPrompt
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.DeleteAccountResult
+import com.backlogbattlers.app.data.repository.ProfileSaveResult
 import com.backlogbattlers.app.data.repository.AuthResult
 import com.backlogbattlers.app.data.repository.SettingsRepository
 import com.backlogbattlers.app.domain.model.AppLanguage
@@ -123,7 +124,7 @@ class BiometricLockViewModelTest {
         override fun observeCurrentUser(): Flow<User?> = flowOf(null)
         override suspend fun getCurrentUser(): User? = null
         override suspend fun signInWithGoogle(activity: Activity): AuthResult = AuthResult.Failure(R.string.sign_in_failed)
-        override suspend fun updateDisplayName(displayName: String): Boolean = false
+        override suspend fun updateProfile(displayName: String?, pictureId: String?): ProfileSaveResult = ProfileSaveResult.NOT_SIGNED_IN
         override suspend fun signOut() {
             signOutCalled = true
         }

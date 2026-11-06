@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import com.backlogbattlers.app.MainActivity
 import com.backlogbattlers.app.R
+import com.backlogbattlers.app.util.formatPoints
 
 //------------------------------
 // builds and shows the notifications for pushes, and tells MainActivity which screen a tapped
@@ -38,6 +39,7 @@ object PushNotifications {
             listOf(
                 channel(context, PushChannel.FRIENDS, R.string.channel_friend_activity, R.string.channel_friend_activity_body),
                 channel(context, PushChannel.COMPETITION, R.string.channel_competition, R.string.channel_competition_body),
+                channel(context, PushChannel.ACHIEVEMENTS, R.string.channel_achievements, R.string.channel_achievements_body),
             ),
         )
     }
@@ -54,8 +56,8 @@ object PushNotifications {
             Log.i(TAG, "Notifications are turned off for the app, not showing ${push.type}")
             return
         }
-        // one per person and kind, so two friend requests stack but a repeat replaces itself
-        val notificationId = 31 * push.type.ordinal + push.actorName.hashCode()
+        // one per person (or game, or month) and kind, so two friend requests stack but a repeat replaces itself
+        val notificationId = 31 * push.type.ordinal + (push.actorName.ifEmpty { push.gameTitle.orEmpty() }).hashCode()
 
         val open = Intent(context, MainActivity::class.java).apply {
             // brings the running app forward (onNewIntent) instead of starting a second copy
@@ -99,6 +101,34 @@ object PushNotifications {
                 context.getString(R.string.push_friend_completed_body, push.actorName, push.gameTitle.orEmpty())
         PushType.OVERTAKEN ->
             context.getString(R.string.push_overtaken_title) to context.getString(R.string.push_overtaken_body, push.actorName)
+        PushType.ACHIEVEMENT_UNLOCKED -> context.getString(R.string.push_achievement_title) to achievementBody(context, push)
+        PushType.SEASON_RESET -> context.getString(R.string.push_season_title) to seasonBody(context, push)
+    }
+
+    // what was unlocked: the one achievement by name, or how many in the game, and the rarest of them
+    private fun achievementBody(context: Context, push: Push): String {
+        val count = push.count ?: 1
+        val game = push.gameTitle
+        val rarest = push.achievementName
+        return when {
+            game == null -> context.resources.getQuantityString(R.plurals.push_achievement_summary, count, count)
+            count == 1 && rarest != null -> context.getString(R.string.push_achievement_one, rarest, game)
+            else -> {
+                val many = context.resources.getQuantityString(R.plurals.push_achievement_many, count, count, game)
+                if (rarest != null) many + " " + context.getString(R.string.push_achievement_rarest, rarest) else many
+            }
+        }
+    }
+
+    // how last month ended, or that everyone starts level when the user scored nothing
+    private fun seasonBody(context: Context, push: Push): String {
+        val rank = push.lastRank
+        val points = push.lastPoints ?: 0
+        return if (rank != null && points > 0) {
+            context.getString(R.string.push_season_result, rank, formatPoints(points))
+        } else {
+            context.getString(R.string.push_season_none)
+        }
     }
 
     //------------------------------
@@ -129,7 +159,9 @@ object PushNotifications {
     fun destinationOf(type: PushType): Int = when (type) {
         PushType.FRIEND_REQUEST_RECEIVED, PushType.FRIEND_REQUEST_ACCEPTED -> R.id.friendsFragment
         PushType.FRIEND_COMPLETED_GAME -> R.id.activityFragment
-        PushType.OVERTAKEN -> R.id.standingsFragment
+        PushType.OVERTAKEN, PushType.SEASON_RESET -> R.id.standingsFragment
+        // the profile's recent activity lists what was unlocked
+        PushType.ACHIEVEMENT_UNLOCKED -> R.id.profileFragment
     }
 
     fun argumentsOf(type: PushType): Bundle? = type.friendsTab?.let { bundleOf(ARG_OPEN_TAB to it) }

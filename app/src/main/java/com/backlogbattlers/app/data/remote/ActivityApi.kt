@@ -24,6 +24,7 @@ data class ActivityEventDto(
     val actorId: String,
     val actorName: String,
     val actorAvatarUrl: String? = null,
+    val actorPictureId: String? = null,
     val gameId: Int? = null,
     val gameTitle: String? = null,
     val subjectId: String? = null,

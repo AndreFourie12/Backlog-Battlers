@@ -8,6 +8,7 @@ import com.backlogbattlers.app.R
 import com.backlogbattlers.app.core.ServiceLocator
 import com.backlogbattlers.app.data.repository.AuthRepository
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepository
+import com.backlogbattlers.app.data.repository.ProfileSaveResult
 import com.backlogbattlers.app.domain.model.ProfileCustomization
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -96,7 +97,8 @@ class EditProfileViewModel(
     fun setShowShowcase(show: Boolean) = updateCustomization { it.copy(showShowcase = show) }
 
     //------------------------------
-    // checks the name, then stores the setup and, when it changed, the name
+    // checks the name, then saves what changed of the name and picture on the account (nothing is kept
+    // here unless the account took it), then stores the setup on this phone
     fun save() {
         val state = _uiState.value
         if (state.saving) return
@@ -116,12 +118,20 @@ class EditProfileViewModel(
 
         _uiState.update { it.copy(saving = true) }
         viewModelScope.launch {
-            val nameSaved = name == state.savedName || authRepository.updateDisplayName(name)
-            if (!nameSaved) {
-                Log.w(TAG, "The display name could not be saved: nobody is signed in")
-                _uiState.update { it.copy(saving = false) }
-                _events.emit(EditProfileEvent.Rejected(R.string.edit_profile_signed_out))
-                return@launch
+            val nameChanged = name != state.savedName
+            val pictureChanged = state.customization.pictureId != state.savedCustomization.pictureId
+            if (nameChanged || pictureChanged) {
+                val result = authRepository.updateProfile(
+                    displayName = name.takeIf { nameChanged },
+                    // an empty id takes the picture away
+                    pictureId = if (pictureChanged) state.customization.pictureId.orEmpty() else null,
+                )
+                if (result != ProfileSaveResult.SAVED) {
+                    Log.w(TAG, "The profile could not be saved: $result")
+                    _uiState.update { it.copy(saving = false) }
+                    _events.emit(EditProfileEvent.Rejected(problemFor(result)))
+                    return@launch
+                }
             }
             customizationRepository.save(state.customization)
             Log.i(TAG, "Profile saved")
@@ -130,6 +140,13 @@ class EditProfileViewModel(
             }
             _events.emit(EditProfileEvent.Saved)
         }
+    }
+
+    @StringRes
+    private fun problemFor(result: ProfileSaveResult): Int = when (result) {
+        ProfileSaveResult.NOT_SIGNED_IN -> R.string.edit_profile_signed_out
+        ProfileSaveResult.NO_CONNECTION -> R.string.edit_profile_no_connection
+        ProfileSaveResult.REJECTED, ProfileSaveResult.FAILED, ProfileSaveResult.SAVED -> R.string.edit_profile_save_failed
     }
 
     private fun updateCustomization(change: (ProfileCustomization) -> ProfileCustomization) {

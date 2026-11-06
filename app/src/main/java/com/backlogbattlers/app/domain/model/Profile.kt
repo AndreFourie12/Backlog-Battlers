@@ -61,6 +61,8 @@ data class Profile(
     val userId: String,
     val displayName: String,
     val avatarUrl: String?,
+    // the picture they picked, by the app's id
+    val pictureId: String? = null,
     val xp: Int,
     val level: Int,
     // xp into the current level, out of xpForNextLevel (what the whole level takes)

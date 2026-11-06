@@ -145,6 +145,25 @@ Everything the account owns goes with it: library entries and their unlocked ach
 | 401 | `{"error":"Sign in to manage your account"}` (missing, invalid or expired token) |
 | 404 | `{"error":"Account was not found"}` (already deleted) |
 
+### `GET /users/me` and `PATCH /users/me`
+
+The signed-in user's name and picture, as friends see them. Both need `Authorization: Bearer <access token>`.
+
+```json
+{ "userId": "7f3c…", "displayName": "Dylan", "avatarUrl": "https://…", "pictureId": "pfp_03" }
+```
+
+`PATCH` takes `{"displayName": "Dyl"}`, `{"pictureId": "pfp_03"}` or both, and answers with the saved user. A field that is left out (or null) stays as it is, and an empty `pictureId` takes the picture away. The name is trimmed and has to be 1 to 20 characters. `pictureId` is the app's own id for one of the pictures it ships (the API only checks it is letters, digits and underscores, up to 32). Signing in again never overwrites a name that was changed here.
+
+Friends see the change at once: the name is read from the account everywhere, and `pictureId` rides along with the name on the friends list (`pictureId`), friend requests (`fromPictureId`), friend search (`pictureId`), the leaderboard (`pictureId`), the activity feed (`actorPictureId`), the profile (`pictureId`) and the sign-in answer (`user.pictureId`, so a new phone starts with it). `avatarUrl` is still the Google photo, which the app shows when no picture was picked. Pictures are kept in the `user_pictures` table.
+
+| Status | Meaning |
+|---|---|
+| 200 | Saved (or, for `GET`, the user) |
+| 400 | An empty or too long name, a picture id of the wrong shape, or nothing to change |
+| 401 | `{"error":"Sign in to change your profile"}` |
+| 404 | `{"error":"Account was not found"}` |
+
 ### `GET /users/me/settings` and `PUT /users/me/settings`
 
 The app's preferences, saved to the account so they follow the user to another phone. Both need `Authorization: Bearer <access token>`. The fingerprint lock is not included: it belongs to one phone's sensor.
@@ -208,12 +227,16 @@ The API sends these through Firebase Cloud Messaging to every phone the recipien
 | `FRIEND_REQUEST_ACCEPTED` | whoever sent the request | it is accepted | Friend activity | Friends |
 | `FRIEND_COMPLETED_GAME` | each of the completer's friends | a game is marked complete | Friend activity | Activity (the feed, `GET /activity`) |
 | `OVERTAKEN` | everyone the completer passed this month | a completion lifts them past you | Rank changes | Standings |
+| `ACHIEVEMENT_UNLOCKED` | the player | a Steam import finds achievements unlocked in the last 7 days (history is never pushed) | Achievements | Profile, whose recent activity lists them |
+| `SEASON_RESET` | everyone with the app on a phone | the competition month changes | Season resets | Standings |
 
 "Passed" means you had at least as many points as them before the completion and fewer after it.
 
-Pushes are data-only messages: `type`, `userId` (the recipient), `actorName` and, for `FRIEND_COMPLETED_GAME`, `gameTitle`. The app writes the text itself in the user's language and drops a push meant for an account that is no longer signed in. Nothing is sent when the recipient switched that kind off, or when the account-wide `push_notifications_enabled` flag is off. A user who has never saved settings gets everything, because the app ships with every switch on. Tokens that FCM reports as gone are deleted.
+Pushes are data-only messages: `type`, `userId` (the recipient), and then what that kind needs: `actorName` for the four about friends and rivals, plus `gameTitle` for `FRIEND_COMPLETED_GAME`; `gameTitle` (left out when the unlocks are spread over several games), `count` and `achievementName` (the rarest) for `ACHIEVEMENT_UNLOCKED`; `monthPeriod`, `lastRank` (left out when they scored nothing) and `lastPoints` for `SEASON_RESET`. The app writes the text itself in the user's language and drops a push meant for an account that is no longer signed in. Nothing is sent when the recipient switched that kind off, or when the account-wide `push_notifications_enabled` flag is off. A user who has never saved settings gets everything, because the app ships with every switch on. Tokens that FCM reports as gone are deleted.
 
-The Achievements and Season resets switches are synced and stored, but no push uses them yet.
+**Achievements.** An import tells the player about the unlocks it found: one push for each of up to three games, and past that a single push for all of them. They arrive only when an import runs (the Import button under Steam), because the API does not poll Steam by itself.
+
+**Season resets.** A background job checks every 10 minutes whether the competition month (South African time) has changed. When it has, every user with at least one registered phone gets one push saying how they finished the month before, then everyone starts from zero. Which months were announced is kept in the `season_announcements` table, so a restart or a second instance never sends one twice. The first time the job ever runs it only records the current month, because a season that began weeks ago is not news.
 
 Configure the sender with `FIREBASE_SERVICE_ACCOUNT_FILE` (path to the service-account JSON) or `FIREBASE_SERVICE_ACCOUNT_JSON` (the JSON itself). Without either, the API runs normally and only logs the pushes it would have sent.
 
@@ -312,6 +335,37 @@ The profile screen's whole answer, worked out from the signed-in user's own data
 | 401 | `{"error":"Sign in to see your profile"}` |
 | 404 | `{"error":"Account was not found"}` (the account was deleted) |
 
+### Completing a game: `POST /users/me/library/{id}/complete`
+
+Body: `{"completionType": "MAIN_STORY"}` or `{"completionType": "COMPLETIONIST"}`. The app offers two kinds, the story and 100% (`MAIN_EXTRA` is still accepted and counts as the story). Needs `Authorization: Bearer <access token>`.
+
+- **Story** can always be completed. Steam is asked about the achievements ticked so far, and only the ones it confirms earn points.
+- **100% (`COMPLETIONIST`)** needs every achievement of the game to be unlocked **and confirmed by Steam**. Otherwise nothing is awarded and the answer is a 422 with the reason:
+
+```json
+{
+  "error": "Steam has to confirm every achievement before a game is 100% complete",
+  "reason": "NOT_VERIFIED",
+  "steamStatus": "NOT_LINKED",
+  "achievementIds": ["ACH_1", "ACH_2"]
+}
+```
+
+`reason` is `NO_ACHIEVEMENTS` (the game has none, so 100% is never possible), `NOT_ALL_UNLOCKED` (`achievementIds` are the locked ones) or `NOT_VERIFIED` (`achievementIds` are the ones Steam did not confirm; `steamStatus` says whether Steam could be asked at all: `VERIFIED`, `NOT_LINKED`, `PRIVATE_PROFILE` or `NOT_ON_STEAM`).
+
+**Confirmed unlocks.** An unlock is confirmed when a Steam import brought it in, or when Steam confirmed it as part of a completion (an unlock that was already paid for counts too). A confirmed unlock can no longer be unchecked: `PATCH /users/me/library/{id}` keeps it unlocked even when the list leaves it out, and `GET /users/me/library` lists the confirmed ones as `verifiedAchievementIds`. They are stored in the `verified_unlocks` table. Steam is never asked about a confirmed unlock again.
+
+Completing as `COMPLETIONIST` sets the entry's `completionType` to `COMPLETIONIST`, and it stays that when the story is completed afterwards.
+
+| Status | Meaning |
+|---|---|
+| 200 | Completed, with the points it earned |
+| 401 | Not signed in |
+| 404 | No such library entry |
+| 409 | Already completed as that type |
+| 422 | 100% is not possible yet, see above |
+| 502 | Steam could not be reached, nothing was completed |
+
 ### `POST /users/me/steam/import`
 
 Adds the games the user owns on Steam to their library. Needs `Authorization: Bearer <access token>`, a linked Steam account (`PUT /users/me/steam`), and `STEAM_API_KEY` on the server. No request body.
@@ -359,8 +413,6 @@ Routes follow the Part 1 design document, the below routes are yet to be built:
 | Route | Purpose |
 |---|---|
 | `POST /auth/sso/google` | Sign in or register with Google |
-| `GET /users/me` | The signed-in user's profile |
-| `PATCH /users/me` | Change settings |
 | `GET /users/me/library` | The user's library |
 | `POST /users/me/library` | Add a game to the library |
 | `PATCH /users/me/library/{id}` | Update hours, status, unlocked achievements |
@@ -369,7 +421,6 @@ Routes follow the Part 1 design document, the below routes are yet to be built:
 | `GET /leaderboard/monthly` | This month's standings |
 | `GET /users/me/progression` | XP, level and badges |
 | `GET /users/me/streak` | Login streak |
-| Season reset and achievement pushes | Pushes for the two notification switches the four live pushes don't cover |
 
 Conventions once these exist:
 

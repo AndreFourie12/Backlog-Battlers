@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -14,6 +15,7 @@ import com.backlogbattlers.app.R
 import com.backlogbattlers.app.domain.model.FriendRelationshipStatus
 import com.backlogbattlers.app.domain.model.FriendSearchResult
 import com.backlogbattlers.app.util.avatarColorFor
+import com.backlogbattlers.app.util.showProfilePicture
 import com.backlogbattlers.app.util.initialsFor
 
 // adapter for displaying search results when finding new friends to add
@@ -24,6 +26,7 @@ class FriendSearchResultAdapter(
     // viewholder wrapping views for a single friend search result row
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvAvatarInitial: TextView = itemView.findViewById(R.id.tv_avatar_initial)
+        val ivAvatarPicture: ImageView = itemView.findViewById(R.id.iv_avatar_picture)
         val tvFriendName: TextView = itemView.findViewById(R.id.tv_friend_name)
         val btnSendRequest: Button = itemView.findViewById(R.id.btn_send_request)
     }
@@ -56,6 +59,7 @@ class FriendSearchResultAdapter(
         holder.tvAvatarInitial.text = initialsFor(result.displayName)
         val colorRes = avatarColorFor(result.userId)
         holder.tvAvatarInitial.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, colorRes))
+        holder.ivAvatarPicture.showProfilePicture(result.pictureId)
 
         holder.tvFriendName.text = result.displayName
 

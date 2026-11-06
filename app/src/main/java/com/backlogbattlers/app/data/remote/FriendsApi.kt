@@ -31,6 +31,7 @@ data class FriendDto(
     val monthlyPoints: Int,
     val achievementCount: Int,
     val isOnline: Boolean,
+    val pictureId: String? = null,
 )
 
 // dto representing an incoming friend request returned by the backend
@@ -41,6 +42,7 @@ data class FriendRequestDto(
     val fromDisplayName: String,
     val fromAvatarUrl: String?,
     val createdAt: Long,
+    val fromPictureId: String? = null,
 )
 
 // dto representing a friend search result returned by the backend
@@ -50,6 +52,7 @@ data class FriendSearchResultDto(
     val displayName: String,
     val avatarUrl: String?,
     val status: FriendRelationshipStatusDto,
+    val pictureId: String? = null,
 )
 
 // dto body for sending a friend request

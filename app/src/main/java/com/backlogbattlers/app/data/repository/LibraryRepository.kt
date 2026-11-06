@@ -42,6 +42,9 @@ interface LibraryRepository {
     // removes a library entry by id
     suspend fun remove(libraryEntryId: String)
 
+    // true when the account has every change made to the entry on this phone (nothing waits to be uploaded)
+    suspend fun isSynced(libraryEntryId: String): Boolean
+
     // removes every library entry belonging to userId on this device, when that account is deleted.
     // takes the id rather than reading the session, because the session is already gone by then
     suspend fun clear(userId: String)
@@ -154,13 +157,18 @@ class LibraryRepositoryImpl(
     }
 
     //------------------------------
-    // adds or removes one achievement from the entry's unlocked set and marks it for sync
+    // adds or removes one achievement from the entry's unlocked set and marks it for sync.
+    // an achievement Steam confirmed can never be locked again
     override suspend fun setAchievementUnlocked(
         libraryEntryId: String,
         achievementId: String,
         unlocked: Boolean,
     ) {
         val existing = ownedEntry(libraryEntryId) ?: return
+        if (!unlocked && achievementId in existing.verifiedAchievementIds) {
+            Log.d(TAG, "Achievement $achievementId is confirmed by Steam, so it stays unlocked")
+            return
+        }
         val ids = if (unlocked) {
             if (achievementId in existing.unlockedAchievementIds) return
             existing.unlockedAchievementIds + achievementId
@@ -177,6 +185,10 @@ class LibraryRepositoryImpl(
         Log.d(TAG, "Achievement $achievementId ${if (unlocked) "unlocked" else "locked again"}")
         onChanged()
     }
+
+    //------------------------------
+    // whether the account already has every change made to this entry here
+    override suspend fun isSynced(libraryEntryId: String): Boolean = ownedEntry(libraryEntryId)?.pendingSync == false
 
     //------------------------------
     // hides the entry and marks the removal for upload. the row is deleted for good once the account
@@ -227,6 +239,7 @@ class LibraryRepositoryImpl(
             addedAt = addedAt,
             updatedAt = updatedAt,
             pendingSync = pendingSync,
+            verifiedAchievementIds = verifiedAchievementIds,
         )
     }
 

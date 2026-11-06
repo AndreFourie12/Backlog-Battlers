@@ -147,6 +147,7 @@ class LibrarySync(
         status = status.name,
         hoursPlayed = hoursPlayed.toFloat(),
         unlockedAchievementIds = unlockedAchievementIds,
+        verifiedAchievementIds = verifiedAchievementIds,
         completionType = completionType?.name,
         addedAt = addedAt,
         updatedAt = updatedAt,

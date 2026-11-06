@@ -33,6 +33,8 @@ data class ProfileDto(
     val userId: String,
     val displayName: String,
     val avatarUrl: String?,
+    /** The picture the user picked, by the app's id. */
+    val pictureId: String? = null,
     /** Points earned in total, across every month. */
     val xp: Int,
     val level: Int,
@@ -178,6 +180,7 @@ fun profileFor(userId: Uuid, currentMonth: String = currentMonthPeriod(), now: I
         userId = userId.toString(),
         displayName = user[Users.displayName],
         avatarUrl = user[Users.avatarUrl],
+        pictureId = pictureIdsFor(listOf(userId))[userId],
         xp = xp,
         level = level.level,
         xpIntoLevel = level.xpIntoLevel,

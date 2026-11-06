@@ -13,6 +13,8 @@ import com.backlogbattlers.api.db.UnlockedAchievements
 import com.backlogbattlers.api.notifications.overtaken
 import com.backlogbattlers.api.steam.SteamCheck
 import com.backlogbattlers.api.steam.SteamCheckStatus
+import com.backlogbattlers.api.steam.markVerified
+import com.backlogbattlers.api.steam.verifiedIds
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -44,10 +46,35 @@ data class CompleteResponseDto(
     val unverifiedAchievementIds: List<String> = emptyList(),
 )
 
+/** Why a game could not be completed to 100% yet. */
+@Serializable
+enum class HundredPercentBlock {
+    /** The game has no achievements to unlock, so there is nothing to complete. */
+    NO_ACHIEVEMENTS,
+
+    /** Some achievements are still locked. */
+    NOT_ALL_UNLOCKED,
+
+    /** Every achievement is unlocked, but Steam did not confirm all of them (see the Steam status). */
+    NOT_VERIFIED,
+}
+
+/** The body of the 422 answer when 100% is not possible yet. */
+@Serializable
+data class HundredPercentRefusedDto(
+    val error: String,
+    val reason: HundredPercentBlock,
+    /** Whether Steam could be asked, and if not why not. */
+    val steamStatus: SteamCheckStatus,
+    /** The achievements that are still locked, or that Steam did not confirm. */
+    val achievementIds: List<String>,
+)
+
 sealed interface CompletionResult {
     data class Completed(val response: CompleteResponseDto) : CompletionResult
     data object NotFound : CompletionResult
     data object AlreadyCompleted : CompletionResult
+    data class NotReadyForHundredPercent(val block: HundredPercentBlock, val achievementIds: List<String>, val steamStatus: SteamCheckStatus) : CompletionResult
 }
 
 /**
@@ -63,6 +90,11 @@ sealed interface CompletionResult {
  *
  * The same (entry, completionType) pair can only ever be completed once; a repeat call returns
  * [CompletionResult.AlreadyCompleted] rather than awarding points again.
+ *
+ * COMPLETIONIST (100%) is only possible when every achievement of the game is unlocked AND confirmed
+ * by Steam, either now ([steamCheck]) or earlier (an import, or a check that already paid for it).
+ * Otherwise nothing is awarded and [CompletionResult.NotReadyForHundredPercent] says why. Whatever Steam
+ * confirms on a completion becomes a confirmed unlock, which can no longer be unchecked.
  */
 fun completeLibraryEntry(
     owner: Uuid,
@@ -83,6 +115,24 @@ fun completeLibraryEntry(
 
     val gameId = entry[LibraryEntries.gameId]
     val game = Games.selectAll().where { Games.id eq gameId }.single()
+    val confirmedBefore = verifiedIds(entryId)
+
+    if (completionType == CompletionType.COMPLETIONIST) {
+        val everyAchievement = Achievements.selectAll().where { Achievements.gameId eq gameId }.map { it[Achievements.achievementId] }
+        val unlockedNow = UnlockedAchievements.selectAll().where { UnlockedAchievements.libraryEntryId eq entryId }
+            .map { it[UnlockedAchievements.achievementId] }.toSet()
+        val locked = everyAchievement.filter { it !in unlockedNow }
+        val unconfirmed = everyAchievement.filter { it !in confirmedBefore && it !in steamCheck.confirmed }
+        val refusal = when {
+            everyAchievement.isEmpty() -> CompletionResult.NotReadyForHundredPercent(HundredPercentBlock.NO_ACHIEVEMENTS, emptyList(), steamCheck.status)
+            locked.isNotEmpty() -> CompletionResult.NotReadyForHundredPercent(HundredPercentBlock.NOT_ALL_UNLOCKED, locked.sorted(), steamCheck.status)
+            unconfirmed.isNotEmpty() -> CompletionResult.NotReadyForHundredPercent(HundredPercentBlock.NOT_VERIFIED, unconfirmed.sorted(), steamCheck.status)
+            else -> null
+        }
+        if (refusal != null) return@transaction refusal
+    }
+    // what Steam just confirmed is locked in, whichever kind of completion this is
+    markVerified(entryId, steamCheck.confirmed)
 
     // Achievement points: only for unlocks on this entry that have never paid out before.
     // ponytail: a client that unlocks an achievement, has it counted, then removes and re-adds
@@ -91,8 +141,8 @@ fun completeLibraryEntry(
     val unlockedNotPaid = UnlockedAchievements.selectAll()
         .where { (UnlockedAchievements.libraryEntryId eq entryId) and (UnlockedAchievements.countedForPoints eq false) }
         .map { it[UnlockedAchievements.achievementId] }
-    // only what Steam confirmed is paid; the rest stays uncounted and is reported back
-    val uncounted = unlockedNotPaid.filter { it in steamCheck.confirmed }
+    // only what Steam confirmed is paid, just now or by an earlier import or check; the rest stays uncounted and is reported back
+    val uncounted = unlockedNotPaid.filter { it in steamCheck.confirmed || it in confirmedBefore }
     val unverified = unlockedNotPaid - uncounted.toSet()
 
     val achievementPointsTotal = uncounted.sumOf { achievementId ->
@@ -135,7 +185,9 @@ fun completeLibraryEntry(
 
     LibraryEntries.update({ LibraryEntries.id eq entryId }) {
         it[LibraryEntries.status] = LibraryStatus.COMPLETED
-        it[LibraryEntries.completionType] = completionType
+        // a game that was completed to 100% stays a 100% game, even when its story is completed afterwards
+        it[LibraryEntries.completionType] =
+            if (entry[LibraryEntries.completionType] == CompletionType.COMPLETIONIST) CompletionType.COMPLETIONIST else completionType
         it[LibraryEntries.completedAt] = Instant.now()
         it[LibraryEntries.hoursPlayedAtCompletion] = entry[LibraryEntries.hoursPlayed]
         it[LibraryEntries.updatedAt] = Instant.now()

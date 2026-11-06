@@ -55,6 +55,15 @@ val PROFILE_PICTURES: List<ProfilePicture> = listOf(
 fun profilePictureFor(id: String?): ProfilePicture? = PROFILE_PICTURES.firstOrNull { it.id == id }
 
 //------------------------------
+// shows the picture a person picked over their initial avatar (the circle image sits above the
+// initial in the row), or hides itself so the initial shows
+fun ImageView.showProfilePicture(pictureId: String?) {
+    val picture = profilePictureFor(pictureId)
+    if (picture != null) setImageResource(picture.drawable) else setImageDrawable(null)
+    setVisible(picture != null)
+}
+
+//------------------------------
 // fills a partial_profile_avatar: the picked picture in the circle, or else the first letter of
 // the user's name on the accent disc
 fun View.bindProfileAvatar(pictureId: String?, displayName: String) {
