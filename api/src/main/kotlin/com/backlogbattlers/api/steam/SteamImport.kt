@@ -263,6 +263,8 @@ class SteamImporter(
                         times[code]?.let { time -> it[unlockedAt] = time }
                     }
                 }
+                // Steam itself says these are unlocked, so they are confirmed, and cannot be unchecked any more
+                markVerified(check.entryId, (have + fresh).filter { it in unlocked })
                 // only unlocks from the last week reach the activity feed; an import must not announce a whole history
                 val recent = fresh.filter { code -> times[code]?.let { it >= now.minus(FEED_WINDOW) } == true }
                 if (recent.isNotEmpty()) {
