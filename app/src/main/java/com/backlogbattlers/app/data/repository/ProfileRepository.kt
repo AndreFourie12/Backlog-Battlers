@@ -36,6 +36,7 @@ class ProfileRepositoryImpl(
             userId = userId,
             displayName = displayName,
             avatarUrl = avatarUrl,
+            pictureId = pictureId,
             xp = xp,
             level = level,
             xpIntoLevel = xpIntoLevel,

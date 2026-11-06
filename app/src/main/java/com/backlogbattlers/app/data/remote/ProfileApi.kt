@@ -44,6 +44,7 @@ data class ProfileDto(
     val userId: String,
     val displayName: String,
     val avatarUrl: String? = null,
+    val pictureId: String? = null,
     val xp: Int = 0,
     val level: Int = 1,
     val xpIntoLevel: Int = 0,
