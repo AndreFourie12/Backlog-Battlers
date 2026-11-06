@@ -79,6 +79,7 @@
                 android:layout_marginStart="@dimen/page_padding"
                 android:layout_marginTop="14dp"
                 android:layout_marginEnd="@dimen/page_padding"
+                android:baselineAligned="false"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -219,118 +220,12 @@
                 android:visibility="gone"
                 tools:visibility="visible">
 
-                <!-- Stats: games in the library, games completed, achievements and this month's rank -->
+                <!-- Badges Card: the first four (earned ones first), and See all opens the whole set -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/page_padding"
                     android:layout_marginTop="@dimen/section_spacing"
-                    android:layout_marginEnd="@dimen/page_padding"
-                    android:background="@drawable/bg_card"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center_horizontal"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/tv_stat_games"
-                            style="@style/Text.SectionTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:includeFontPadding="false"
-                            tools:text="103" />
-
-                        <TextView
-                            style="@style/Text.Micro"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:text="@string/profile_stat_games" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center_horizontal"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/tv_stat_completed"
-                            style="@style/Text.SectionTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:includeFontPadding="false"
-                            tools:text="4" />
-
-                        <TextView
-                            style="@style/Text.Micro"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:text="@string/profile_stat_completed" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center_horizontal"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/tv_stat_achievements"
-                            style="@style/Text.SectionTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:includeFontPadding="false"
-                            tools:text="212" />
-
-                        <TextView
-                            style="@style/Text.Micro"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:text="@string/profile_stat_achievements" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center_horizontal"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/tv_stat_rank"
-                            style="@style/Text.SectionTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:includeFontPadding="false"
-                            tools:text="#2" />
-
-                        <TextView
-                            style="@style/Text.Micro"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:text="@string/profile_stat_rank" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- Badges Card: earned ones first, the rest as dashed outlines with their progress -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/page_padding"
-                    android:layout_marginTop="@dimen/section_gap"
                     android:layout_marginEnd="@dimen/page_padding"
                     android:background="@drawable/bg_card"
                     android:orientation="vertical"
@@ -343,34 +238,63 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            style="@style/Text.SectionTitle"
-                            android:layout_width="0dp"
+                            style="@style/Text.CardTitle"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:includeFontPadding="false"
                             android:text="@string/badges" />
 
                         <TextView
                             android:id="@+id/tv_badges_earned"
                             style="@style/Text.Caption"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:includeFontPadding="false"
+                            android:textColor="@color/text_tertiary"
+                            tools:text="6 of 20 earned" />
+
+                        <LinearLayout
+                            android:id="@+id/btn_badges_see_all"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:includeFontPadding="false"
-                            tools:text="3 of 20 earned" />
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:gravity="center_vertical"
+                            android:minHeight="32dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                style="@style/Text.SectionAction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:includeFontPadding="false"
+                                android:text="@string/profile_see_all" />
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:contentDescription="@null"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/ic_chevron_right"
+                                app:tint="@color/accent" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_badges"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
+                        android:layout_marginTop="10dp"
                         android:nestedScrollingEnabled="false"
                         android:overScrollMode="never"
-                        tools:itemCount="8"
+                        tools:itemCount="4"
                         tools:listitem="@layout/item_badge" />
                 </LinearLayout>
 
-                <!-- Rarest Achievement Showcase Card: seven slots, the rarest unlocks first -->
+                <!-- Rarest Achievement Showcase Card: two rows of seven slots, the rarest unlocks first -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -382,7 +306,7 @@
                     android:padding="16dp">
 
                     <TextView
-                        style="@style/Text.SectionTitle"
+                        style="@style/Text.CardTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:includeFontPadding="false"
@@ -392,83 +316,64 @@
                         android:id="@+id/rv_showcase"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
+                        android:layout_marginTop="12dp"
                         android:nestedScrollingEnabled="false"
                         android:overScrollMode="never"
-                        tools:itemCount="7"
+                        tools:itemCount="14"
                         tools:listitem="@layout/item_showcase_tile" />
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/list_divider_thickness"
-                        android:layout_marginTop="16dp"
-                        android:background="@color/border" />
-
-                    <TextView
-                        android:id="@+id/tv_showcase_note"
-                        style="@style/Text.Body"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:includeFontPadding="false"
-                        android:lineSpacingExtra="3dp"
-                        tools:text="Rarest: Beat the Game on Hell · 0.4% of players" />
                 </LinearLayout>
 
-                <!-- Recent Completions -->
-                <TextView
-                    style="@style/Text.SectionTitle"
-                    android:layout_width="wrap_content"
+                <!-- Recent Activity: the games the user unlocked achievements in during the last two weeks -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/page_padding"
                     android:layout_marginTop="@dimen/section_spacing"
                     android:layout_marginEnd="@dimen/page_padding"
-                    android:includeFontPadding="false"
-                    android:text="@string/profile_recent_title" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.SectionTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:text="@string/profile_recent_title" />
+
+                    <TextView
+                        android:id="@+id/tv_recent_window"
+                        style="@style/Text.Micro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:includeFontPadding="false"
+                        tools:text="9 unlocked past 2 weeks" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/list_recent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/page_padding"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="2dp"
                     android:layout_marginEnd="@dimen/page_padding"
-                    android:background="@drawable/bg_card"
                     android:orientation="vertical" />
 
-                <LinearLayout
+                <TextView
                     android:id="@+id/row_recent_empty"
+                    style="@style/Text.Body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/page_padding"
                     android:layout_marginTop="12dp"
                     android:layout_marginEnd="@dimen/page_padding"
                     android:background="@drawable/bg_card"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="16dp"
-                    android:paddingTop="20dp"
-                    android:paddingEnd="16dp"
-                    android:paddingBottom="20dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        style="@style/Text.Body"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:includeFontPadding="false"
-                        android:text="@string/profile_recent_empty" />
-
-                    <TextView
-                        android:id="@+id/btn_add_game"
-                        style="@style/Text.SectionAction"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:includeFontPadding="false"
-                        android:text="@string/add_a_game" />
-                </LinearLayout>
+                    android:includeFontPadding="false"
+                    android:padding="20dp"
+                    android:text="@string/profile_recent_empty"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

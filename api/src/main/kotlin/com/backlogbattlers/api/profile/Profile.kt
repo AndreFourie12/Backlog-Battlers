@@ -2,7 +2,6 @@ package com.backlogbattlers.api.profile
 
 import com.backlogbattlers.api.db.Achievements
 import com.backlogbattlers.api.db.CompletionRecords
-import com.backlogbattlers.api.db.CompletionType
 import com.backlogbattlers.api.db.Friendships
 import com.backlogbattlers.api.db.GameGenres
 import com.backlogbattlers.api.db.Games
@@ -18,13 +17,17 @@ import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import java.time.Duration
+import java.time.Instant
 import kotlin.uuid.Uuid
 
-// how many of the rarest achievements, and the latest completions, a profile shows
-private const val SHOWCASE_SLOTS = 7
-private const val RECENT_COMPLETIONS = 5
+// how many of the rarest achievements a profile shows (two rows of seven), how many games its recent
+// activity lists, and how far back that looks
+private const val SHOWCASE_SLOTS = 14
+private const val RECENT_GAMES = 5
+private val RECENT_WINDOW: Duration = Duration.ofDays(14)
 
-/** The profile screen's whole answer: who, how far along, the stats, the badges and the two showcases. */
+/** The profile screen's whole answer: who, how far along, the stats, the badges, the showcase and the recent activity. */
 @Serializable
 data class ProfileDto(
     val userId: String,
@@ -45,8 +48,10 @@ data class ProfileDto(
     val badges: List<BadgeDto>,
     /** The user's rarest unlocked achievements, rarest first. */
     val rarestAchievements: List<ShowcaseAchievementDto>,
-    /** The latest completions, newest first. */
-    val recentCompletions: List<RecentCompletionDto>,
+    /** How many achievements the user unlocked in the last two weeks, over every game. */
+    val unlockedRecently: Int,
+    /** The games they unlocked achievements in during those two weeks, latest first. */
+    val recentActivity: List<RecentActivityDto>,
 )
 
 @Serializable
@@ -59,18 +64,22 @@ data class ShowcaseAchievementDto(
     val gameTitle: String?,
 )
 
+/** One game the user unlocked achievements in during the last two weeks. */
 @Serializable
-data class RecentCompletionDto(
+data class RecentActivityDto(
     val gameId: Int,
     val gameTitle: String?,
-    val completionType: CompletionType,
-    val points: Int,
-    /** Epoch milliseconds. */
-    val completedAt: Long,
+    /** Unlocked in those two weeks. */
+    val unlockedCount: Int,
+    /** Epoch milliseconds of the latest of them. */
+    val lastUnlockedAt: Long,
+    /** Unlocked in this game altogether, out of [achievementsTotal]. */
+    val achievementsUnlocked: Int,
+    val achievementsTotal: Int,
 )
 
 /** The profile of [userId], or null when there is no such user. */
-fun profileFor(userId: Uuid, currentMonth: String = currentMonthPeriod()): ProfileDto? = transaction {
+fun profileFor(userId: Uuid, currentMonth: String = currentMonthPeriod(), now: Instant = Instant.now()): ProfileDto? = transaction {
     val user = Users.selectAll().where { Users.id eq userId }.singleOrNull() ?: return@transaction null
 
     val entryRows = LibraryEntries.selectAll().where { LibraryEntries.userId eq userId }.toList()
@@ -138,7 +147,10 @@ fun profileFor(userId: Uuid, currentMonth: String = currentMonthPeriod()): Profi
     val thisMonth = months.firstOrNull { it.month == currentMonth }
     val titles = if (gameIds.isEmpty()) emptyMap() else gameRows.mapValues { it.value[Games.title] }
 
-    val rarest = unlocks.distinctBy { it.gameId to it.achievementId }
+    // the same game on two platforms can hold the same unlock twice, and it is still one achievement
+    val owned = unlocks.distinctBy { it.gameId to it.achievementId }
+
+    val rarest = owned
         .filter { it.rarityPercent != null }
         .sortedBy { it.rarityPercent }
         .take(SHOWCASE_SLOTS)
@@ -147,10 +159,20 @@ fun profileFor(userId: Uuid, currentMonth: String = currentMonthPeriod()): Profi
             ShowcaseAchievementDto(unlock.achievementId, row[Achievements.name], row[Achievements.iconUrl], unlock.rarityPercent!!, unlock.gameId, titles[unlock.gameId])
         }
 
-    val pointsByCompletion = completionRows.associate { (it[CompletionRecords.libraryEntryId] to it[CompletionRecords.completionType]) to it[CompletionRecords.pointsAwarded] }
-    val recent = completions.sortedByDescending { it.awardedAt }.take(RECENT_COMPLETIONS).map {
-        RecentCompletionDto(it.gameId, titles[it.gameId], it.type, pointsByCompletion[it.entryId to it.type] ?: 0, it.awardedAt.toEpochMilli())
-    }
+    val since = now.minus(RECENT_WINDOW)
+    val totals = achievementRows.keys.groupingBy { it.first }.eachCount()
+    val recentGames = owned.groupBy { it.gameId }.mapNotNull { (gameId, all) ->
+        val lately = all.filter { it.unlockedAt >= since }
+        if (lately.isEmpty()) return@mapNotNull null
+        RecentActivityDto(
+            gameId = gameId,
+            gameTitle = titles[gameId],
+            unlockedCount = lately.size,
+            lastUnlockedAt = lately.maxOf { it.unlockedAt }.toEpochMilli(),
+            achievementsUnlocked = all.size,
+            achievementsTotal = maxOf(totals[gameId] ?: 0, all.size),
+        )
+    }.sortedByDescending { it.lastUnlockedAt }.take(RECENT_GAMES)
 
     ProfileDto(
         userId = userId.toString(),
@@ -164,10 +186,11 @@ fun profileFor(userId: Uuid, currentMonth: String = currentMonthPeriod()): Profi
         monthRank = thisMonth?.takeIf { it.points > 0 }?.rank,
         gamesInLibrary = gameIds.size,
         gamesCompleted = entryRows.filter { it[LibraryEntries.status] == LibraryStatus.COMPLETED }.map { it[LibraryEntries.gameId] }.distinct().size,
-        achievementsUnlocked = unlocks.size,
+        achievementsUnlocked = owned.size,
         badges = badges,
         rarestAchievements = rarest,
-        recentCompletions = recent,
+        unlockedRecently = owned.count { it.unlockedAt >= since },
+        recentActivity = recentGames,
     )
 }
 //------------------------------EOF------------------------------\

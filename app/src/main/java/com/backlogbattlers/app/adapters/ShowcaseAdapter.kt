@@ -9,8 +9,8 @@ import coil.load
 import com.backlogbattlers.app.R
 import com.backlogbattlers.app.domain.model.ShowcaseAchievement
 
-// the profile's seven showcase slots: the user's rarest achievements first, rarest on the left,
-// and a dashed empty slot for each one they have not got yet
+// the profile's fourteen showcase slots, two rows of seven: the user's rarest achievements first,
+// rarest at the top left, and a dashed empty slot for each one they have not got yet
 class ShowcaseAdapter(private val onClick: (ShowcaseAchievement) -> Unit) : RecyclerView.Adapter<ShowcaseAdapter.ViewHolder>() {
 
     var achievements: List<ShowcaseAchievement> = emptyList()
@@ -40,7 +40,7 @@ class ShowcaseAdapter(private val onClick: (ShowcaseAchievement) -> Unit) : Recy
             holder.ivTile.isClickable = false
             return
         }
-        holder.ivTile.setBackgroundResource(R.drawable.bg_tile_surface)
+        holder.ivTile.setBackgroundResource(R.drawable.bg_tile_gold_glow)
         // Steam gives most achievements an icon; the star stands in for the ones it does not, or that fail to load
         holder.ivTile.load(achievement.iconUrl) {
             placeholder(R.drawable.ic_star)
@@ -51,8 +51,9 @@ class ShowcaseAdapter(private val onClick: (ShowcaseAchievement) -> Unit) : Recy
     }
 
     companion object {
-        // the profile shows seven
-        const val SLOTS = 7
+        // the profile shows two rows of seven
+        const val COLUMNS = 7
+        const val SLOTS = 14
     }
 }
 //------------------------------EOF------------------------------\

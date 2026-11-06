@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- an unlocked achievement in the showcase: a soft gold glow that bleeds out of the picture. it is eight
+     very faint gold layers, each a little smaller and squarer than the one before, so the gold is thin at
+     the outer edge and thickens toward the picture, with no line anywhere. the picture fills the middle -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:bottom="0.0dp" android:left="0.0dp" android:right="0.0dp" android:top="0.0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/gold_glow" />
+            <corners android:radius="11.0dp" />
+        </shape>
+    </item>
+    <item android:bottom="0.8dp" android:left="0.8dp" android:right="0.8dp" android:top="0.8dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/gold_glow" />
+            <corners android:radius="10.1dp" />
+        </shape>
+    </item>
+    <item android:bottom="1.6dp" android:left="1.6dp" android:right="1.6dp" android:top="1.6dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/gold_glow" />
+            <corners android:radius="9.2dp" />
+        </shape>
+    </item>
+    <item android:bottom="2.4dp" android:left="2.4dp" android:right="2.4dp" android:top="2.4dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/gold_glow" />
+            <corners android:radius="8.3dp" />
+        </shape>
+    </item>
+    <item android:bottom="3.2dp" android:left="3.2dp" android:right="3.2dp" android:top="3.2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/gold_glow" />
+            <corners android:radius="7.4dp" />
+        </shape>
+    </item>
+    <item android:bottom="4.0dp" android:left="4.0dp" android:right="4.0dp" android:top="4.0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/gold_glow" />
+            <corners android:radius="6.5dp" />
+        </shape>
+    </item>
+    <item android:bottom="4.8dp" android:left="4.8dp" android:right="4.8dp" android:top="4.8dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/gold_glow" />
+            <corners android:radius="5.6dp" />
+        </shape>
+    </item>
+    <item android:bottom="5.6dp" android:left="5.6dp" android:right="5.6dp" android:top="5.6dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/gold_glow" />
+            <corners android:radius="4.7dp" />
+        </shape>
+    </item>
+</layer-list>

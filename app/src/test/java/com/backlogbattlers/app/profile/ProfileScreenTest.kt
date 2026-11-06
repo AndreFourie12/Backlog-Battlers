@@ -13,10 +13,10 @@ import com.backlogbattlers.app.data.repository.ProfileRepository
 import com.backlogbattlers.app.data.repository.ProfileRepositoryImpl
 import com.backlogbattlers.app.domain.model.BadgeId
 import com.backlogbattlers.app.domain.model.BadgeProgress
-import com.backlogbattlers.app.domain.model.CompletionType
 import com.backlogbattlers.app.domain.model.Profile
 import com.backlogbattlers.app.domain.model.ProfileCustomization
 import com.backlogbattlers.app.domain.model.User
+import com.backlogbattlers.app.util.daysSince
 import com.backlogbattlers.app.viewmodels.ProfileUiState
 import com.backlogbattlers.app.viewmodels.ProfileViewModel
 import io.ktor.client.HttpClient
@@ -77,9 +77,10 @@ class ProfileScreenTest {
            {"id":"BADGE_FROM_THE_FUTURE","progress":1,"target":1,"earned":true},
            {"id":"FIRST_BLOOD","progress":1,"target":1,"earned":true}],
          "rarestAchievements":[{"achievementId":"A1","name":"Beat it","iconUrl":"https://icons.test/a1.jpg","rarityPercent":0.4,"gameId":7,"gameTitle":"Hades"}],
-         "recentCompletions":[
-           {"gameId":7,"gameTitle":"Hades","completionType":"COMPLETIONIST","points":120,"completedAt":1762340000000},
-           {"gameId":8,"gameTitle":null,"completionType":"A_TYPE_FROM_THE_FUTURE","points":10,"completedAt":1762330000000}]}
+         "unlockedRecently":9,
+         "recentActivity":[
+           {"gameId":7,"gameTitle":"Hades","unlockedCount":4,"lastUnlockedAt":1762340000000,"achievementsUnlocked":36,"achievementsTotal":42},
+           {"gameId":8,"gameTitle":null,"unlockedCount":1,"lastUnlockedAt":1762330000000,"achievementsUnlocked":1,"achievementsTotal":0}]}
     """.trimIndent()
 
     private val repository = ProfileRepositoryImpl(
@@ -95,6 +96,7 @@ class ProfileScreenTest {
             baseUrl = "https://api.test",
             tokens = AccessTokenSource(fresh = { "token" }, renew = { "token" }, endSession = { }),
         ),
+        artFor = { id -> if (id == 7) listOf("https://art.test/7-wide.jpg", "https://art.test/7-cover.jpg") else emptyList() },
     )
 
     @Test
@@ -106,7 +108,7 @@ class ProfileScreenTest {
     }
 
     @Test
-    fun `the profile is mapped, with the level, stats and showcases`() = runBlocking {
+    fun `the profile is mapped, with the level, totals and showcase`() = runBlocking {
         val profile = repository.getProfile()
 
         assertEquals("Dylan", profile.displayName)
@@ -119,8 +121,7 @@ class ProfileScreenTest {
         assertEquals(2, profile.monthRank)
         assertEquals("Beat it", profile.rarestAchievements.single().name)
         assertEquals(0.4, profile.rarestAchievements.single().rarityPercent, 0.0)
-        assertEquals("Hades", profile.recentCompletions.first().gameTitle)
-        assertEquals(CompletionType.COMPLETIONIST, profile.recentCompletions.first().completionType)
+        assertEquals(9, profile.unlockedRecently)
     }
 
     @Test
@@ -132,11 +133,40 @@ class ProfileScreenTest {
     }
 
     @Test
-    fun `a completion type this version does not know is shown as a story completion`() = runBlocking {
+    fun `recent activity keeps each games progress, and gets its pictures from the phone`() = runBlocking {
+        val activity = repository.getProfile().recentActivity
+
+        assertEquals(listOf("Hades", null), activity.map { it.gameTitle })
+        assertEquals(4, activity.first().unlockedCount)
+        assertEquals(36, activity.first().achievementsUnlocked)
+        assertEquals(42, activity.first().achievementsTotal)
+        assertEquals(1762340000000, activity.first().lastUnlockedAt)
+        assertEquals(listOf("https://art.test/7-wide.jpg", "https://art.test/7-cover.jpg"), activity.first().artUrls)
+        // a game the phone has never seen has no picture, and is still listed
+        assertEquals(emptyList<String>(), activity.last().artUrls)
+    }
+
+    @Test
+    fun `a profile from a server without the recent activity still loads`() = runBlocking {
+        body = """{"userId":"u1","displayName":"Dylan"}"""
+
         val profile = repository.getProfile()
 
-        assertEquals(CompletionType.MAIN_STORY, profile.recentCompletions.last().completionType)
-        assertNull(profile.recentCompletions.last().gameTitle)
+        assertEquals(0, profile.unlockedRecently)
+        assertEquals(emptyList<Any>(), profile.recentActivity)
+    }
+
+    @Test
+    fun `days since counts whole days, and never goes below nothing`() {
+        val day = 24L * 60 * 60 * 1000
+        val now = 10 * day
+
+        assertEquals(0, daysSince(now - 3_600_000, now))
+        assertEquals(1, daysSince(now - 30 * 3_600_000, now))
+        assertEquals(2, daysSince(now - 2 * day, now))
+        assertEquals(13, daysSince(now - 13 * day - 5_000, now))
+        // a phone whose clock is behind the server's
+        assertEquals(0, daysSince(now + day, now))
     }
 
     @Test
@@ -201,7 +231,8 @@ class ProfileScreenTest {
             achievementsUnlocked = 0,
             badges = listOf(BadgeProgress(BadgeId.FIRST_BLOOD, 0, 1, false)),
             rarestAchievements = emptyList(),
-            recentCompletions = emptyList(),
+            unlockedRecently = 0,
+            recentActivity = emptyList(),
         )
     }
 

@@ -333,22 +333,26 @@
     <!-- profile -->
     <string name="profile_level">Izinga %1$d</string>
     <string name="profile_xp_progress">%1$s / %2$s XP</string>
-    <string name="profile_stat_games">Imidlalo</string>
-    <string name="profile_stat_completed">Eyaqedwa</string>
-    <string name="profile_stat_achievements">Izimpumelelo</string>
-    <string name="profile_stat_rank">Indawo</string>
+    <string name="profile_see_all">Buka konke</string>
     <string name="profile_badges_earned">%1$d kwezingu-%2$d zitholakele</string>
     <string name="profile_badge_earned">Itholakele</string>
     <string name="profile_badge_progress">Inqubekela phambili: %1$d kwangu-%2$d</string>
     <string name="profile_showcase_detail">%1$s · %2$s%% yabadlali</string>
-    <string name="profile_showcase_empty">Vula izimpumelelo ezinqaba bese eziyisikhombisa ezinqaba kakhulu zivela lapha.</string>
-    <string name="profile_showcase_rarest">Inqaba kakhulu: %1$s · %2$s%% yabadlali</string>
-    <string name="profile_recent_title">Okuqedwe muva nje</string>
-    <string name="profile_recent_empty">Imidlalo oyiqedayo izovela lapha</string>
-    <string name="profile_completion_story">Indaba</string>
-    <string name="profile_completion_extra">Indaba + okwengeziwe</string>
-    <string name="profile_completion_full" formatted="false">100%</string>
-    <string name="profile_recent_row">%1$s · +amaphuzu angu-%2$s · %3$s</string>
+    <string name="profile_recent_title">Umsebenzi wakamuva</string>
+    <string name="profile_recent_window">%1$d ezivuliwe emavikini amabili edlule</string>
+    <string name="profile_recent_empty">Izimpumelelo ozivulayo zizovela lapha</string>
+    <plurals name="profile_recent_unlocked">
+        <item quantity="one">%1$d impumelelo evuliwe · %2$s</item>
+        <item quantity="other">%1$d izimpumelelo ezivuliwe · %2$s</item>
+    </plurals>
+    <string name="profile_recent_progress">Inqubekela phambili yezimpumelelo</string>
+    <string name="profile_recent_progress_value">%1$d kwangu-%2$d</string>
+    <string name="profile_recent_today">Namuhla</string>
+    <string name="profile_recent_yesterday">Izolo</string>
+    <plurals name="profile_recent_days_ago">
+        <item quantity="one">%1$d usuku olwedlule</item>
+        <item quantity="other">%1$d izinsuku ezedlule</item>
+    </plurals>
     <string name="profile_error_title">Kukhona okungahambanga kahle</string>
     <string name="profile_error_load">Ayikwazanga ukulayisha iphrofayela yakho. Hlola uxhumano lwakho bese uzama futhi.</string>
     <string name="badge_first_blood_desc">Vula impumelelo yakho yokuqala emdlalweni ofakiwe ekulandeleni.</string>

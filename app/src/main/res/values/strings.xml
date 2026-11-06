@@ -364,25 +364,27 @@
     <!-- profile -->
     <string name="profile_level">Level %1$d</string>
     <string name="profile_xp_progress">%1$s / %2$s XP</string>
-    <string name="profile_stat_games">Games</string>
-    <string name="profile_stat_completed">Completed</string>
-    <string name="profile_stat_achievements">Achievements</string>
-    <string name="profile_stat_rank">Rank</string>
-    <string name="profile_rank_value" translatable="false">#%1$d</string>
+    <string name="profile_see_all">See all</string>
     <string name="profile_badges_earned">%1$d of %2$d earned</string>
     <string name="profile_badge_earned">Earned</string>
     <string name="profile_badge_progress">Progress: %1$d of %2$d</string>
     <string name="profile_badge_progress_short" translatable="false">%1$d / %2$d</string>
-    <string name="profile_rank_none" translatable="false">—</string>
     <string name="profile_showcase_detail">%1$s · %2$s%% of players</string>
-    <string name="profile_showcase_empty">Unlock rare achievements and your seven rarest show up here.</string>
-    <string name="profile_showcase_rarest">Rarest: %1$s · %2$s%% of players</string>
-    <string name="profile_recent_title">Recent completions</string>
-    <string name="profile_recent_empty">Games you complete will show up here</string>
-    <string name="profile_completion_story">Story</string>
-    <string name="profile_completion_extra">Story + extras</string>
-    <string name="profile_completion_full" formatted="false">100%</string>
-    <string name="profile_recent_row">%1$s · +%2$s points · %3$s</string>
+    <string name="profile_recent_title">Recent Activity</string>
+    <string name="profile_recent_window">%1$d unlocked past 2 weeks</string>
+    <string name="profile_recent_empty">Achievements you unlock will show up here</string>
+    <plurals name="profile_recent_unlocked">
+        <item quantity="one">%1$d achievement unlocked · %2$s</item>
+        <item quantity="other">%1$d achievements unlocked · %2$s</item>
+    </plurals>
+    <string name="profile_recent_progress">Achievement Progress</string>
+    <string name="profile_recent_progress_value">%1$d of %2$d</string>
+    <string name="profile_recent_today">Today</string>
+    <string name="profile_recent_yesterday">Yesterday</string>
+    <plurals name="profile_recent_days_ago">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
     <string name="profile_error_title">Something went wrong</string>
     <string name="profile_error_load">Couldn\'t load your profile. Check your connection and try again.</string>
     <string name="badge_first_blood_name" translatable="false">First Blood</string>

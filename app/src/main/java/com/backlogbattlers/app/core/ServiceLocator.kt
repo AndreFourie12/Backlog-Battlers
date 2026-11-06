@@ -153,7 +153,13 @@ object ServiceLocator {
     }
 
     val profileRepository: ProfileRepository by lazy {
-        ProfileRepositoryImpl(profileApi)
+        ProfileRepositoryImpl(
+            profileApi,
+            // the wide picture first, as on the other game tiles, then the portrait cover
+            artFor = { gameId ->
+                gameRepository.getGame(gameId)?.let { game -> game.landscapeArtUrls + listOfNotNull(game.coverImageUrl) }.orEmpty()
+            },
+        )
     }
 
     val activityRepository: ActivityRepository by lazy {

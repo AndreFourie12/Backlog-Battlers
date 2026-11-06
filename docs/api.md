@@ -290,8 +290,9 @@ The profile screen's whole answer, worked out from the signed-in user's own data
   "rarestAchievements": [
     { "achievementId": "ACH_1", "name": "Beat it", "iconUrl": "https://…", "rarityPercent": 0.4, "gameId": 113112, "gameTitle": "Hades" }
   ],
-  "recentCompletions": [
-    { "gameId": 113112, "gameTitle": "Hades", "completionType": "COMPLETIONIST", "points": 120, "completedAt": 1762340000000 }
+  "unlockedRecently": 9,
+  "recentActivity": [
+    { "gameId": 113112, "gameTitle": "Hades", "unlockedCount": 4, "lastUnlockedAt": 1762340000000, "achievementsUnlocked": 36, "achievementsTotal": 42 }
   ]
 }
 ```
@@ -300,8 +301,10 @@ The profile screen's whole answer, worked out from the signed-in user's own data
 - **`monthRank`** is the rank on this month's leaderboard (ties share a rank), or `null` before the user has scored this month. **`monthlyPoints`** is this month's points.
 - **`gamesInLibrary`** and **`gamesCompleted`** count games, so one game on two platforms is one.
 - **`badges`** lists all 20, in a fixed order. A badge is earned when `progress` reaches `target`. The ids are `FIRST_BLOOD`, `CLEAN_SWEEP`, `COMPLETION_CLUB`, `FINISHER`, `THE_LONG_HAUL`, `NEEDLE_IN_A_HAYSTACK`, `GHOST_HUNTER`, `STATISTICALLY_IMPROBABLE`, `SHELF_CLEANER`, `DUST_OFF`, `COLD_TURKEY`, `BACKLOG_ZERO`, `TOP_OF_THE_TABLE`, `PHOTO_FINISH`, `COMEBACK`, `NEMESIS`, `DAILY_DRIVER`, `MARATHON_MONTH`, `GENRE_TOURIST` and `PLATFORM_AGNOSTIC`. The names and descriptions belong to the app; the rules are in the README.
-- **`rarestAchievements`** are the user's seven rarest unlocked achievements, rarest first. Achievements Steam gave no rarity for are left out.
-- **`recentCompletions`** are the latest five, newest first.
+- **`achievementsUnlocked`** counts each achievement once, even when the same game is in the library on two platforms.
+- **`rarestAchievements`** are the user's fourteen rarest unlocked achievements, rarest first (two rows of seven in the app). Achievements Steam gave no rarity for are left out.
+- **`unlockedRecently`** is how many achievements the user unlocked in the last 14 days, over every game.
+- **`recentActivity`** lists the games those unlocks were in, the five most recently unlocked in first. `unlockedCount` is the unlocks within the 14 days and `lastUnlockedAt` the latest of them; `achievementsUnlocked` out of `achievementsTotal` is how far along the whole game is. The server stores no pictures, so the app takes each game's from the games it has cached.
 
 | Status | Meaning |
 |---|---|
