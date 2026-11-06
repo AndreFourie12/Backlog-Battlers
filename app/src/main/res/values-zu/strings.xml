@@ -507,4 +507,20 @@
     <string name="cd_game_hundred" formatted="false">Iqediwe ku-100%</string>
     <string name="edit_profile_no_connection">Iphrofayela yakho ayikwazanga ukulondolozwa. Hlola uxhumano lwakho bese uzama futhi.</string>
     <string name="edit_profile_save_failed">Iphrofayela yakho ayikwazanga ukulondolozwa. Zama futhi ngokushesha.</string>
+    <string name="channel_achievements">Izimpumelelo</string>
+    <string name="channel_achievements_body">Uma uvula izimpumelelo emidlalweni yakho</string>
+    <string name="push_achievement_title">Impumelelo evuliwe</string>
+    <string name="push_achievement_one">Uvule u-%1$s ku-%2$s.</string>
+    <plurals name="push_achievement_many">
+        <item quantity="one">Uvule impumelelo entsha ku-%2$s.</item>
+        <item quantity="other">Uvule izimpumelelo ezintsha ezingu-%1$d ku-%2$s.</item>
+    </plurals>
+    <string name="push_achievement_rarest">Eyinqaba kakhulu: %1$s.</string>
+    <plurals name="push_achievement_summary">
+        <item quantity="one">Uvule impumelelo entsha engu-%1$d.</item>
+        <item quantity="other">Uvule izimpumelelo ezintsha ezingu-%1$d emidlalweni eminingi.</item>
+    </plurals>
+    <string name="push_season_title">Isizini entsha iqalile</string>
+    <string name="push_season_result">Inyanga edlule uqede ku-#%1$d unamaphuzu angu-%2$s. Wonke umuntu uqala kabusha.</string>
+    <string name="push_season_none">Amaphuzu aqale kabusha. Yiba owokuqala ukuthola amaphuzu kule nyanga.</string>
 </resources>

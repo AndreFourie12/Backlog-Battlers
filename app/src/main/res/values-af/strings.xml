@@ -507,4 +507,20 @@
     <string name="cd_game_hundred" formatted="false">Tot 100% voltooi</string>
     <string name="edit_profile_no_connection">Jou profiel kon nie gestoor word nie. Kyk na jou verbinding en probeer weer.</string>
     <string name="edit_profile_save_failed">Jou profiel kon nie gestoor word nie. Probeer netnou weer.</string>
+    <string name="channel_achievements">Prestasies</string>
+    <string name="channel_achievements_body">Wanneer jy prestasies in jou speletjies ontsluit</string>
+    <string name="push_achievement_title">Prestasie ontsluit</string>
+    <string name="push_achievement_one">Jy het %1$s in %2$s ontsluit.</string>
+    <plurals name="push_achievement_many">
+        <item quantity="one">Jy het \'n nuwe prestasie in %2$s ontsluit.</item>
+        <item quantity="other">Jy het %1$d nuwe prestasies in %2$s ontsluit.</item>
+    </plurals>
+    <string name="push_achievement_rarest">Skaarsste: %1$s.</string>
+    <plurals name="push_achievement_summary">
+        <item quantity="one">Jy het \'n nuwe prestasie ontsluit.</item>
+        <item quantity="other">Jy het %1$d nuwe prestasies oor verskeie speletjies ontsluit.</item>
+    </plurals>
+    <string name="push_season_title">\'n Nuwe seisoen het begin</string>
+    <string name="push_season_result">Verlede maand het jy #%1$d geëindig met %2$s punte. Almal begin weer van nul.</string>
+    <string name="push_season_none">Punte is teruggestel na nul. Wees die eerste om hierdie maand punte te verdien.</string>
 </resources>

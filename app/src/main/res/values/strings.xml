@@ -564,4 +564,20 @@
     <string name="cd_game_hundred" formatted="false">Completed to 100%</string>
     <string name="edit_profile_no_connection">Your profile could not be saved. Check your connection and try again.</string>
     <string name="edit_profile_save_failed">Your profile could not be saved. Try again in a moment.</string>
+    <string name="channel_achievements">Achievements</string>
+    <string name="channel_achievements_body">When you unlock achievements in your games</string>
+    <string name="push_achievement_title">Achievement unlocked</string>
+    <string name="push_achievement_one">You unlocked %1$s in %2$s.</string>
+    <plurals name="push_achievement_many">
+        <item quantity="one">You unlocked a new achievement in %2$s.</item>
+        <item quantity="other">You unlocked %1$d new achievements in %2$s.</item>
+    </plurals>
+    <string name="push_achievement_rarest">Rarest: %1$s.</string>
+    <plurals name="push_achievement_summary">
+        <item quantity="one">You unlocked a new achievement.</item>
+        <item quantity="other">You unlocked %1$d new achievements across several games.</item>
+    </plurals>
+    <string name="push_season_title">A new season has started</string>
+    <string name="push_season_result">Last month you finished #%1$d with %2$s points. Everyone starts again from zero.</string>
+    <string name="push_season_none">Points have reset to zero. Be the first to score this month.</string>
 </resources>
