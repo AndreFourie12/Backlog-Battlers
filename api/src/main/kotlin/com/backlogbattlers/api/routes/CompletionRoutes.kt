@@ -7,6 +7,8 @@ import com.backlogbattlers.api.games.SteamClient
 import com.backlogbattlers.api.steam.checkUnlocks
 import com.backlogbattlers.api.scoring.CompleteRequest
 import com.backlogbattlers.api.scoring.CompletionResult
+import com.backlogbattlers.api.scoring.HundredPercentBlock
+import com.backlogbattlers.api.scoring.HundredPercentRefusedDto
 import com.backlogbattlers.api.scoring.completeLibraryEntry
 import com.backlogbattlers.api.scoring.currentMonthPeriod
 import com.backlogbattlers.api.notifications.Notifier
@@ -32,7 +34,8 @@ fun Route.completionRoutes(
     currentUser: CurrentUser,
 ) {
 
-    // POST /users/me/library/{id}/complete   {"completionType": "MAIN_STORY"}
+    // POST /users/me/library/{id}/complete   {"completionType": "MAIN_STORY"} or {"completionType": "COMPLETIONIST"}
+    // 100% (COMPLETIONIST) is a 422 until every achievement is unlocked and confirmed by Steam.
     // Achievement points are paid only for achievements Steam confirms the user unlocked. If Steam
     // (or IGDB, which maps the game to its Steam app) is down this answers 502 and completes nothing,
     // so an outage never costs the user points; they just try again.
@@ -66,6 +69,22 @@ fun Route.completionRoutes(
                 call.respond(HttpStatusCode.OK, response)
             }
             CompletionResult.NotFound -> call.respond(HttpStatusCode.NotFound, ApiError("Library entry was not found"))
+            is CompletionResult.NotReadyForHundredPercent -> {
+                log.info("User {} could not complete library entry {} to 100%: {}", owner, entryId, result.block)
+                call.respond(
+                    HttpStatusCode.UnprocessableEntity,
+                    HundredPercentRefusedDto(
+                        error = when (result.block) {
+                            HundredPercentBlock.NO_ACHIEVEMENTS -> "This game has no achievements, so it cannot be completed to 100%"
+                            HundredPercentBlock.NOT_ALL_UNLOCKED -> "Every achievement has to be unlocked before a game is 100% complete"
+                            HundredPercentBlock.NOT_VERIFIED -> "Steam has to confirm every achievement before a game is 100% complete"
+                        },
+                        reason = result.block,
+                        steamStatus = result.steamStatus,
+                        achievementIds = result.achievementIds,
+                    ),
+                )
+            }
             CompletionResult.AlreadyCompleted -> {
                 log.info("User {} tried to complete library entry {} as {} again", owner, entryId, request.completionType)
                 call.respond(
