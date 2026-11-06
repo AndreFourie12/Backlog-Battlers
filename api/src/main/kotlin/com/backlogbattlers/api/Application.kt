@@ -20,6 +20,7 @@ import com.backlogbattlers.api.routes.completionRoutes
 import com.backlogbattlers.api.routes.deviceRoutes
 import com.backlogbattlers.api.routes.healthRoutes
 import com.backlogbattlers.api.routes.leaderboardRoutes
+import com.backlogbattlers.api.routes.meRoutes
 import com.backlogbattlers.api.routes.libraryRoutes
 import com.backlogbattlers.api.routes.profileRoutes
 import com.backlogbattlers.api.routes.settingsRoutes
@@ -76,6 +77,7 @@ fun Application.module() {
         steamImportRoutes(SteamImporter(igdb, steam), currentUser = bearerCurrentUser(jwtService))
         leaderboardRoutes(currentUser = bearerCurrentUser(jwtService))
         accountRoutes(currentUser = bearerCurrentUser(jwtService))
+        meRoutes(currentUser = bearerCurrentUser(jwtService))
         settingsRoutes(currentUser = bearerCurrentUser(jwtService))
         deviceRoutes(currentUser = bearerCurrentUser(jwtService))
         activityRoutes(currentUser = bearerCurrentUser(jwtService))

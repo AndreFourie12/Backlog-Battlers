@@ -332,6 +332,17 @@ object VerifiedUnlocks : Table("verified_unlocks")
     override val primaryKey = PrimaryKey(libraryEntryId, achievementId)
 }
 
+// userpictures table: the profile picture a user picked, saved so friends and other phones see it.
+// the id is the app's own (the app ships the pictures), the API only keeps it. a table of its own for
+// the reason UserSettings is one: SchemaUtils.create never adds columns to an existing table
+object UserPictures : Table("user_pictures")
+{
+    val userId = reference("user_id", Users.id, onDelete = ReferenceOption.CASCADE)
+    val pictureId = varchar("picture_id", 32)
+
+    override val primaryKey = PrimaryKey(userId)
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -351,5 +362,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     ActivityEvents,
     GameGenres,
     VerifiedUnlocks,
+    UserPictures,
 )
 //------------------------------EOF------------------------------\\
