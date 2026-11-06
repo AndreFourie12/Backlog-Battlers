@@ -18,7 +18,7 @@ class PushTest {
         mapOf("type" to type, "userId" to me, "actorName" to "Ana") + extra
 
     @Test
-    fun `reads each of the four pushes the API sends`() {
+    fun `reads each of the four friend and rank pushes the API sends`() {
         assertEquals(PushType.FRIEND_REQUEST_RECEIVED, Push.from(payload("FRIEND_REQUEST_RECEIVED"))?.type)
         assertEquals(PushType.FRIEND_REQUEST_ACCEPTED, Push.from(payload("FRIEND_REQUEST_ACCEPTED"))?.type)
         assertEquals(PushType.OVERTAKEN, Push.from(payload("OVERTAKEN"))?.type)
@@ -29,10 +29,52 @@ class PushTest {
 
     @Test
     fun `a push this version doesn't know, or one missing its fields, is ignored`() {
-        assertNull(Push.from(payload("SEASON_RESET")))
+        assertNull(Push.from(payload("SOMETHING_NEW")))
         assertNull(Push.from(mapOf("type" to "OVERTAKEN", "actorName" to "Ana")))
         assertNull(Push.from(mapOf("type" to "OVERTAKEN", "userId" to me, "actorName" to " ")))
         assertNull(Push.from(emptyMap()))
+    }
+
+    @Test
+    fun `reads the achievement push, which needs a count but no friend`() {
+        val data = mapOf("type" to "ACHIEVEMENT_UNLOCKED", "userId" to me, "gameTitle" to "Hades", "count" to "3", "achievementName" to "Beat the Game")
+
+        assertEquals(
+            Push(PushType.ACHIEVEMENT_UNLOCKED, me, gameTitle = "Hades", count = 3, achievementName = "Beat the Game"),
+            Push.from(data),
+        )
+        // spread over several games there is no game title
+        assertEquals(null, Push.from(data - "gameTitle" - "achievementName")?.gameTitle)
+        assertNull(Push.from(data - "count"))
+        assertNull(Push.from(data + ("count" to "0")))
+        assertNull(Push.from(data + ("count" to "many")))
+    }
+
+    @Test
+    fun `reads the season push, with or without a rank`() {
+        val ranked = Push.from(mapOf("type" to "SEASON_RESET", "userId" to me, "monthPeriod" to "2026-12", "lastRank" to "2", "lastPoints" to "120"))
+        assertEquals(Push(PushType.SEASON_RESET, me, lastRank = 2, lastPoints = 120), ranked)
+
+        val unranked = Push.from(mapOf("type" to "SEASON_RESET", "userId" to me, "lastPoints" to "0"))
+        assertEquals(Push(PushType.SEASON_RESET, me, lastRank = null, lastPoints = 0), unranked)
+        assertNull(Push.from(mapOf("type" to "SEASON_RESET")))
+    }
+
+    @Test
+    fun `the achievements switch hides achievement pushes, and the season resets switch hides season pushes`() {
+        val achievementsOff = everythingOn.copy(achievementNotificationsEnabled = false)
+        val seasonOff = everythingOn.copy(seasonResetNotificationsEnabled = false)
+        val achievements = Push(PushType.ACHIEVEMENT_UNLOCKED, me, count = 1)
+        val season = Push(PushType.SEASON_RESET, me)
+
+        assertTrue(achievements.shouldShow(me, everythingOn))
+        assertTrue(season.shouldShow(me, everythingOn))
+        assertFalse(achievements.shouldShow(me, achievementsOff))
+        assertTrue(season.shouldShow(me, achievementsOff))
+        assertFalse(season.shouldShow(me, seasonOff))
+        assertTrue(achievements.shouldShow(me, seasonOff))
+        // neither of the two switches touches the friend or rank pushes
+        assertTrue(Push(PushType.OVERTAKEN, me, "Ana").shouldShow(me, achievementsOff.copy(seasonResetNotificationsEnabled = false)))
     }
 
     @Test
@@ -64,6 +106,9 @@ class PushTest {
         assertEquals(R.id.friendsFragment, PushNotifications.destinationOf(PushType.FRIEND_REQUEST_ACCEPTED))
         assertEquals(R.id.activityFragment, PushNotifications.destinationOf(PushType.FRIEND_COMPLETED_GAME))
         assertEquals(R.id.standingsFragment, PushNotifications.destinationOf(PushType.OVERTAKEN))
+        assertEquals(R.id.standingsFragment, PushNotifications.destinationOf(PushType.SEASON_RESET))
+        // the profile's recent activity lists what was unlocked
+        assertEquals(R.id.profileFragment, PushNotifications.destinationOf(PushType.ACHIEVEMENT_UNLOCKED))
 
         // a friend request opens the friends screen on its requests tab
         assertEquals(OPEN_TAB_REQUESTS, PushType.FRIEND_REQUEST_RECEIVED.friendsTab)
@@ -75,6 +120,8 @@ class PushTest {
         assertEquals(PushChannel.FRIENDS, PushType.FRIEND_REQUEST_RECEIVED.channel)
         assertEquals(PushChannel.FRIENDS, PushType.FRIEND_COMPLETED_GAME.channel)
         assertEquals(PushChannel.COMPETITION, PushType.OVERTAKEN.channel)
+        assertEquals(PushChannel.COMPETITION, PushType.SEASON_RESET.channel)
+        assertEquals(PushChannel.ACHIEVEMENTS, PushType.ACHIEVEMENT_UNLOCKED.channel)
     }
 }
 //------------------------------EOF------------------------------\\
