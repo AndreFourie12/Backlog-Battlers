@@ -6,10 +6,12 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -21,6 +23,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
 import androidx.navigation.ui.setupWithNavController
 import com.backlogbattlers.app.core.ServiceLocator
+import com.backlogbattlers.app.data.repository.SyncBanner
 import com.backlogbattlers.app.notifications.NotificationPermission
 import com.backlogbattlers.app.notifications.PushNotifications
 import com.backlogbattlers.app.notifications.PushType
@@ -35,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     private val fullBleedDestinations = setOf(R.id.homeFragment)
     private var contentDrawsBehindStatusBar = false
+    private var bannerVisible = false
 
     // screens shown before the user is signed in and unlocked. a tapped notification waits until
     // the user is past them, then opens its screen
@@ -67,7 +71,9 @@ class MainActivity : AppCompatActivity() {
         root = findViewById(R.id.main)
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val top = if (contentDrawsBehindStatusBar) 0 else systemBars.top
+            // the banner sits at the very top, so it needs the status bar's room even on a screen that
+            // normally draws behind it
+            val top = if (contentDrawsBehindStatusBar && !bannerVisible) 0 else systemBars.top
             v.setPadding(systemBars.left, top, systemBars.right, systemBars.bottom)
             insets
         }
@@ -119,6 +125,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { ServiceLocator.sessionEnded.collect { backToLogin(navController) } }
+                launch { ServiceLocator.syncCoordinator.banner.collect { showSyncBanner(it) } }
 
                 // a session can also end while the app is in the background, when nothing is listening.
                 // login and splash are the only screens a signed out user belongs on; the storage is
@@ -130,6 +137,34 @@ class MainActivity : AppCompatActivity() {
                     backToLogin(navController)
                 }
             }
+        }
+    }
+
+    //------------------------------
+    // shows the strip across the top: offline, syncing what was changed offline, or done.
+    // grey while waiting, green for done, and gone when there is nothing to say
+    private fun showSyncBanner(state: SyncBanner) {
+        val banner = findViewById<TextView>(R.id.syncBanner)
+        when (state) {
+            SyncBanner.HIDDEN -> Unit
+            SyncBanner.OFFLINE -> {
+                banner.setText(R.string.sync_banner_offline)
+                banner.setBackgroundColor(ContextCompat.getColor(this, R.color.scrim_slate))
+            }
+            SyncBanner.SYNCING -> {
+                banner.setText(R.string.sync_banner_syncing)
+                banner.setBackgroundColor(ContextCompat.getColor(this, R.color.scrim_slate))
+            }
+            SyncBanner.SYNCED -> {
+                banner.setText(R.string.sync_banner_synced)
+                banner.setBackgroundColor(ContextCompat.getColor(this, R.color.success))
+            }
+        }
+        val visible = state != SyncBanner.HIDDEN
+        banner.visibility = if (visible) View.VISIBLE else View.GONE
+        if (visible != bannerVisible) {
+            bannerVisible = visible
+            ViewCompat.requestApplyInsets(root)
         }
     }
 

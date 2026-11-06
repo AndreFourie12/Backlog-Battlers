@@ -44,6 +44,7 @@ class LibraryGameAdapter(
         private val art: ImageView = view.findViewById(R.id.img_game_art)
         private val completion: TextView = view.findViewById(R.id.tv_game_completion)
         private val hundredTrophy: ImageView = view.findViewById(R.id.iv_game_hundred)
+        private val pendingSync: ImageView = view.findViewById(R.id.iv_game_pending_sync)
         private val subtitle: TextView = view.findViewById(R.id.tv_game_subtitle)
 
         init {
@@ -65,6 +66,8 @@ class LibraryGameAdapter(
             completion.setBackgroundResource(if (hundred) R.drawable.bg_pill_completed else R.drawable.bg_pill_scrim_slate)
             completion.setTextColor(ContextCompat.getColor(completion.context, if (hundred) R.color.on_accent else R.color.white))
             hundredTrophy.setVisible(hundred)
+            // a change still waiting to reach the account, e.g. made offline
+            pendingSync.setVisible(libraryGame.entry.pendingSync)
             // a library game is labelled with the platform it was filed under
             subtitle.text = gameSubtitle(itemView.context.platformLabel(libraryGame.entry.platform.name), game.genres)
 

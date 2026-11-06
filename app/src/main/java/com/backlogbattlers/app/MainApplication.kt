@@ -31,6 +31,12 @@ class MainApplication : Application() {
             ServiceLocator.httpClient
             Log.d(TAG, "HTTP client ready")
         }
+
+        // from here the app notices the connection dropping and coming back: the banner across the top
+        // follows it, and changes made offline are uploaded the moment it returns. the callback is
+        // registered on the main thread, a cheap call; the coordinator itself only waits on the flow
+        ServiceLocator.connectivityMonitor.start()
+        ServiceLocator.syncCoordinator
     }
 
     //------------------------------
