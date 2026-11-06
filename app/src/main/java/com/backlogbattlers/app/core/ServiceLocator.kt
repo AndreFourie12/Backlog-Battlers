@@ -11,6 +11,7 @@ import com.backlogbattlers.app.data.remote.ActivityApi
 import com.backlogbattlers.app.data.remote.FriendsApi
 import com.backlogbattlers.app.data.remote.GameApi
 import com.backlogbattlers.app.data.remote.LeaderboardApi
+import com.backlogbattlers.app.data.remote.ProfileApi
 import com.backlogbattlers.app.data.remote.LibraryApi
 import com.backlogbattlers.app.data.remote.SettingsApi
 import com.backlogbattlers.app.data.remote.SteamApi
@@ -29,6 +30,8 @@ import com.backlogbattlers.app.data.repository.LibraryRepository
 import com.backlogbattlers.app.data.repository.LibraryRepositoryImpl
 import com.backlogbattlers.app.data.repository.LibrarySync
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepository
+import com.backlogbattlers.app.data.repository.ProfileRepository
+import com.backlogbattlers.app.data.repository.ProfileRepositoryImpl
 import com.backlogbattlers.app.data.repository.ProfileCustomizationRepositoryImpl
 import com.backlogbattlers.app.data.repository.SearchHistoryRepository
 import com.backlogbattlers.app.data.repository.SearchHistoryRepositoryImpl
@@ -143,6 +146,14 @@ object ServiceLocator {
 
     val activityApi: ActivityApi by lazy {
         ActivityApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokens = accessTokenSource)
+    }
+
+    val profileApi: ProfileApi by lazy {
+        ProfileApi(httpClient = httpClient, baseUrl = BuildConfig.API_BASE_URL, tokens = accessTokenSource)
+    }
+
+    val profileRepository: ProfileRepository by lazy {
+        ProfileRepositoryImpl(profileApi)
     }
 
     val activityRepository: ActivityRepository by lazy {
