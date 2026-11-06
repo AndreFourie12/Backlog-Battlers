@@ -16,6 +16,8 @@ data class ActivityEvent(
     val actorId: String,
     val actorName: String,
     val actorAvatarUrl: String?,
+    // the picture the actor picked, by the app's id
+    val actorPictureId: String? = null,
     val gameId: Int?,
     val gameTitle: String?,
     val subjectId: String?,

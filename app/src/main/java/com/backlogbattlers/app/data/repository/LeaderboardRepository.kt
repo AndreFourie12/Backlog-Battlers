@@ -30,7 +30,7 @@ class LeaderboardRepositoryImpl(
     //------------------------------
     // converts a LeaderboardEntryDto to domain LeaderboardEntry
     private fun LeaderboardEntryDto.toDomain(): LeaderboardEntry =
-        LeaderboardEntry(rank, userId, displayName, avatarUrl, monthlyPoints)
+        LeaderboardEntry(rank, userId, displayName, avatarUrl, monthlyPoints, pictureId)
 
     private companion object {
         const val TAG = "LeaderboardRepository"

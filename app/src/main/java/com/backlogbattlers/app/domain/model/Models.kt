@@ -200,6 +200,8 @@ data class Friend(
     val monthlyPoints: Int,
     val achievementCount: Int,
     val isOnline: Boolean,
+    // the picture they picked, by the app's id
+    val pictureId: String? = null,
 )
 
 // one row of the monthly leaderboard. rank comes from the backend (ties share a rank),
@@ -210,6 +212,7 @@ data class LeaderboardEntry(
     val displayName: String,
     val avatarUrl: String?,
     val monthlyPoints: Int,
+    val pictureId: String? = null,
 )
 
 // this month's leaderboard: the current page of ranked entries, plus the signed in user's own
@@ -226,6 +229,7 @@ data class FriendRequest(
     val fromDisplayName: String,
     val fromAvatarUrl: String?,
     val createdAt: Long,
+    val fromPictureId: String? = null,
 )
 
 // one person found while searching for someone to add
@@ -234,5 +238,6 @@ data class FriendSearchResult(
     val displayName: String,
     val avatarUrl: String?,
     val status: FriendRelationshipStatus,
+    val pictureId: String? = null,
 )
 //------------------------------EOF------------------------------\\

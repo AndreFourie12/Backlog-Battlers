@@ -33,6 +33,7 @@ class ActivityRepositoryImpl(
         actorId = actorId,
         actorName = actorName,
         actorAvatarUrl = actorAvatarUrl,
+        actorPictureId = actorPictureId,
         gameId = gameId,
         gameTitle = gameTitle,
         subjectId = subjectId,

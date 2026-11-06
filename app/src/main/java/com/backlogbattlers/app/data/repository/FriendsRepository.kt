@@ -57,15 +57,15 @@ class FriendsRepositoryImpl(
 
     //------------------------------
     // converts a FriendDto to domain Friend
-    private fun FriendDto.toDomain(): Friend = Friend(userId, displayName, avatarUrl, monthlyPoints, achievementCount, isOnline)
+    private fun FriendDto.toDomain(): Friend = Friend(userId, displayName, avatarUrl, monthlyPoints, achievementCount, isOnline, pictureId)
 
     //------------------------------
     // converts a FriendRequestDto to domain FriendRequest
-    private fun FriendRequestDto.toDomain(): FriendRequest = FriendRequest(requestId, fromUserId, fromDisplayName, fromAvatarUrl, createdAt)
+    private fun FriendRequestDto.toDomain(): FriendRequest = FriendRequest(requestId, fromUserId, fromDisplayName, fromAvatarUrl, createdAt, fromPictureId)
 
     //------------------------------
     // converts a FriendSearchResultDto to domain FriendSearchResult
-    private fun FriendSearchResultDto.toDomain(): FriendSearchResult = FriendSearchResult(userId, displayName, avatarUrl, status.toDomain())
+    private fun FriendSearchResultDto.toDomain(): FriendSearchResult = FriendSearchResult(userId, displayName, avatarUrl, status.toDomain(), pictureId)
 
     //------------------------------
     // converts a FriendRelationshipStatusDto to domain FriendRelationshipStatus
