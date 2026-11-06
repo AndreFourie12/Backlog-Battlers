@@ -463,4 +463,46 @@
 
     <!-- shown when the backend stops accepting the session and the user is sent back to login -->
     <string name="session_expired">Isikhathi sakho sesiphelile. Sicela ungene futhi.</string>
+    <string name="detail_complete_none_title">Akuqedwa okwamanje</string>
+    <string name="detail_complete_none_hint">Uqede indaba noma uvule konke? Kumaka ukuze uthole amaphuzu.</string>
+    <string name="detail_complete_story_title">Indaba iqediwe</string>
+    <string name="detail_complete_story_hint" formatted="false">Vula wonke izimpumelelo bese i-Steam izikuqinisekisa ku-100%.</string>
+    <string name="detail_complete_hundred_title" formatted="false">100% iqediwe</string>
+    <string name="detail_complete_hundred_hint">Zonke izimpumelelo zivuliwe futhi ziqinisekiswe ku-Steam.</string>
+    <string name="detail_complete_button">Maka njengokuqediwe</string>
+    <string name="detail_completing">Iyaqeda…</string>
+    <string name="complete_sheet_title">Maka njengokuqediwe</string>
+    <string name="complete_story_title">Indaba iqediwe</string>
+    <string name="complete_story_hint">Uqede indaba enkulu.</string>
+    <string name="complete_hundred_title" formatted="false">100% iqediwe</string>
+    <string name="complete_hundred_ready">Zonke izimpumelelo zivuliwe. I-Steam izoqinisekisa zonke.</string>
+    <string name="complete_hundred_locked">Qala uvule zonke izimpumelelo ezingu-%1$d (zisele ezingu-%2$d).</string>
+    <string name="complete_hundred_none">Lo mdlalo awunazimpumelelo zokuqeda.</string>
+    <string name="complete_done_hint">Seyiqediwe</string>
+    <string name="complete_confirm_title">Maka njengokuqediwe?</string>
+    <string name="complete_confirm_story">Lokhu kumaka indaba njengeqediwe futhi kunikeza amaphuzu. Akunakuhlehliswa.</string>
+    <string name="complete_confirm_hundred" formatted="false">I-Steam izohlola yonke impumelelo. Uma zonke zivumelana, umdlalo uqedwa ku-100%, izimpumelelo ziyakhiyeka futhi uthola amaphuzu. Akunakuhlehliswa.</string>
+    <string name="complete_confirm_yes">Qeda</string>
+    <string name="complete_result_story_title">Indaba iqediwe!</string>
+    <string name="complete_result_hundred_title" formatted="false">100% iqediwe!</string>
+    <string name="complete_result_points">Uthole amaphuzu angu-%1$s.</string>
+    <plurals name="complete_result_unverified">
+        <item quantity="one">Impumelelo engu-%1$d oyimakile ayiqinisekiswanga yi-Steam, ngakho ayizange ithole lutho.</item>
+        <item quantity="other">Izimpumelelo ezingu-%1$d ozimakile aziqinisekiswanga yi-Steam, ngakho azizange zithole lutho.</item>
+    </plurals>
+    <string name="complete_not_ready_title" formatted="false">Akukafiki ku-100%</string>
+    <string name="complete_not_ready_locked">Qala uvule yonke impumelelo. Zisele ezingu-%1$d.</string>
+    <string name="complete_not_ready_none" formatted="false">Lo mdlalo awunazimpumelelo, ngakho awukwazi ukuqedwa ku-100%.</string>
+    <string name="complete_not_ready_not_linked">Xhuma i-akhawunti yakho ye-Steam kuMasethingi ukuze i-Steam iqinisekise izimpumelelo zakho.</string>
+    <string name="complete_not_ready_private">Iphrofayela yakho ye-Steam noma imininingwane yomdlalo ayisesidlangalaleni, ngakho i-Steam ayikwazi ukuqinisekisa izimpumelelo zakho. Yenze isesidlangalaleni bese uzama futhi.</string>
+    <string name="complete_not_ready_not_on_steam">Lo mdlalo awuku-Steam, ngakho izimpumelelo zawo azikwazi ukuqinisekiswa.</string>
+    <string name="complete_not_ready_unconfirmed">I-Steam ayiqinisekisanga izimpumelelo ezingu-%1$d zakho. Kubalwa kuphela izimpumelelo oziqhamukele ku-Steam.</string>
+    <string name="complete_error_title">Ayikwazanga ukuqeda umdlalo</string>
+    <string name="complete_error_already">Lo mdlalo usuqediwe ngale ndlela.</string>
+    <string name="complete_error_not_synced">Izinguquko zakho zakamuva azikalondolozwa. Hlola uxhumano lwakho bese uzama futhi.</string>
+    <string name="complete_error_steam">I-Steam ayifinyeleleki ukuhlola izimpumelelo zakho. Akukho okuqediwe, zama futhi ngokushesha.</string>
+    <string name="complete_error_failed">Hlola uxhumano lwakho bese uzama futhi.</string>
+    <string name="achievement_verified">Iqinisekiswe ku-Steam</string>
+    <string name="achievement_verified_locked">I-Steam iqinisekise le mpumelelo, ngakho ayikwazi ukukhishwa uphawu.</string>
+    <string name="cd_game_hundred" formatted="false">Iqediwe ku-100%</string>
 </resources>
