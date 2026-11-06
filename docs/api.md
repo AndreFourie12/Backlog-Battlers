@@ -206,7 +206,7 @@ The API sends these through Firebase Cloud Messaging to every phone the recipien
 |---|---|---|---|---|
 | `FRIEND_REQUEST_RECEIVED` | the person asked | a friend request is sent | Friend activity | Friends, Requests tab |
 | `FRIEND_REQUEST_ACCEPTED` | whoever sent the request | it is accepted | Friend activity | Friends |
-| `FRIEND_COMPLETED_GAME` | each of the completer's friends | a game is marked complete | Friend activity | Activity |
+| `FRIEND_COMPLETED_GAME` | each of the completer's friends | a game is marked complete | Friend activity | Activity (the feed, `GET /activity`) |
 | `OVERTAKEN` | everyone the completer passed this month | a completion lifts them past you | Rank changes | Standings |
 
 "Passed" means you had at least as many points as them before the completion and fewer after it.
@@ -216,6 +216,57 @@ Pushes are data-only messages: `type`, `userId` (the recipient), `actorName` and
 The Achievements and Season resets switches are synced and stored, but no push uses them yet.
 
 Configure the sender with `FIREBASE_SERVICE_ACCOUNT_FILE` (path to the service-account JSON) or `FIREBASE_SERVICE_ACCOUNT_JSON` (the JSON itself). Without either, the API runs normally and only logs the pushes it would have sent.
+
+### `GET /activity`
+
+The activity feed: what the signed-in user and their friends have been doing, newest first. Needs `Authorization: Bearer <access token>`.
+
+| Parameter | Rules |
+|---|---|
+| `limit` | Whole number of 1 or more, at most 100. Defaults to 30. |
+| `before` | Epoch milliseconds. Only events older than this are returned. Pass the previous page's `nextBefore`. |
+
+```json
+{
+  "events": [
+    {
+      "eventId": "6f1c…",
+      "type": "GAME_COMPLETED",
+      "actorId": "7f3c…",
+      "actorName": "Dylan",
+      "actorAvatarUrl": "pfp_03",
+      "gameId": 113112,
+      "gameTitle": "Hades",
+      "subjectId": null,
+      "subjectName": null,
+      "count": 1,
+      "points": 120,
+      "detail": "COMPLETIONIST",
+      "createdAt": 1762340000000
+    }
+  ],
+  "nextBefore": 1762340000000
+}
+```
+
+`nextBefore` is `null` on the last page. Events are written when they happen, into the `activity_events` table, and only those by the user and their friends are returned, never a stranger's.
+
+| `type` | Written when | Fields it uses |
+|---|---|---|
+| `GAME_COMPLETED` | a game is marked complete | `gameId`/`gameTitle`, `points` earned, `detail` = the completion type (`COMPLETIONIST` is 100%) |
+| `ACHIEVEMENT_UNLOCKED` | achievements are newly unlocked on an entry (one event per update, however many) | `gameId`/`gameTitle`, `count`, `detail` = the rarest one's name, when known |
+| `FRIEND_ADDED` | a friend request is accepted | `actorId` is who accepted, `subjectId`/`subjectName` who sent it. Both people see it |
+| `RANK_PASSED` | a completion lifts the user past others on this month's leaderboard | `subjectId`/`subjectName` = the closest person passed, `count` = how many were passed |
+
+A Steam import writes `ACHIEVEMENT_UNLOCKED` only for unlocks Steam dates within the last 7 days, and stores each unlock with the time Steam gives, so importing a whole history does not flood the feed.
+
+| Status | Meaning |
+|---|---|
+| 200 | One page, as above |
+| 400 | `limit` or `before` is not a number |
+| 401 | `{"error":"Sign in to see your activity"}` |
+
+The app ignores a `type` it does not know, so new kinds can be added without breaking older versions.
 
 ### `POST /users/me/steam/import`
 
