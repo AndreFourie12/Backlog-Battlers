@@ -11,6 +11,7 @@ import com.backlogbattlers.api.games.igdbHttpClient
 import com.backlogbattlers.api.notifications.Notifier
 import com.backlogbattlers.api.notifications.PushSender
 import com.backlogbattlers.api.routes.accountRoutes
+import com.backlogbattlers.api.routes.activityRoutes
 import com.backlogbattlers.api.routes.achievementRoutes
 import com.backlogbattlers.api.routes.authRoutes
 import com.backlogbattlers.api.routes.friendRoutes
@@ -76,6 +77,7 @@ fun Application.module() {
         accountRoutes(currentUser = bearerCurrentUser(jwtService))
         settingsRoutes(currentUser = bearerCurrentUser(jwtService))
         deviceRoutes(currentUser = bearerCurrentUser(jwtService))
+        activityRoutes(currentUser = bearerCurrentUser(jwtService))
     }
 }
 //------------------------------EOF------------------------------\\
