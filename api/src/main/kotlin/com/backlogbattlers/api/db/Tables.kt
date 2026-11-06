@@ -319,6 +319,19 @@ object GameGenres : Table("game_genres")
     override val primaryKey = PrimaryKey(gameId, genre)
 }
 
+// the unlocks Steam has confirmed for a library entry, by an import or by a check when the game was completed.
+// a confirmed unlock cannot be unchecked again, and a game can only be completed to 100% once every
+// achievement is one. a table of its own rather than a column on UnlockedAchievements, because
+// SchemaUtils.create adds missing tables but never adds columns to existing ones
+object VerifiedUnlocks : Table("verified_unlocks")
+{
+    val libraryEntryId = reference("library_entry_id", LibraryEntries.id, onDelete = ReferenceOption.CASCADE)
+    val achievementId = varchar("achievement_id", 64)
+    val verifiedAt = timestamp("verified_at").clientDefault { Instant.now() }
+
+    override val primaryKey = PrimaryKey(libraryEntryId, achievementId)
+}
+
 /** Every table, in dependency order (a table must come after the tables it references). */
 val ALL_TABLES: Array<Table> = arrayOf(
     Users,
@@ -337,5 +350,6 @@ val ALL_TABLES: Array<Table> = arrayOf(
     SteamAchievementChecks,
     ActivityEvents,
     GameGenres,
+    VerifiedUnlocks,
 )
 //------------------------------EOF------------------------------\\
