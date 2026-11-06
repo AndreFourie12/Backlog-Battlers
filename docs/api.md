@@ -268,6 +268,47 @@ A Steam import writes `ACHIEVEMENT_UNLOCKED` only for unlocks Steam dates within
 
 The app ignores a `type` it does not know, so new kinds can be added without breaking older versions.
 
+### `GET /users/me/profile`
+
+The profile screen's whole answer, worked out from the signed-in user's own data. Needs `Authorization: Bearer <access token>`.
+
+```json
+{
+  "userId": "7f3c…",
+  "displayName": "Dylan",
+  "avatarUrl": null,
+  "xp": 850,
+  "level": 4,
+  "xpIntoLevel": 250,
+  "xpForNextLevel": 400,
+  "monthlyPoints": 80,
+  "monthRank": 2,
+  "gamesInLibrary": 103,
+  "gamesCompleted": 4,
+  "achievementsUnlocked": 212,
+  "badges": [{ "id": "FIRST_BLOOD", "progress": 1, "target": 1, "earned": true }],
+  "rarestAchievements": [
+    { "achievementId": "ACH_1", "name": "Beat it", "iconUrl": "https://…", "rarityPercent": 0.4, "gameId": 113112, "gameTitle": "Hades" }
+  ],
+  "recentCompletions": [
+    { "gameId": 113112, "gameTitle": "Hades", "completionType": "COMPLETIONIST", "points": 120, "completedAt": 1762340000000 }
+  ]
+}
+```
+
+- **`xp`** is every point earned in any month. **`level`**, **`xpIntoLevel`** and **`xpForNextLevel`** come from it by the formula in the README (XP to reach level *n* is 50 × n × (n − 1)).
+- **`monthRank`** is the rank on this month's leaderboard (ties share a rank), or `null` before the user has scored this month. **`monthlyPoints`** is this month's points.
+- **`gamesInLibrary`** and **`gamesCompleted`** count games, so one game on two platforms is one.
+- **`badges`** lists all 20, in a fixed order. A badge is earned when `progress` reaches `target`. The ids are `FIRST_BLOOD`, `CLEAN_SWEEP`, `COMPLETION_CLUB`, `FINISHER`, `THE_LONG_HAUL`, `NEEDLE_IN_A_HAYSTACK`, `GHOST_HUNTER`, `STATISTICALLY_IMPROBABLE`, `SHELF_CLEANER`, `DUST_OFF`, `COLD_TURKEY`, `BACKLOG_ZERO`, `TOP_OF_THE_TABLE`, `PHOTO_FINISH`, `COMEBACK`, `NEMESIS`, `DAILY_DRIVER`, `MARATHON_MONTH`, `GENRE_TOURIST` and `PLATFORM_AGNOSTIC`. The names and descriptions belong to the app; the rules are in the README.
+- **`rarestAchievements`** are the user's seven rarest unlocked achievements, rarest first. Achievements Steam gave no rarity for are left out.
+- **`recentCompletions`** are the latest five, newest first.
+
+| Status | Meaning |
+|---|---|
+| 200 | The profile, as above |
+| 401 | `{"error":"Sign in to see your profile"}` |
+| 404 | `{"error":"Account was not found"}` (the account was deleted) |
+
 ### `POST /users/me/steam/import`
 
 Adds the games the user owns on Steam to their library. Needs `Authorization: Bearer <access token>`, a linked Steam account (`PUT /users/me/steam`), and `STEAM_API_KEY` on the server. No request body.
