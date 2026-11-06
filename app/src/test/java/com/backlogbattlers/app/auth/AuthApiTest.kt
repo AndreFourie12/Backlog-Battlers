@@ -1,6 +1,7 @@
 package com.backlogbattlers.app.auth
 
 import com.backlogbattlers.app.data.remote.AuthApi
+import com.backlogbattlers.app.data.remote.ProfileRejectedException
 import com.backlogbattlers.app.data.remote.SessionExpiredException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -10,6 +11,8 @@ import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.TextContent
+import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -25,7 +28,7 @@ class AuthApiTest {
         val client = HttpClient(
             MockEngine { request ->
                 seen += request
-                respond(body, status)
+                respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))
             },
         ) {
             // the refresh call sends a JSON body
@@ -61,6 +64,44 @@ class AuthApiTest {
     fun `any other failure is an error`() {
         assertThrows(IllegalStateException::class.java) {
             runBlocking { api(HttpStatusCode.InternalServerError).deleteAccount("token-123") }
+        }
+    }
+
+    private val savedMe = """{"userId":"u1","displayName":"Sam","avatarUrl":null,"pictureId":"pfp_03"}"""
+
+    @Test
+    fun `saving the profile sends PATCH users me with the token, and only the fields that were given`() = runBlocking {
+        val saved = api(HttpStatusCode.OK, savedMe).updateProfile("token-123", displayName = "Sam", pictureId = null)
+
+        val request = seen.single()
+        assertEquals(HttpMethod.Patch, request.method)
+        assertEquals("/users/me", request.url.encodedPath)
+        assertEquals("Bearer token-123", request.headers[HttpHeaders.Authorization])
+        // a field that is not given goes as null, which the backend reads as "leave it"
+        assertEquals("""{"displayName":"Sam","pictureId":null}""", (request.body as TextContent).text)
+        assertEquals("Sam", saved.displayName)
+        assertEquals("pfp_03", saved.pictureId)
+    }
+
+    @Test
+    fun `a picture is sent by id, and an empty id takes it away`() = runBlocking {
+        api(HttpStatusCode.OK, savedMe).updateProfile("token-123", displayName = null, pictureId = "pfp_03")
+        api(HttpStatusCode.OK, savedMe).updateProfile("token-123", displayName = null, pictureId = "")
+
+        assertEquals("""{"displayName":null,"pictureId":"pfp_03"}""", (seen[0].body as TextContent).text)
+        assertEquals("""{"displayName":null,"pictureId":""}""", (seen[1].body as TextContent).text)
+    }
+
+    @Test
+    fun `a refused profile, a dead session and a server error are told apart`() {
+        assertThrows(ProfileRejectedException::class.java) {
+            runBlocking { api(HttpStatusCode.BadRequest, """{"error":"A display name is 1 to 20 characters"}""").updateProfile("t", "x", null) }
+        }
+        assertThrows(SessionExpiredException::class.java) {
+            runBlocking { api(HttpStatusCode.Unauthorized).updateProfile("t", "x", null) }
+        }
+        assertThrows(IllegalStateException::class.java) {
+            runBlocking { api(HttpStatusCode.InternalServerError).updateProfile("t", "x", null) }
         }
     }
 
