@@ -65,12 +65,13 @@ private data class PlayerStats(
 
 // `achieved` is 1 once the player has unlocked it, 0 otherwise
 @Serializable
-private data class PlayerAchievementRow(val apiname: String, val achieved: Int = 0)
+// `unlocktime` is when it was unlocked, in epoch seconds (0 while locked)
+private data class PlayerAchievementRow(val apiname: String, val achieved: Int = 0, val unlocktime: Long = 0)
 
 /** What Steam says one player has unlocked in one game. */
 sealed interface PlayerAchievements {
     /** The codes of the achievements the player has unlocked. Empty when they have none, or do not own the game. */
-    data class Unlocked(val codes: Set<String>) : PlayerAchievements
+    data class Unlocked(val codes: Set<String>, val unlockedAt: Map<String, java.time.Instant> = emptyMap()) : PlayerAchievements
 
     /** The player's Steam profile (or its game details) is private, so Steam will not say. */
     data object PrivateProfile : PlayerAchievements
@@ -197,7 +198,12 @@ class SteamClient(
         // The message never includes the request address, because that contains the key
         if (!response.status.isSuccess() || stats == null) throw SteamException("Steam player achievements request failed: ${response.status}")
 
-        return PlayerAchievements.Unlocked(stats.achievements.filter { it.achieved == 1 }.map { it.apiname }.toSet())
+        val unlocked = stats.achievements.filter { it.achieved == 1 }
+        return PlayerAchievements.Unlocked(
+            codes = unlocked.map { it.apiname }.toSet(),
+            // Steam gives no time for some old unlocks, which are left out rather than dated 1970
+            unlockedAt = unlocked.filter { it.unlocktime > 0 }.associate { it.apiname to java.time.Instant.ofEpochSecond(it.unlocktime) },
+        )
     }
 
     /** Steam app ids of the most played games on Steam right now, most played first (Steam's top 100). */

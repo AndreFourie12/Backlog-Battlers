@@ -2,6 +2,7 @@ package com.backlogbattlers.api.steam
 
 import com.backlogbattlers.api.db.LibraryEntries
 import com.backlogbattlers.api.db.LibraryStatus
+import com.backlogbattlers.api.activity.recordUnlocks
 import com.backlogbattlers.api.db.Platform
 import com.backlogbattlers.api.db.SteamAchievementChecks
 import com.backlogbattlers.api.db.UnlockedAchievements
@@ -188,7 +189,7 @@ class SteamImporter(
     }
 
     // one PC entry whose achievements are due a read from Steam
-    private data class DueCheck(val entryId: Uuid, val appId: Int, val minutesPlayed: Int)
+    private data class DueCheck(val entryId: Uuid, val gameId: Int, val appId: Int, val minutesPlayed: Int)
 
     /**
      * Adds the achievements Steam says [owner] has unlocked to their PC entries, for each game played
@@ -220,7 +221,7 @@ class SteamImporter(
                 val appId = appByGame[gameId]
                 // never played, or not played since the last read: Steam has nothing new to say
                 if (appId == null || minutes == 0 || (readAt[entryId] ?: -1) >= minutes) null
-                else DueCheck(entryId, appId, minutes)
+                else DueCheck(entryId, gameId, appId, minutes)
             }
         }
         if (due.isEmpty()) return 0
@@ -253,11 +254,19 @@ class SteamImporter(
                     .map { it[UnlockedAchievements.achievementId] }
                     .toSet()
                 val fresh = unlocked.filter { it !in have && it.length <= MAX_ACHIEVEMENT_ID_LENGTH }
+                val times = (answer as PlayerAchievements.Unlocked).unlockedAt
                 fresh.forEach { code ->
                     UnlockedAchievements.insert {
                         it[libraryEntryId] = check.entryId
                         it[achievementId] = code
+                        // when Steam says it happened, so years of old unlocks are not dated today
+                        times[code]?.let { time -> it[unlockedAt] = time }
                     }
+                }
+                // only unlocks from the last week reach the activity feed; an import must not announce a whole history
+                val recent = fresh.filter { code -> times[code]?.let { it >= now.minus(FEED_WINDOW) } == true }
+                if (recent.isNotEmpty()) {
+                    recordUnlocks(owner, check.gameId, recent, at = recent.maxOf { times.getValue(it) })
                 }
                 if (fresh.isNotEmpty()) {
                     LibraryEntries.update({ LibraryEntries.id eq check.entryId }) { it[updatedAt] = now }
@@ -280,6 +289,9 @@ class SteamImporter(
         // Steam achievement reads in flight at once: a big library finishes in seconds, without a
         // burst Steam might throttle
         private const val PARALLEL_ACHIEVEMENT_CALLS = 4
+
+        // how far back an unlock still counts as news for the activity feed
+        private val FEED_WINDOW: Duration = Duration.ofDays(7)
 
         // the size of the achievement_id column
         private const val MAX_ACHIEVEMENT_ID_LENGTH = 64
