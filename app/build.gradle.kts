@@ -99,6 +99,8 @@ dependencies {
     // ConcatAdapter (1.2.0+), which the game detail screen uses to join its header, its
     // achievements-loading row and its achievement list into a single RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.4.0")
+    // pull down to refresh on the activity feed
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     // 1.1.7, not older: the version Firebase needs (Gradle would pick it anyway)
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("androidx.core:core-splashscreen:1.0.1")

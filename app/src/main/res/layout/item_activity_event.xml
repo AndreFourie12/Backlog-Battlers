@@ -1,6 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- one feed entry: who it was, what they did and when, and an icon for the kind of thing it was -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/page_padding"
+    android:layout_marginEnd="@dimen/page_padding"
+    android:layout_marginBottom="@dimen/list_gap"
+    android:background="@drawable/bg_card"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="@dimen/card_padding">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Actor: the picture they picked, or the first letter of their name -->
+    <FrameLayout
+        android:layout_width="42dp"
+        android:layout_height="42dp">
+
+        <TextView
+            android:id="@+id/tv_avatar_initial"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_circle_accent"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:textColor="@color/on_accent"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            tools:text="D" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_avatar_picture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="13dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_event_text"
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:textColor="@color/text_primary"
+            tools:text="Dylan completed Hades" />
+
+        <TextView
+            android:id="@+id/tv_event_meta"
+            style="@style/Text.Micro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:includeFontPadding="false"
+            tools:text="5 min ago · +120 points" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_event_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="10dp"
+        android:background="@drawable/bg_tile_surface"
+        android:contentDescription="@null"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        tools:src="@drawable/ic_trophy" />
+</LinearLayout>
