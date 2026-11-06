@@ -6,6 +6,7 @@ import com.backlogbattlers.api.db.ActivityType
 import com.backlogbattlers.api.db.Friendships
 import com.backlogbattlers.api.db.Games
 import com.backlogbattlers.api.db.Users
+import com.backlogbattlers.api.profile.pictureIdsFor
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
@@ -40,6 +41,8 @@ data class ActivityEventDto(
     val actorId: String,
     val actorName: String,
     val actorAvatarUrl: String?,
+    /** The picture the actor picked, by the app's id. */
+    val actorPictureId: String? = null,
     val gameId: Int?,
     val gameTitle: String?,
     val subjectId: String?,
@@ -125,6 +128,7 @@ fun activityFeed(owner: Uuid, limit: Int = DEFAULT_ACTIVITY_LIMIT, before: Insta
 
     val userIds = page.flatMap { listOfNotNull(it[ActivityEvents.actorId], it[ActivityEvents.subjectId]) }.distinct()
     val users = if (userIds.isEmpty()) emptyMap() else Users.selectAll().where { Users.id inList userIds }.associateBy { it[Users.id] }
+    val pictures = pictureIdsFor(userIds)
     val gameIds = page.mapNotNull { it[ActivityEvents.gameId] }.distinct()
     val titles = if (gameIds.isEmpty()) emptyMap() else {
         Games.selectAll().where { Games.id inList gameIds }.associate { it[Games.id] to it[Games.title] }
@@ -139,6 +143,7 @@ fun activityFeed(owner: Uuid, limit: Int = DEFAULT_ACTIVITY_LIMIT, before: Insta
             actorId = row[ActivityEvents.actorId].toString(),
             actorName = actor[Users.displayName],
             actorAvatarUrl = actor[Users.avatarUrl],
+            actorPictureId = pictures[row[ActivityEvents.actorId]],
             gameId = row[ActivityEvents.gameId],
             gameTitle = row[ActivityEvents.gameId]?.let { titles[it] },
             subjectId = row[ActivityEvents.subjectId]?.toString(),
