@@ -72,5 +72,7 @@ data class LibraryEntryEntity(
     //the user removed this entry. it stays hidden here until the account has been told, so a removal
     //made offline is not undone by the next download. matches MIGRATION_6_7 for rows that existed before it
     @ColumnInfo(defaultValue = "0") val pendingDelete: Boolean = false,
+    //the unlocked achievements Steam has confirmed, which cannot be unchecked. matches MIGRATION_7_8 for rows that existed before it
+    @ColumnInfo(defaultValue = "") val verifiedAchievementIds: List<String> = emptyList(),
 )
 //------------------------------EOF------------------------------\\

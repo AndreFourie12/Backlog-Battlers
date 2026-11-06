@@ -32,6 +32,8 @@ data class LibraryEntryDto(
     val status: LibraryStatus,
     val hoursPlayed: Double,
     val unlockedAchievementIds: List<String>,
+    // the unlocked ones Steam has confirmed. an older server sends none
+    val verifiedAchievementIds: List<String> = emptyList(),
     val completionType: CompletionType? = null,
     val addedAt: Long,
     val updatedAt: Long,

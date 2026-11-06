@@ -149,7 +149,18 @@ data class LibraryEntry(
     val addedAt: Long,
     val updatedAt: Long,
     val pendingSync: Boolean = false,
-)
+    // the unlocked achievements Steam has confirmed (by an import or when the game was completed).
+    // they cannot be unchecked, and 100% needs every achievement of the game to be one
+    val verifiedAchievementIds: List<String> = emptyList(),
+) {
+    // the story is completed, or the game is completed to 100%, which includes it
+    val storyCompleted: Boolean
+        get() = completionType == CompletionType.MAIN_STORY || completionType == CompletionType.MAIN_EXTRA || completionType == CompletionType.COMPLETIONIST
+
+    // completed to 100%: every achievement unlocked and confirmed by Steam
+    val hundredPercentCompleted: Boolean
+        get() = completionType == CompletionType.COMPLETIONIST
+}
 
 //------------------------------
 // LibraryGame data class pairs a library entry with its game, for the games tab's library list
